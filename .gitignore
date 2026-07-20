@@ -1,0 +1,32 @@
+# dependencies
+node_modules/
+.pnpm-store/
+
+# build output
+dist/
+.vite-inspect/
+.remote-assets/
+components.d.ts
+*.local
+
+# python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.ruff_cache/
+.pytest_cache/
+
+# slidev exports (regenerate)
+export/
+screenshots/
+*-export.pdf
+
+# os / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# local-only working notes
+.scratch/
