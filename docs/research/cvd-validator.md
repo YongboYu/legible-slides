@@ -18,6 +18,14 @@ of the deck's "≥39". Treat 39 as the *achieved* margin and set the **pass floo
 `colorspacious` is unmaintained (last release 2018), so pin it and keep the actively-maintained
 `daltonlens` as a drop-in for the simulation step.
 
+> **Correction ([#9](https://github.com/YongboYu/legible-slides/issues/9), resolved).** The inference
+> below that "≥39" *is* a min pairwise CAM02-UCS ΔE — and the framing "treat 39 as headroom above the
+> 15 floor" — is **wrong on units** and is retired. Measured on the actual palette, CAM02-UCS ΔE tops
+> out at ~15 (CVD) / ~11 (grayscale); "39" belongs to the *raw, non-perceptual* distance family
+> (~46 in raw sRGB). "39" and "15" are the same colours on two different rulers — do not compare them.
+> The library + metric recommendation (`colorspacious`, CAM02-UCS, floor 15) stands; only the "39"
+> interpretation is corrected. See [`docs/cvd-validator-contract.md`](../cvd-validator-contract.md) §2.
+
 ---
 
 ## 1. CVD simulation library
