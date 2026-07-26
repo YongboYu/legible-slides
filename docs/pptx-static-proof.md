@@ -6,7 +6,7 @@ finding ([#5](https://github.com/YongboYu/legible-slides/issues/5),
 ([#2](https://github.com/YongboYu/legible-slides/issues/2), [`token-contract.md`](token-contract.md)),
 the reference-impl structure ([#10](https://github.com/YongboYu/legible-slides/issues/10),
 [`slidev-reference-impl.md`](slidev-reference-impl.md)), and the method canon
-([#3](https://github.com/YongboYu/legible-slides/issues/3))._
+([#3](https://github.com/YongboYu/legible-slides/issues/3), [`method.md`](method.md))._
 
 The v1 static proof is **ONE PowerPoint delivery** that carries the method — the Assertion-Evidence
 masters, the palette as native theme colours, and the type scale — into a tool the audience already
@@ -59,7 +59,8 @@ The **persistent AE chrome** — locator pill + accent rule + page number — li
 so every content layout inherits it:
 
 - **Locator pill** and **accent rule** are master placeholders; the presenter edits the pill text per
-  section (it is the orientation device — no section-divider layouts, per #3/#6).
+  section. The pill is the orientation device that `no-section-dividers` relies on, so there is no
+  divider layout to add.
 - **Page number** uses PowerPoint's native slide-number placeholder.
 - **Per-slide opt-out** (the cover carries no chrome) is handled by the `Cover` layout simply omitting
   those placeholders — the native equivalent of the theme's `global-*` opt-out.
@@ -92,27 +93,27 @@ The 12 theme slots therefore carry only the **native-surface roles**.
 - **`hairline` (`#dde5ee`)** is a manual fixed fill for rules, not a theme slot.
 - Accents 5–6 (`reference` / `muted`) are present only so a presenter has swatches matching the
   figures (e.g. a legend chip); the actual data always arrives as a validated figure image.
-- **`accent` (Accent 2) stays attention-only** — never a data fill, always ink text on top (token
-  contract §4).
+- **Accent 2 carries `accent`**, which `accent-is-attention` governs in PowerPoint exactly as it does
+  in the deck.
 
 ## 5. Type scale and fonts
 
-**Type scale — height-ratio derived.** The method fixes body 23 / headline 37 on the 1280×720 canvas
-(`.dense` 18 / `.dense--xs` 16 escape hatches). PowerPoint's 16:9 slide is 13.333″×7.5″ = 960×540pt.
-Point sizes are derived by **preserving the font-height-to-slide-height ratio** (×0.75 from canvas px —
-what actually governs back-row legibility), rounded to even points and **never below the legibility
-floor**:
+**Type scale — height-ratio derived.** `type-scale` fixes the canvas sizes; this is the one place they
+are converted, never restated. PowerPoint's 16:9 slide is 13.333″×7.5″ = 960×540pt, and the canon's
+canvas is 16:9 at `canvas-width-px`, so the slide is **0.75×** the canvas height. Point sizes preserve
+the **font-height-to-slide-height ratio** at that factor (the ratio is what actually governs back-row
+legibility), rounded to even points and **never below the legibility floor**:
 
-| Method role | canvas px | PowerPoint pt |
-|---|---|---|
-| Headline (claim) | 37 | **28** |
-| Body | 23 | **18** |
-| `.dense` | 18 | **14** |
-| `.dense--xs` | 16 | **12** |
-| Locator (mono) | — | **~11** |
+| Method role (`type-scale` key) | PowerPoint pt |
+|---|---|
+| Headline (claim) — `headline-px` | **28** |
+| Body — `body-px` | **18** |
+| `dense-px` | **14** |
+| `dense-xs-px` | **12** |
+| Locator (mono) | **~11** |
 
-These are baked into the master's placeholder text styles. Fonts: **Inter** (headline + body),
-**JetBrains Mono** (locator only).
+These are baked into the master's placeholder text styles. Fonts come from `fonts`: Inter for
+headline and body, JetBrains Mono for the locator only.
 
 **Fonts — embed + fallback + install.** Inter and JetBrains Mono are both SIL OFL (embeddable) and
 already bundled in the theme. For a cross-platform academic audience the proof does all three:
@@ -161,8 +162,7 @@ verbatim in Keynote / Google Slides (a v2 item, per the map's Out-of-scope):
    `themes/*.json`).
 2. **Masters** — build the 4 AE layouts (§3) on the tool's master, with the locator-pill + accent-rule
    + page-number chrome inherited by every content layout and omitted on the cover.
-3. **Type scale** — set placeholder text styles to the height-ratio point sizes (§5): 28 / 18 / 14 /
-   12 / 11-mono.
+3. **Type scale** — set placeholder text styles to the height-ratio point sizes derived in §5.
 4. **Fonts** — embed Inter + JetBrains Mono where the tool allows, with a declared fallback; ship the
    font files with an install note.
 5. **Figures** — import the Python-`legible`-generated, CVD-validated PNGs as pictures (never redraw

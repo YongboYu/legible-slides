@@ -5,8 +5,12 @@ _Resolves [#2](https://github.com/YongboYu/legible-slides/issues/2). Generalized
 
 A **theme** is a palette file plus an optional logo. Everything else that makes a deck legible —
 the type scale, the font pairing, the Assertion-Evidence layout structure, the light colour scheme —
-is **fixed by the method**, not swappable per brand. That split is the whole point: a brand may
-recolour, but it cannot opt out of the accessibility floor.
+is **fixed by the method** ([`method.md`](method.md)), not swappable per brand. That split is the
+whole point: a brand may recolour, but it cannot opt out of the accessibility floor.
+
+This document fixes the palette's **shape**: which roles exist, what they are named, and how they
+reach CSS. The **rules** governing how those roles may be used are the canon's, and are linked by
+rule ID rather than repeated here.
 
 ---
 
@@ -37,7 +41,7 @@ Keys are **kebab-case**, mirroring the CSS custom properties they become (`ink` 
   // ── structural neutrals (universal; ported from pmf as-is) ──
   "ink":          "#102a43",   // primary text, dark structural lines   (≥14:1 on surface)
   "neutral":      "#486581",   // secondary text, axis labels           (≥6:1)
-  "neutral-soft": "#93a4b8",   // rules, gridlines, ghost edges — DECORATIVE ONLY, never text
+  "neutral-soft": "#93a4b8",   // rules, gridlines, ghost edges         (`decorative-neutral-never-text`)
   "surface":      "#ffffff",
   "surface-alt":  "#f4f7fb",
   "hairline":     "#dde5ee",
@@ -45,7 +49,7 @@ Keys are **kebab-case**, mirroring the CSS custom properties they become (`ink` 
   // ── brand & accent (universal) ──
   "brand":        "#00407a",   // headings, the "highlighted group" in 2-group charts
   "brand-strong": "#1d8db0",   // emphasis / links / chrome — large text only
-  "accent":       "#dd8a2e",   // ATTENTION ONLY — arrows, "our method". Never a data series. Ink text on it.
+  "accent":       "#dd8a2e",   // the attention role: arrows, "our method"  (`accent-is-attention`)
 
   // ── data-encoding roles (the generalization) ──
   "reference":    "#111111",   // ground-truth / anchor series      (was pmf `truth`)
@@ -71,30 +75,28 @@ Keys are **kebab-case**, mirroring the CSS custom properties they become (`ink` 
 
 ## 3. What is fixed by the method (NOT in a theme)
 
-- **Type scale** — body 23 / headline 37 on `canvasWidth: 1280` (≈34px / 55px projected @1920).
-  The back-row legibility floor. Escape hatches (`.dense` 18, `.dense--xs` 16) are exceptions, not
-  knobs.
-- **Fonts** — Inter (headings/body) + JetBrains Mono (locator only). Both SIL OFL, bundled in-repo.
-- **Layout structure** — the Assertion-Evidence skeleton (locator → assertion → rule → evidence →
-  page no).
-- **Colour scheme** — **`colorSchema: light`, locked** (matches pmf #126). The CVD verification and
-  the ink-on-white figures are done on white; a validated dark variant is **v2** (`themes/*.dark.json`,
-  validator run on both grounds).
+A theme carries colour and a logo. It cannot touch the type scale, the font pairing, the
+Assertion-Evidence layout skeleton, or the light ground — those are canon rules
+(`type-scale`, `fonts`, `ae-skeleton`, `light-ground`), and the numbers behind them live there.
 
-## 4. Usage rules (carried from pmf, generalized)
+A validated **dark** variant is **v2** (`themes/*.dark.json`, validator run on both grounds), because
+`light-ground` fixes the ground every colour decision here was verified on.
 
-These are the rules the review skill (#12) will enforce and the validator (#9) will check:
+## 4. How these roles may be used
 
-- **`accent` is attention, not data.** Never colour a series with it; use `ink` text on top of it.
-- **Spend colour only where the message needs discrimination** (pmf's "hybrid strategy"): a 2-group
-  view uses `muted` vs. one highlight (`brand` or `series-1`); reach for the full `series[]` ramp
-  only on genuine per-series comparison slides.
-- **Colour is never the sole channel.** Pair `series[]` with redundant dash/marker in line charts;
-  put direct labels on bars.
-- **`neutral-soft` is decorative only** (~2.6:1) — never used for text.
-- **`series[]` is validator-gated.** Every pair must stay above the CVD threshold under
-  deuteranopia / protanopia / tritanopia **and** grayscale. Add as many series as you like; the
-  validator tells you when you've added one too many.
+The rules are the canon's; this table is the map from a role to the rule that governs it. None of
+them is restated here.
+
+| Role | Governing rule |
+|---|---|
+| `accent` | `accent-is-attention` — attention only, never a data series |
+| `muted` + one highlight vs. the full `series[]` ramp | `spend-colour-on-discrimination` |
+| `series[]` in a chart | `never-sole-channel` — dash/marker in line charts, direct labels on bars |
+| `neutral-soft` | `decorative-neutral-never-text` |
+| every `series[]` pair, plus `reference` / `muted` / `brand` | `separation-floor` — validator-gated; add as many series as you like and the validator tells you when you've added one too many |
+
+The review skill ([#12](https://github.com/YongboYu/legible-slides/issues/12)) enforces them and the
+validator ([#9](https://github.com/YongboYu/legible-slides/issues/9)) checks the last one.
 
 ## 5. CSS binding
 
@@ -113,6 +115,7 @@ pmf proved, now brand-swappable.
 
 ## 6. Open dependencies
 
-- The exact **validator metric + threshold** that gates `series[]` is decided in **#9** (blocked by
-  research **#4**). This contract fixes the *shape*; #9 fixes the *number*.
+- The **validator metric + threshold** that gates `series[]` was decided in **#9**
+  ([`cvd-validator-contract.md`](cvd-validator-contract.md)) and now lives in the canon as
+  `separation-floor`. This contract fixes the *shape*; the canon owns the *number*.
 - Whether a **Python figure helper** is a third consumer in v1 is decided in **#10**.

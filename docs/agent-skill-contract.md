@@ -40,9 +40,12 @@ rather than restate). The skill obeys the same rule:
   mechanical vs judgment, and the report format. It does **not** restate what a good slide is.
 - The **rule content and thresholds are loaded from `method.md` at review time**. A rule change in
   `method.md` therefore never silently un-syncs the reviewer.
-- The handful of **numeric thresholds** (≤5 bullets, ≤12 words, ΔE ≥ 15) are stated in `method.md`
-  crisply enough to be **quoted mechanically**, so the thin pointer never forces the reviewer to
-  re-derive a number at runtime.
+- Every rule there carries a **stable ID** (`one-message`, `bullet-ceiling`, `separation-floor`, …)
+  and, where it has a number, a `key = value` **threshold line**. The skill addresses rules by ID and
+  **quotes** those lines, so the thin pointer never forces the reviewer to re-derive a number at
+  runtime.
+- `method.md` also marks each rule **`script`** or **`judgment`**, which is the same seam §4 splits
+  the engine along. The canon decides which side a rule falls on; the skill only implements it.
 
 ## 3. Review surface — Slidev-coupled for v1
 
@@ -64,26 +67,30 @@ and CI-able; semantic checks need an LLM's judgment.
 Lives in the existing **`legible` Python package** (one Python home, alongside the figure helper and
 the validator, sharing the pinned `colorspacious`). Objective, reproducible, CI-integratable.
 
-| Check | Rule source | How |
+| Check | Rule | How |
 |---|---|---|
-| ≤5 bullets per slide | `method.md` | count list items per slide |
-| ≤12 words per bullet | `method.md` | word count per list item |
-| No em-dashes in headlines | `method.md` anti-slop | scan headline text |
-| No inflated-register words | `method.md` anti-slop | wordlist (crucial/pivotal/seamless/robust/leverage/elevate/delve/tapestry/testament…) |
-| Sentence-opener distribution | `method.md` anti-slop | flag when >½ of prose/notes sentences open with The/This/It/In |
-| **Palette passes CVD** | `cvd-validator-contract.md` | **shell out to `cvd-validate`** over `themes/*.json` — never reimplement CVD |
+| Bullet ceiling | `bullet-ceiling` | count list items per slide, against the rule's threshold |
+| Word ceiling | `word-ceiling` | word count per list item, against the rule's threshold |
+| No em-dashes in headlines | `no-em-dash-headline` | scan headline text |
+| No inflated-register words | `no-inflated-register` | the rule's wordlist, at the severity the rule assigns |
+| Sentence-opener distribution | `opener-variety` | opener share per passage, against the rule's ceiling |
+| **Palette passes CVD** | `separation-floor` | **shell out to `cvd-validate`** over `themes/*.json` — never reimplement CVD |
+
+Each row's numbers, wordlist and severity are read from that rule in `method.md`. The linter carries
+none of its own.
 
 ### 4b. Semantic — LLM judgment
 
 The four calls that need understanding, applied by the agent against the rules loaded from
-`method.md`:
+`method.md`. The canon marks many more rules `judgment`; these are the four the v1 review covers:
 
-- **>1 message per slide** — does the slide answer exactly one question?
-- **Claim-vs-label headline** — is the headline an assertion (AE claim) or a bare label?
-- **Colour as sole channel** in **hand-made** visuals — generated figures already enforce
-  dash/marker redundancy by construction (#10), so this targets pasted-in images.
-- **Structural anti-slop tells** — "not X, it's Y" contrast-for-emphasis, reflexive tricolons,
-  hedging preambles, boilerplate closers, monotonous rhythm.
+- **`one-message`** — is this one slide or two?
+- **`assertion-headline`** — claim, or bare label?
+- **`never-sole-channel`, hand-made visuals only** — generated figures carry the redundancy by
+  construction (#10), so this targets pasted-in images.
+- **The canon's judgment anti-slop rules** (`no-contrast-for-emphasis`, `no-reflexive-tricolon`,
+  `no-hedging-or-boilerplate`, `rhythm-variety`, `concrete-over-abstract`) — the structural tells a
+  wordlist cannot catch.
 
 ## 5. Review posture & output
 
@@ -94,7 +101,9 @@ The four calls that need understanding, applied by the agent against the rules l
   you.
 - **Two-tier authority.**
   - **Mechanical linter = hard gate** — exit 0/1, CI-integratable, mirroring `cvd-validate` (#9).
-    Objective violations block.
+    Objective violations block. One exception, declared by the canon rather than by the skill: a rule
+    whose threshold line sets its own severity to `warning` reports without blocking. Today that is
+    only `no-inflated-register`, which `established-terminology` can legitimately override.
   - **Semantic review = advisory** — LLM judgments are fallible, so they never block CI.
 - **Output = one merged per-slide markdown report.** Findings grouped by slide, each tagged severity
   **error** (mechanical gate) or **warning** (advisory judgment) and **linked to the `method.md`

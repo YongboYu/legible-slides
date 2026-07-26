@@ -3,7 +3,8 @@
 _Resolves [#10](https://github.com/YongboYu/legible-slides/issues/10). Consumes the token contract
 ([#2](https://github.com/YongboYu/legible-slides/issues/2),
 [`token-contract.md`](token-contract.md)), the method canon + 13-beat flagship outline
-([#3](https://github.com/YongboYu/legible-slides/issues/3)), the prior-art survey
+([#3](https://github.com/YongboYu/legible-slides/issues/3), [`method.md`](method.md)), the prior-art
+survey
 ([#6](https://github.com/YongboYu/legible-slides/issues/6),
 [`research/prior-art-themes.md`](research/prior-art-themes.md)), and the CVD-validator contract
 ([#9](https://github.com/YongboYu/legible-slides/issues/9),
@@ -44,8 +45,8 @@ blocker (cf. the KU Leuven public-flip).
 | `references` | a divider-free sources slide (`indexEntries: [{title, uri}]`) | borrow academic's `index` (#6) |
 
 **Not shipped:** `intro`, `section`, `end`, and the `statement`/`fact`/`focus`/`quote` emphasis
-layouts. Section-divider and single-word-emphasis layouts are forbidden (#3/#6) — the **persistent
-locator carries orientation**. The beat-13 close reuses `cover` or a plain `assertion-evidence`.
+layouts. `no-section-dividers` forbids them, and the theme enforces that rule by simply not offering
+a layout that breaks it. The beat-13 close reuses `cover` or a plain `assertion-evidence`.
 
 ## 3. Components (4)
 
@@ -71,12 +72,13 @@ provenance §4 ("figures — regenerated, never redrawn").
 
 It is deliberately **not a charting library**. Scope = the archetypes the method prescribes:
 
-1. **Multi-series line chart** — `series[]` with **mandatory** dash/marker redundancy; an optional
-   CVD-simulated render. This is the workhorse *and* the beat-3/10 demo.
+1. **Multi-series line chart** — `series[]` with **mandatory** dash/marker redundancy, so
+   `never-sole-channel` holds by construction rather than by review; an optional CVD-simulated
+   render. This is the workhorse *and* the beat-3/10 demo.
 2. **2-group labeled bar / line** — `muted` vs one highlight (`brand` or `series-1`), with direct
-   labels.
+   labels (`spend-colour-on-discrimination`).
 
-- Consumes `palette.json` + the **bundled Inter** (registered in matplotlib, provenance §3, so figure
+- Consumes `palette.json` + the **bundled Inter** (registered in matplotlib per `fonts`, so figure
   type matches the deck).
 - **Shares infrastructure with the CVD validator** — one palette-loader over the token-contract
   schema, and the *same* pinned `colorspacious`. The validator and helper are two entry points of one

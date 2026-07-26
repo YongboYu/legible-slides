@@ -6,7 +6,11 @@ Everything in `legible-slides` was argued out somewhere else first: in
 
 This file is the **capture** of those decisions — what was settled and why — so the extraction
 starts from evidence rather than memory. It is deliberately descriptive: it records what the deck
-does today, not what the template should do. That is what the wayfinder map decides.
+does today, not what the template should do.
+
+**It states no rules.** The rules the deck's practice became, and every number they turn on, live in
+[`method.md`](method.md); this file is the trail of where they came from. Rule IDs below
+(`one-message`, `type-scale`, …) link there.
 
 ---
 
@@ -15,32 +19,27 @@ does today, not what the template should do. That is what the wayfinder map deci
 *Source: [pmf-tsfm#108](https://github.com/YongboYu/pmf-tsfm/issues/108) · reached via a grill +
 throwaway prototypes.*
 
-Every content slide is **three zones plus one chrome element, nothing else**:
+Every content slide was **three zones plus chrome, nothing else** — a navy locator pill, the
+assertion headline, an accent rule, the evidence, and the page number. That shape is now fixed as
+`ae-skeleton`.
 
-```
-locator (navy pill)  →  assertion headline  →  accent rule + gap  →  evidence  →  page number
-```
-
-Two consequences were treated as load-bearing, not cosmetic:
-
-- **The sentence headline absorbs the takeaway.** No separate "key message" strip or footnote —
-  if the claim isn't the headline, the slide has two messages and needs splitting.
-- **No section-divider slides.** The persistent locator carries orientation instead, so no slide
-  is spent purely on navigation.
+Two consequences were treated as load-bearing rather than cosmetic: the sentence headline absorbing
+the takeaway, and the deck shipping no section dividers. Both became canon
+(`assertion-headline`, `no-section-dividers`).
 
 Implemented as three Slidev layouts: `assertion-evidence` (default), `two-col-evidence`
 (`::left::` / `::right::` slots), and `cover`.
 
 ### The hard rules
 
-From the deck's `AGENTS.md` / `CLAUDE.md`:
-
-- Max **5 bullets** per slide; max **12 words** per bullet.
-- **Every slide must answer one question; if you can't state it, the slide is wrong.**
-- Always pair an equation with a worked example.
-- Animations welcome, but ≤15s and purposeful.
+The deck's `AGENTS.md` / `CLAUDE.md` carried the bullet and word ceilings, the one-question test, the
+equation-plus-worked-example pairing and the animation ceiling. That list is the seed of
+[`method.md`](method.md) §1–§6, which now states them and owns their numbers.
 
 ### The discipline, in the author's words
+
+Quoted as source material. The rules these quotes became are `one-message`,
+`message-before-visual` and `established-terminology`.
 
 From `talk_design/revision_comments_minimal.md` — the clearest statement of the method, and the
 reason this repo exists:
@@ -85,7 +84,7 @@ hard-coding — the mechanism already exists and is proven.
 | Role | Hex | Notes |
 |---|---|---|
 | brand / highlighted group | `#00407A` | KU Leuven blue; white text ok |
-| accent | `#DD8A2E` | **attention only**, never a data series; ink text on it |
+| accent | `#DD8A2E` | the deck's attention-only role, carrying ink text; became `accent-is-attention` |
 | baseline group | `#778496` | gray |
 | ground truth | `#111111` | |
 | family · Chronos | `#1B6FB0` | vivid azure — deliberately decoupled from brand navy |
@@ -93,30 +92,37 @@ hard-coding — the mechanism already exists and is proven.
 | family · TimesFM | `#4C3A78` | deep indigo (dark anchor) |
 
 Neutrals carry documented contrast ratios: `--ink #102a43` (14.6:1 on white), `--neutral #486581`
-(6.1:1), `--neutral-soft #93a4b8` (2.6:1 — **decorative only**, never text).
+(6.1:1), `--neutral-soft #93a4b8` (2.6:1, which the deck spent on rules and gridlines only — now
+`decorative-neutral-never-text`).
 
 ### The accessibility verification
 
-The family trio is **colour-vision-deficiency verified via Machado (2009) simulation**. The full
-five-line plot set (truth + baseline + 3 families) stays **≥39 apart** under deuteranopia,
-protanopia, tritanopia *and* grayscale.
+The family trio was **colour-vision-deficiency verified via Machado (2009) simulation**, and the deck
+recorded the five-line plot set (truth + baseline + 3 families) as staying **≥39 apart** under
+deuteranopia, protanopia, tritanopia *and* grayscale.
 
-Crucially, colour is never the sole channel: multi-line plots carry **redundant dash + marker
-cues**, and bars carry **direct labels**. Chronos was decoupled from the brand navy specifically so
-it reads as its own colour rather than as chrome.
+> **That `≥39` is retired.** It is a raw sRGB distance, not a perceptual ΔE: the same colours,
+> measured with a different ruler than the canon's `separation-floor`. Never read it as headroom
+> above the canon's floor. The full reckoning is in
+> [`cvd-validator-contract.md`](cvd-validator-contract.md) §2.
+
+The deck also never let colour carry meaning alone: multi-line plots carried **redundant dash +
+marker cues** and bars carried **direct labels**, which is now `never-sole-channel`. Chronos was
+decoupled from the brand navy specifically so it reads as its own colour rather than as chrome.
 
 > This validator — run against an arbitrary palette rather than asserted about ours — is the single
 > most transferable artifact in the whole project.
 
 ### Hybrid figure strategy
 
-A rule about *when* to spend colour: headline slides use **two groups** (baselines gray vs. the
-highlighted group in one blue); per-family hues appear **only** on family-comparison slides. Colour
-is spent where the message needs discrimination, not by default.
+The deck's practice on *when* to spend colour: headline slides used **two groups** (baselines gray
+vs. the highlighted group in one blue), and per-family hues appeared **only** on family-comparison
+slides. That practice is now `spend-colour-on-discrimination`.
 
-Also settled here: `colorSchema: light` is **locked**
-([pmf-tsfm#126](https://github.com/YongboYu/pmf-tsfm/issues/126)). Following the viewer's OS
-preference rendered an ink-on-white figure set against near-black and destroyed contrast.
+Also settled here: `colorSchema: light` was **locked**
+([pmf-tsfm#126](https://github.com/YongboYu/pmf-tsfm/issues/126)) after following the viewer's OS
+preference rendered an ink-on-white figure set against near-black and destroyed contrast. Now
+`light-ground`.
 
 ---
 
@@ -125,16 +131,15 @@ preference rendered an ink-on-white figure set against near-black and destroyed 
 *Source: [pmf-tsfm#108](https://github.com/YongboYu/pmf-tsfm/issues/108),
 [pmf-tsfm#109](https://github.com/YongboYu/pmf-tsfm/issues/109).*
 
-- **Inter** for headings and body; **JetBrains Mono** for the locator pill and nothing else.
-- `canvasWidth: 1280` — a logical canvas, so px values render as designed and scale to the
-  projector.
-- **Body 23px, headline 37px.** The reasoning recorded in `style.css`: a **body floor of ~24px**,
-  because 23px on a 1280 canvas projects to roughly **34px at 1920** — the legibility floor for the
-  back row. Escape hatches (`.dense` 18px, `.dense--xs` 16px) exist for tight figure panels and are
-  marked as exceptions.
-- **Inter TTFs are bundled in-repo** and registered in `make_figures.py`, so Python-generated
-  figures match the deck font on any machine. Without this, a box lacking Inter silently fell back
-  to DejaVu Sans and the figures stopped matching the slides.
+- **Inter** for headings and body; **JetBrains Mono** for the locator pill and nothing else. Now
+  `fonts`.
+- A **logical canvas**, so px values render as designed and scale to the projector — and a body size
+  chosen from what the back row of a lecture hall can actually read, with the projection arithmetic
+  written down in `style.css` beside it. Escape hatches for tight figure panels were marked as
+  exceptions rather than offered as knobs. All of it, with the numbers, is now `type-scale`.
+- **Inter TTFs bundled in-repo** and registered in `make_figures.py`, so Python-generated figures
+  match the deck font on any machine. This is the failure `fonts` exists to prevent: a box lacking
+  Inter silently fell back to DejaVu Sans and the figures stopped matching the slides.
 
 A CSS gotcha worth carrying forward, documented in `style.css`: these rules are **global and
 unscoped on purpose**. A Slidev layout's `<style scoped>` does *not* reach markdown slotted into it

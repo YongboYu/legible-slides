@@ -11,6 +11,10 @@ apart") into a **reproducible check anyone can run on any palette** — pinned l
 stated floor. The provenance calls this "the single most transferable artifact in the whole
 project" ([`design-provenance.md`](design-provenance.md) §2).
 
+The rule it enforces is `separation-floor` in [`method.md`](method.md), which owns the floor, the
+metric and the conditions. This document fixes the **library, the report shape and the gate** — and
+records how that floor was arrived at.
+
 ---
 
 ## 1. What is checked — two co-occurrence groups
@@ -37,14 +41,15 @@ present.
 
 ## 2. Metric
 
-Standardize on **`colorspacious`** (MIT, **pinned** — last release 2018) for both halves in one
-dependency:
+The canon names the simulation, the conditions, the severity and the distance space
+(`separation-floor`). Standardize on **`colorspacious`** (MIT, **pinned** — last release 2018) to
+implement all of it in one dependency:
 
-- **Simulation** — Machado, Oliveira & Fernandes (2009) via the `sRGB1+CVD` space,
-  `cvd_type ∈ {deuteranomaly, protanomaly, tritanomaly}`, **`severity = 100`** (full dichromacy =
-  worst case; passing here implies passing milder anomalous CVD).
-- **Distance** — `colorspacious.deltaE`, default **CAM02-UCS** ΔE (a perceptually-uniform space, so
-  equal numbers mean roughly equal perceived difference).
+- **Simulation** — the canon's Machado, Oliveira & Fernandes (2009) simulation via the `sRGB1+CVD`
+  space, passing each `cvd_type` and the canon's severity straight through. Full dichromacy is the
+  worst case, so passing there implies passing milder anomalous CVD.
+- **Distance** — `colorspacious.deltaE`, whose default uniform space is the canon's CAM02-UCS
+  (perceptually uniform, so equal numbers mean roughly equal perceived difference).
 - **Grayscale** — chroma drop in a uniform appearance space (`JCh`, set `C = 0`), since grayscale is
   not a Machado CVD type.
 - **Backup** — keep `daltonlens` (MIT, actively maintained) as a drop-in for the *simulation* step if
@@ -64,24 +69,24 @@ Measured on the exact palette:
 | **CAM02-UCS ΔE** (this validator) | **~11** |
 
 "39" belongs to the *raw, non-perceptual* distance family (~46 in raw sRGB) — not a perceptual ΔE.
-The palette is genuinely well-separated; "39" and "15" are the **same colours measured with
-different rulers**. Do **not** treat 39 as "headroom above the 15 floor" — that compares two scales.
-The honest statement is below.
+The palette is genuinely well-separated; "39" and the canon's floor are the **same colours measured
+with different rulers**. Do **not** treat 39 as "headroom above the floor" — that compares two
+scales. The honest statement is below.
 
-## 3. Threshold
+## 3. Threshold — where the canon's floor came from
 
-> **Pass** if, in **both groups**, every pairwise ΔE (CAM02-UCS) **≥ 15** under normal vision and the
-> three Machado dichromacies (severity 100).
+The pass condition is `separation-floor`: the canon owns the number, the metric, the conditions, the
+inclusive comparison and the grayscale carve-out. What this section records is the derivation.
 
-- **15** is grounded in the JND literature (≈6–15× the just-noticeable difference; above every
-  perceptibility/acceptability figure), **not** reverse-engineered to the palette. Document it as a
-  tunable design parameter, not a physical constant.
-- **Comparison is `>=`.** With `colorspacious` pinned the numbers are deterministic, so a value that
-  lands exactly at the floor is a safe, reproducible pass.
-- **Grayscale is advisory.** A grayscale pair below 15 is a **warning**, never a build failure — the
-  method already mandates the fix (`colour is never the sole channel`: redundant dash/marker in line
-  charts, direct labels on bars). Grayscale is precisely the condition redundant encoding exists to
-  cover.
+- **The floor is grounded in the JND literature** (≈6–15× the just-noticeable difference; above every
+  perceptibility and acceptability figure in [#4](https://github.com/YongboYu/legible-slides/issues/4)),
+  **not** reverse-engineered to the palette. That is why the canon documents it as a tunable design
+  parameter rather than a physical constant.
+- **The inclusive comparison is safe because the numbers are deterministic.** With `colorspacious`
+  pinned, a value that lands exactly on the floor is a reproducible pass rather than a coin flip.
+- **Grayscale is advisory because the method already mandates the fix** (`never-sole-channel`).
+  Grayscale is precisely the condition redundant encoding exists to cover, so it produces a warning
+  and leaves the exit code alone.
 
 ### Verified against the reference palette (`themes/kuleuven.json`)
 
@@ -102,13 +107,16 @@ A single Python core with two faces, shipped as an installable package (`pyproje
 `colorspacious`, `cvd-validate` console script):
 
 ```python
-def validate(palette, threshold: float = 15.0) -> Report: ...
+def validate(palette, threshold: float = DELTA_E_FLOOR) -> Report: ...
 ```
+
+`DELTA_E_FLOOR` is quoted from the canon (`separation-floor`) — the package reads the number from
+there rather than carrying its own copy.
 
 ```
 Report:
   passed:       bool          # True iff every CVD pair ≥ threshold, both groups (grayscale excluded)
-  threshold:    float         # 15.0
+  threshold:    float         # the canon's floor unless the caller overrides it
   groups:       {G1: {...}, G2: {...}}
   min_delta_e:  {normal, deuteranomaly, protanomaly, tritanomaly}
   grayscale_min: float        # advisory
@@ -146,9 +154,8 @@ share one palette-loader that reads the token-contract schema.
 import itertools, math
 from colorspacious import cspace_convert, deltaE
 
-CVD_TYPES = ["deuteranomaly", "protanomaly", "tritanomaly"]
-SEVERITY  = 100          # full dichromacy = worst case
-THRESHOLD = 15.0         # CAM02-UCS ΔE floor, hard gate on the CVD conditions
+# CVD_TYPES, SEVERITY and THRESHOLD are quoted from method.md `separation-floor`.
+# The canon owns those values; nothing here re-derives or re-states them.
 
 def _simulate(rgb1, *, cvd_type=None, grayscale=False):
     if grayscale:                                   # drop chroma in a uniform space
@@ -195,7 +202,7 @@ def validate(palette, threshold=THRESHOLD):
 ```
 
 *(`role_rgb` / the exact group construction are implementation detail; the contract is: two groups,
-`≥ 15` on the four hard conditions, grayscale advisory.)*
+the canon's floor on the four hard conditions, grayscale advisory.)*
 
 ## 7. Open dependencies
 

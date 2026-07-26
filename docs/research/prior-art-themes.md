@@ -6,6 +6,9 @@ Surveyed two, against our stance — Assertion-Evidence slide model, a single CV
 `palette.json` token contract shared by deck CSS **and** a Python figure pipeline, and a
 back-of-the-room large-type legibility floor. See [`docs/design-provenance.md`](../design-provenance.md).
 
+> **Research input, dated.** Where this document names one of our rules, the canon
+> ([`docs/method.md`](../method.md)) is authoritative and owns its numbers.
+
 Themes surveyed:
 
 - **slidev-theme-academic** — alexanderdavide (Alexander Eble), v3.0.0, MIT.
@@ -195,10 +198,10 @@ package). Semantic layout tokens: `--scholarly-header-height: 50px`, `--scholarl
 |---|---|---|---|
 | Layouts | 6, minimal | 26, catalog | 3 (assertion-evidence, two-col-evidence, cover) |
 | Fonts | Montserrat / Roboto Slab / Roboto Mono, **self-hosted** | Inter/Merriweather default but body = **system** Palatino serif; 8 font themes | Inter + JetBrains Mono, **bundled in-repo** for figure parity |
-| Type scale | deferred to Slidev defaults | rich per-context CSS-var scale | fixed floor: body 23px (~24px min), headline 37px, canvas 1280 |
+| Type scale | deferred to Slidev defaults | rich per-context CSS-var scale | one fixed floor, headline + body + locator (`type-scale`) |
 | Colour model | one `--slidev-theme-primary` | 9 data-attr palettes, 5 tokens each, color-mix chrome | one CVD-verified `palette.json` → CSS `:root` **and** Python |
-| colorSchema | `both` | `both` | **`light` locked** (dark destroyed figure contrast) |
-| Accent | n/a | free decorative `--scholarly-accent` | attention-only, never a data series |
+| colorSchema | `both` | `both` | **`light` locked** (`light-ground`) |
+| Accent | n/a | free decorative `--scholarly-accent` | `accent-is-attention` |
 | Citations | manual `Footnote`/`Footnotes` | full BibTeX pipeline + CLI + VS Code | (open) |
 | Chrome | global `Pagination` only | header + footer + TOC nav + preview cards | locator pill + accent rule + page number, nothing else |
 | Section dividers | none | `section`/`agenda`/`end` | **forbidden** (locator carries orientation) |
@@ -240,8 +243,8 @@ package). Semantic layout tokens: `--scholarly-header-height: 50px`, `--scholarl
 
 ### Avoid — conflicts with our stance
 
-1. **`colorSchema: "both"`** (both themes default to it). We locked `light` (pmf-tsfm#126) because
-   OS-dark rendered ink-on-white figures against near-black. Set `slidev.colorSchema: "light"` in
+1. **`colorSchema: "both"`** (both themes default to it). We locked `light` (`light-ground`,
+   pmf-tsfm#126) because OS-dark rendered ink-on-white figures against near-black. Set `slidev.colorSchema: "light"` in
    our `defaults`; do **not** inherit "both", and skip scholarly's dark-chrome `data-color-mode`
    machinery.
 2. **Scholarly's font system** — serif (Palatino) body default, 8 swappable font themes, and
@@ -252,24 +255,24 @@ package). Semantic layout tokens: `--scholarly-header-height: 50px`, `--scholarl
 3. **Academic's font *choices*** (Montserrat / Roboto Slab, incl. a 200-weight face). Geometric
    display sans + hairline weights hurt back-row legibility. Take the loading mechanism, keep Inter.
 4. **Scholarly's 9 brand palettes + free decorative `--scholarly-accent`.** None is CVD-verified;
-   the accent is used as a colour anywhere. Conflicts with "accent = attention only, never a data
-   series" and with verification-by-validator. Ship **one** verified set + the Machado validator, not
+   the accent is used as a colour anywhere. Conflicts with `accent-is-attention` and with
+   verification-by-validator. Ship **one** verified set + the Machado validator, not
    a palette carousel.
 5. **Scholarly's per-context heading scale** (hero/display/section/content/fact, h1–h3 each) and
-   `content-density` knob. Assertion-Evidence has essentially **one** headline size (37px) + body
-   (23px) + locator; a multi-size scale invites size drift below the legibility floor. Keep the
-   two-size floor.
+   `content-density` knob. Assertion-Evidence has essentially **one** headline size + one body size
+   + the locator (`type-scale`); a multi-size scale invites size drift below the legibility floor.
+   Keep the two-size floor.
 6. **Emphasis + divider layouts** — scholarly's `section`, `agenda`, `end`, `statement`, `focus`,
-   `fact`, `quote`, `timeline`. Section dividers and single-word emphasis slides directly violate "no
-   section-divider slides; the persistent locator carries orientation."
+   `fact`, `quote`, `timeline`. Section dividers and single-word emphasis slides directly violate
+   `no-section-dividers`.
 7. **Beamer footer-TOC navigation + preview cards** (scholarly). Heavy chrome; our model is locator
    pill + accent rule + page number and nothing else.
 8. **The full BibTeX pipeline + `markdown-it-citation` dependency + CLI + VS Code extension**
    (scholarly). Large dependency and tooling surface for a template explicitly trying to start clean
    on dependency debt. Academic's manual `Footnote` is the proportionate choice unless reference
    volume forces otherwise.
-9. **`aspectRatio: "4:3"`** (scholarly's Beamer nostalgia). Keep our `canvasWidth: 1280` logical
-   16:9 canvas so px values render as designed and scale to the projector.
+9. **`aspectRatio: "4:3"`** (scholarly's Beamer nostalgia). Keep the logical 16:9 canvas
+   (`type-scale`) so px values render as designed and scale to the projector.
 
 ### What the packaging teaches us
 

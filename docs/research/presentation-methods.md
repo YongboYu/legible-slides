@@ -9,11 +9,14 @@ sites), confirms what the project already asserts, and closes with an explicit
 **v1-adopt vs. v2-defer** recommendation. It is descriptive research feeding the
 wayfinder map; nothing here is settled until its ticket is.
 
-The existing method canon it must sharpen (from
-[`docs/design-provenance.md`](../design-provenance.md)): **one message per slide**;
-**Assertion-Evidence** (headline *is* the claim, body is the visual proof); **≤5 bullets,
-≤12 words** per bullet; **decide the message before the visual**; **animations ≤15s and
-purposeful**; **use established terminology**.
+> **Research input, dated.** The rules this document set out to sharpen — and the rules it
+> recommends — now live in the canon, [`docs/method.md`](../method.md), which is authoritative on
+> every one of them and owns their numbers. Read the values quoted here as what was proposed when
+> the research ran, not as the rule.
+
+The canon it sharpens was, at the time, the practice recorded in
+[`docs/design-provenance.md`](../design-provenance.md): one message per slide, Assertion-Evidence,
+the bullet and word ceilings, message before visual, the animation ceiling, standard terminology.
 
 ---
 
@@ -206,6 +209,13 @@ restate the evidence; treat the aesthetics as optional, subordinate to the a11y 
 ---
 
 ## RECOMMENDATION — v1 adopt vs. v2 defer
+
+> **Outcome.** The v1 list below was adopted into [`method.md`](../method.md) as `headline-shape`,
+> `coherence`, `no-script-on-slide`, `signaling`, `layout-discipline`, `figure-noise`,
+> `motion-purpose` and `established-terminology`. One deviation: Alley's **8–14 word headline band
+> landed as guidance rather than a threshold**, because several of the flagship's resolved beat
+> headlines are shorter claims and a hard word gate would fail them. The canon keeps the two-line
+> ceiling as the operative limit instead.
 
 ### v1 — adopt into the method canon now
 

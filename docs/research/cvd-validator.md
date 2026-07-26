@@ -3,6 +3,10 @@
 *Research ticket: what Python tooling and metric should `legible-slides`' colour-vision-deficiency
 (CVD) validator standardize on?*
 
+> **Research input, dated.** The floor, the metric and the conditions this document proposes are now
+> the canon's `separation-floor` ([`docs/method.md`](../method.md)), which is authoritative and owns
+> the numbers. Read the values below as what the research recommended, not as the rule.
+
 **Context.** The source deck (`pmf-tsfm`, CAiSE 2026) asserts that its 5-line categorical colour
 set stays **"≥39 apart"** under deuteranopia / protanopia / tritanopia *and* grayscale, using
 [Machado (2009)](https://www.inf.ufrgs.br/~oliveira/pubs_files/CVD_Simulation/Machado_Oliveira_Fernandes_CVD_Vis2009_final.pdf)

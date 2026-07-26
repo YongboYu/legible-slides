@@ -25,9 +25,9 @@ failure modes, delivered in whatever tool you already present with.
 
 Three things, in order of how much they matter:
 
-1. **A method.** One message per slide, structured as Assertion-Evidence (Alley & Neeley): the
-   headline *is* the claim, everything below it is the proof. Decide the message first, then find
-   the visual that earns it.
+1. **A method.** A short set of rules about what a slide is *for*, built on Assertion-Evidence
+   (Alley & Neeley) and the cognitive-load research underneath it. They live in
+   [`docs/method.md`](docs/method.md) — the canon, and the only place any of them is stated.
 2. **A verified accessibility floor.** A type scale tuned for real projection distance, and a
    colour-vision-deficiency validator you can run against *your* palette — not just a promise that
    ours passes.
