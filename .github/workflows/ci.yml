@@ -41,6 +41,37 @@ jobs:
           uv run --project python
           legible gen-css themes/kuleuven.json --output theme/styles/tokens.css --check
 
+  # The theme's own build, over the example deck that exercises every layout it ships. A theme is
+  # declarative — layouts, chrome and one stylesheet — so a build that renders every layout is the
+  # test worth having, and there is no JavaScript unit suite behind it.
+  #
+  # It also asserts the two things about the built output that are easy to break and invisible in a
+  # screenshot: that no font is fetched from a provider, and that the bundled ones actually shipped.
+  # A deck whose typeface arrives over the network is a deck that renders in a fallback in a
+  # lecture room with no wifi, and nothing else in this pipeline would notice.
+  theme:
+    name: theme example builds
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: theme
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: theme/pnpm-lock.yaml
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run build
+      - name: The deck asks no font provider for anything
+        run: '! grep -rq "fonts.googleapis.com\|fonts.gstatic.com\|api.fonts.coollabs.io" dist'
+      - name: Both bundled families shipped with it
+        run: ls dist/assets/Inter-*.woff2 dist/assets/JetBrainsMono-*.woff2
+
   python:
     name: python
     runs-on: ubuntu-latest

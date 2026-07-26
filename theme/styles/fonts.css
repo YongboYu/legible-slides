@@ -1,0 +1,55 @@
+/* The two families of `fonts`, self-hosted.
+ *
+ * No `@import` and no font provider: a deck must render in the family it was designed in on a
+ * lecture-room laptop with no network, and a fallback that arrives silently is the failure the rule
+ * exists to prevent. These woff2 are the browser's half of `theme/assets/fonts/`; the TTFs beside
+ * them are the same release, registered with matplotlib by `legible.fonts` so a generated figure
+ * and the slide it lands on are set in one typeface.
+ *
+ * Only the weights below are bundled, so nothing in this theme may ask for another one. `block`
+ * rather than `swap`: a headline that reflows mid-talk is worse than one that arrives late.
+ */
+
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 400;
+  font-display: block;
+  src: url('../assets/fonts/Inter-Regular.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 500;
+  font-display: block;
+  src: url('../assets/fonts/Inter-Medium.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 600;
+  font-display: block;
+  src: url('../assets/fonts/Inter-SemiBold.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 700;
+  font-display: block;
+  src: url('../assets/fonts/Inter-Bold.woff2') format('woff2');
+}
+
+/* One weight, because the locator is the only thing set in it — and the regular, because that is the
+ * face that carries the bare family name `JetBrains Mono`. A weight-suffixed face reports itself as
+ * a family of its own ("JetBrains Mono Medium"), which is fine for a browser reading this rule and
+ * wrong for matplotlib, which resolves the family by name and would go looking outside the bundle. */
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: block;
+  src: url('../assets/fonts/JetBrainsMono-Regular.woff2') format('woff2');
+}

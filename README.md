@@ -94,6 +94,19 @@ implementation of the simulation in this project, and the linter is deliberately
 What is left is judgment — whether a slide carries one message, whether its headline is a claim —
 and judgment stays with a reader, or with the coding-agent skill that reviews on your behalf.
 
+## Presenting with Slidev
+
+[`theme/`](theme) is `slidev-theme-legible`, the method as machinery: four layouts, the persistent
+chrome that carries orientation so no slide has to be spent on navigation, and styles that read
+nothing but the generated palette. Both typefaces are bundled, so a deck renders in the family it was
+designed in on a lecture-room laptop with no network — and in the same one the figures were drawn in.
+
+What it refuses is as much the point. There is no section-divider, no opener, no closer and no
+single-word-emphasis layout, because the method forbids the slides they build.
+
+A deck consumes it by path until it is published. See [`theme/README.md`](theme/README.md), and
+[`theme/example.md`](theme/example.md) for every layout exercised once.
+
 ## Provenance
 
 This is not a greenfield idea. It is an extraction from a deck that shipped: the CAiSE 2026

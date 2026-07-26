@@ -1,0 +1,50 @@
+{
+  "name": "slidev-theme-legible",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Assertion-Evidence layouts, persistent chrome and tokenised styles for legible-slides.",
+  "license": "MIT",
+  "keywords": [
+    "slidev-theme",
+    "slidev",
+    "assertion-evidence",
+    "accessibility"
+  ],
+  "engines": {
+    "node": ">=20.0.0",
+    "slidev": ">=52.0.0"
+  },
+  "files": [
+    "assets/fonts/*.woff2",
+    "assets/fonts/*.txt",
+    "assets/fonts/README.md",
+    "components",
+    "layouts",
+    "styles",
+    "slide-top.vue"
+  ],
+  "scripts": {
+    "dev": "slidev example.md --open",
+    "build": "slidev build example.md --base ./ --out dist"
+  },
+  "slidev": {
+    "colorSchema": "light",
+    "defaults": {
+      "aspectRatio": "16/9",
+      "canvasWidth": 1280,
+      "fonts": {
+        "sans": "Inter",
+        "mono": "JetBrains Mono",
+        "local": ["Inter", "JetBrains Mono"],
+        "provider": "none"
+      },
+      "themeConfig": {
+        "logo": ""
+      }
+    }
+  },
+  "devDependencies": {
+    "@slidev/cli": "^52.18.0",
+    "@slidev/types": "^52.18.0"
+  }
+}

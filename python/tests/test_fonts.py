@@ -12,7 +12,7 @@ import pytest
 from matplotlib import font_manager
 
 from legible.fonts import BUNDLE, FontError, register
-from legible.method import FONT_TEXT
+from legible.method import FONT_MONO, FONT_TEXT
 
 
 def test_the_backend_resolves_the_canon_s_text_family_to_a_bundled_file():
@@ -21,6 +21,17 @@ def test_the_backend_resolves_the_canon_s_text_family_to_a_bundled_file():
     register()
 
     resolved = Path(font_manager.findfont(FONT_TEXT, fallback_to_default=False))
+
+    assert resolved.parent == BUNDLE
+
+
+def test_the_bundle_carries_the_locator_s_family_too():
+    """`fonts` names two families, and the bundle is where both of them live. Nothing here draws in
+    the mono one — this is the guard that says so out loud if the deck's copy of it goes missing, or
+    if it is replaced by a weight-suffixed face that reports a family name of its own."""
+    register()
+
+    resolved = Path(font_manager.findfont(FONT_MONO, fallback_to_default=False))
 
     assert resolved.parent == BUNDLE
 

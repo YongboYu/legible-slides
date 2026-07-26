@@ -52,7 +52,7 @@ a layout that breaks it. The beat-13 close reuses `cover` or a plain `assertion-
 
 | Component | Role |
 |---|---|
-| locator + page-no **chrome** | the persistent AE identity — locator pill + accent rule + page number, injected via `global-top.vue` / `global-bottom.vue`, with per-slide opt-out (academic's `Pagination` pattern). Generalizes pmf's `PageNo` + locator. |
+| locator + page-no **chrome** | the persistent AE identity — locator pill + accent rule + page number, injected globally with per-slide opt-out (academic's `Pagination` pattern). Generalizes pmf's `PageNo` + locator. **Built on the per-slide `slide-top.vue` layer, not `global-top.vue`** (#20): a global layer is mounted once outside the slide, so its px are the viewport's rather than the canvas' `type-scale` is written in, and its chrome does not land on an exported page. |
 | **`Callout`** | inline emphasis box (pmf universal). |
 | **`Footnote` / `Footnotes`** | manual citation markers (borrow academic, #6) — pairs with the `references` layout for the deck's Alley / Tversky / Machado cites. |
 | **`Figure`** | image + caption + optional cite-marker, kept as *data* (borrow academic's prop-driven captions) — evidence panes carry image + caption + source together. |

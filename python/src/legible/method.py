@@ -126,9 +126,15 @@ DENSE_PX = int(_TYPE_SCALE["dense-px"])
 DENSE_XS_PX = int(_TYPE_SCALE["dense-xs-px"])
 
 
+_FONTS = rule_thresholds("fonts")
+
 #: The family the deck's text is set in. `fonts` says where it has to be bundled and registered,
 #: and why; ``legible.fonts`` is what does it.
-FONT_TEXT = rule_thresholds("fonts")["font-text"]
+FONT_TEXT = _FONTS["font-text"]
+
+#: The family the deck's locator is set in, and nothing else. Nothing here draws with it: it is here
+#: so the bundle can be held to carrying both of the families the canon names.
+FONT_MONO = _FONTS["font-mono"]
 
 
 #: The density ceilings, which are what physically stop a slide absorbing a second message. Both

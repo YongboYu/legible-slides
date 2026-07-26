@@ -1,0 +1,460 @@
+/* Every rule this theme has, in one unscoped file.
+ *
+ * Unscoped on purpose, and the reason is a Slidev gotcha the source deck paid for first: a layout's
+ * `<style scoped>` does not reach the markdown slotted into it, because the slot keeps the page's
+ * scope. Scoping the layouts would silently style the theme's own chrome and miss every word the
+ * deck actually writes. One file also makes the theme's central promise greppable — no colour is
+ * stated here, only the custom properties `tokens.css` generates from the palette.
+ *
+ * The sizes are the canon's, quoted from `type-scale` in `docs/method.md`. Change a number there
+ * and it changes here; do not invent a size in a component.
+ */
+
+:root {
+  /* ── the type scale (`type-scale`), in the px of its 1280×720 logical canvas ── */
+  --headline-px: 37px;
+  --body-px: 23px;
+
+  /* The canon's two dense sizes. They are marked exceptions for tight panels — a figure caption, a
+   * citation, a source line — and never a knob for fitting more onto a slide. Every use of them in
+   * this file names which exception it is. */
+  --dense-px: 18px;
+  --dense-xs-px: 16px;
+
+  /* ── the five zones of `ae-skeleton`, as canvas px ──
+   * locator → assertion headline → accent rule → evidence → page number. The zone heights are
+   * fixed rather than content-driven, which is what makes the chrome land in the same place on
+   * every slide of a deck instead of drifting with the length of a headline. */
+  --edge-x: 72px;
+  --edge-top: 36px;
+  --edge-bottom: 36px;
+  --zone-gap: 20px;
+  --zone-locator-h: 28px;
+  /* Two rendered lines of headline, which is what `headline-lines-max` allows. A third line has
+   * nowhere to go and collides with the accent rule — the ceiling, made visible. */
+  --zone-headline-h: 96px;
+  --zone-rule-h: 3px;
+  /* Room under the evidence for the page number. */
+  --zone-footer-h: 28px;
+
+  --zone-headline-top: calc(var(--edge-top) + var(--zone-locator-h) + var(--zone-gap));
+  --zone-header-h: calc(
+    var(--zone-headline-top) + var(--zone-headline-h) + var(--zone-gap) + var(--zone-rule-h)
+  );
+
+  /* The accent segment that starts the rule. Attention, not decoration (`accent-is-attention`). */
+  --zone-rule-accent-w: 88px;
+
+  /* `light-ground`: the scheme is locked, so form controls, scrollbars and any UA-drawn surface
+   * are told the ground they are on rather than asking the viewer's OS. */
+  color-scheme: light;
+
+  /* Slidev's own primary, aliased onto the palette so the built-in UI cannot render off-palette. */
+  --slidev-theme-primary: var(--brand);
+  --slidev-slide-container-background: var(--ink);
+
+  /* Code is evidence, so it is not left at Slidev's 12px default. Dense: a code block is a tight
+   * panel by definition. */
+  --slidev-code-background: var(--surface-alt);
+  --slidev-code-foreground: var(--ink);
+  --slidev-code-font-size: var(--dense-px);
+  --slidev-code-line-height: 1.5;
+}
+
+/* ── the slide ground ─────────────────────────────────────────────────────────────────────── */
+
+.slidev-layout {
+  height: 100%;
+  background: var(--surface);
+  color: var(--ink);
+  font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  font-size: var(--body-px);
+  font-weight: 400;
+  line-height: 1.5;
+}
+
+.slidev-layout h1 {
+  margin: 0 0 calc(var(--zone-gap) * 2 + var(--zone-rule-h)) 0;
+  min-height: var(--zone-headline-h);
+  color: var(--brand);
+  font-size: var(--headline-px);
+  font-weight: 600;
+  line-height: 1.28;
+  letter-spacing: -0.01em;
+}
+
+/* No h2–h6 scale. Assertion-Evidence has one headline size, one body size and the locator; a
+ * per-context heading scale is how a deck drifts below the floor one slide at a time. A subhead on
+ * a content slide is a second message (`one-message`), so the only h2 the theme styles is the
+ * cover's. */
+
+.slidev-layout p {
+  margin: 0 0 var(--zone-gap) 0;
+}
+
+/* Bullets are the fallback form of evidence, under the ceiling in `bullet-ceiling` — not the
+ * default (`evidence-is-visual`). Markers are stated here rather than left to the UA so the indent
+ * sits on the same left edge as everything else on the slide. */
+.slidev-layout ul,
+.slidev-layout ol {
+  margin: 0 0 var(--zone-gap) 0;
+  padding-left: 1.1em;
+}
+
+.slidev-layout ul {
+  list-style: square;
+}
+
+.slidev-layout ol {
+  list-style: decimal;
+}
+
+.slidev-layout li {
+  margin-bottom: 10px;
+  line-height: 1.45;
+}
+
+.slidev-layout li::marker {
+  color: var(--neutral-soft);
+}
+
+.slidev-layout strong,
+.slidev-layout b {
+  font-weight: 600;
+}
+
+.slidev-layout em {
+  /* Only upright faces are bundled, so emphasis is carried by weight rather than by the skewed
+   * shapes a browser would synthesise from them. */
+  font-style: normal;
+  font-weight: 500;
+}
+
+.slidev-layout a {
+  border: none;
+  color: var(--brand);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.slidev-layout code {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-weight: 500;
+}
+
+.slidev-layout blockquote {
+  margin: 0 0 var(--zone-gap) 0;
+  padding: 0 0 0 var(--zone-gap);
+  border-left: 3px solid var(--hairline);
+  background: none;
+  color: var(--ink);
+  font-size: var(--body-px);
+}
+
+.slidev-layout table {
+  border-collapse: collapse;
+  font-size: var(--dense-px); /* dense: a table is a tight panel */
+}
+
+.slidev-layout th,
+.slidev-layout td {
+  padding: 8px 16px 8px 0;
+  border-bottom: 1px solid var(--hairline);
+  text-align: left;
+}
+
+.slidev-layout th {
+  color: var(--neutral);
+  font-weight: 600;
+}
+
+/* ── the chrome (`ae-skeleton`) ───────────────────────────────────────────────────────────────
+ * Injected once by `slide-top.vue`, so no layout opts in and none can forget. It sits inside the
+ * slide's own box rather than over the viewport, which is what makes these px the canvas px the
+ * type scale is written in — the chrome scales with the slide, and lands on an exported page.
+ *
+ * The locator and the page number are set at the smallest size the canon carries. They are
+ * orientation, not evidence: the back-row floor is about the material the audience has to read,
+ * and chrome that competes with the claim is noise (`coherence`). */
+
+.legible-chrome {
+  position: absolute;
+  inset: 0;
+  /* Chrome is never a target — a click belongs to the slide underneath it. */
+  pointer-events: none;
+}
+
+.legible-locator {
+  position: absolute;
+  top: var(--edge-top);
+  left: var(--edge-x);
+  display: inline-flex;
+  align-items: center;
+  height: var(--zone-locator-h);
+  padding: 0 14px;
+  border-radius: 999px;
+  background: var(--brand);
+  color: var(--surface);
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: var(--dense-xs-px);
+  font-weight: 400;
+  letter-spacing: 0.04em;
+}
+
+.legible-rule {
+  position: absolute;
+  top: calc(var(--zone-header-h) - var(--zone-rule-h));
+  right: var(--edge-x);
+  left: var(--edge-x);
+  height: var(--zone-rule-h);
+  background: var(--hairline);
+}
+
+.legible-rule::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: var(--zone-rule-accent-w);
+  background: var(--accent);
+}
+
+.legible-page {
+  position: absolute;
+  right: var(--edge-x);
+  bottom: var(--edge-bottom);
+  color: var(--neutral);
+  font-size: var(--dense-xs-px);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── layout: cover ────────────────────────────────────────────────────────────────────────────
+ * The one slide outside the skeleton, and the only one with no chrome: it is where orientation
+ * begins rather than something the locator has to carry. It introduces no new type size either —
+ * the title is set at the headline size, because a cover is not a licence for a display face. */
+
+.slidev-layout.cover {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: var(--edge-top) var(--edge-x) var(--edge-bottom) var(--edge-x);
+}
+
+.slidev-layout.cover h1 {
+  min-height: 0;
+  margin: 0;
+  font-weight: 700;
+}
+
+.slidev-layout.cover h2 {
+  margin: 12px 0 0 0;
+  color: var(--neutral);
+  font-size: var(--body-px);
+  font-weight: 400;
+  line-height: 1.45;
+}
+
+.legible-cover-rule {
+  width: var(--zone-rule-accent-w);
+  height: var(--zone-rule-h);
+  margin: 32px 0;
+  background: var(--accent);
+}
+
+.legible-cover-meta {
+  display: grid;
+  gap: 4px;
+  color: var(--neutral);
+}
+
+.legible-cover-logo {
+  position: absolute;
+  top: var(--edge-top);
+  right: var(--edge-x);
+  max-width: 260px;
+  /* Matched to the locator zone opposite it, so the two top corners sit on one line. */
+  max-height: 44px;
+}
+
+/* ── layouts: the content skeleton ────────────────────────────────────────────────────────────
+ * Padded to the zones above: the headline starts under the locator, and the evidence starts under
+ * the accent rule. A column, so a `Footnotes` block can sit on the bottom edge of the evidence. */
+
+.slidev-layout.assertion-evidence,
+.slidev-layout.two-col-evidence,
+.slidev-layout.references {
+  display: flex;
+  flex-direction: column;
+  padding: var(--zone-headline-top) var(--edge-x) calc(var(--edge-bottom) + var(--zone-footer-h))
+    var(--edge-x);
+}
+
+/* The evidence pane, filling what is left under the rule. A column, and `min-height: 0` on both
+ * ends of it, so a figure inside shrinks to fit rather than pushing the slide past its bottom
+ * edge — and so a `Footnotes` block can be pushed to that edge. */
+.legible-evidence {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+}
+
+/* On the default layout there is no pane element: the evidence is whatever follows the headline in
+ * the slide's own markdown, so the layout is the column. */
+.legible-evidence > :last-child,
+.legible-column > :last-child,
+.slidev-layout.assertion-evidence > :last-child {
+  margin-bottom: 0;
+}
+
+/* Side by side, on a ratio the slide sets. Each pane is a column of its own, so a figure fills one
+ * and a citation can sit at the foot of the other. */
+.slidev-layout.two-col-evidence .legible-evidence {
+  display: grid;
+  align-items: stretch;
+  gap: 48px;
+}
+
+.legible-column {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+}
+
+/* A figure is the pane's content rather than a block in it: it takes the room that is left. */
+.legible-evidence > .legible-figure,
+.legible-column > .legible-figure,
+.slidev-layout.assertion-evidence > .legible-figure {
+  flex: 1;
+}
+
+/* ── layout: references ───────────────────────────────────────────────────────────────────────
+ * A sources slide that is a slide about sources, not a divider. Entries are data, numbered so an
+ * in-text `Footnote` marker elsewhere in the deck lines up with one of them. */
+
+.legible-references {
+  display: grid;
+  gap: 14px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: legible-reference;
+}
+
+.legible-reference {
+  display: grid;
+  grid-template-columns: 2.4em 1fr;
+  margin: 0;
+  counter-increment: legible-reference;
+}
+
+.legible-reference::before {
+  content: counter(legible-reference) '.';
+  color: var(--neutral);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Qualified by the layout so it outranks the link colour above rather than repeating it. */
+.slidev-layout .legible-reference-uri {
+  display: block;
+  margin-top: 2px;
+  color: var(--neutral);
+  /* dense: a source line is the reference's fine print, not its content. `brand-strong` is
+   * deliberately not used here — at this size it would fail contrast
+   * (`decorative-neutral-never-text`). */
+  font-size: var(--dense-px);
+  text-decoration: none;
+}
+
+/* ── component: Callout ───────────────────────────────────────────────────────────────────── */
+
+.legible-callout {
+  padding: 16px 24px;
+  border-left: 4px solid var(--brand-strong);
+  background: var(--surface-alt);
+}
+
+/* The attention variant. Accent marks the thing to look at, and carries ink on top of it rather
+ * than light text (`accent-is-attention`). */
+.legible-callout.legible-callout-accent {
+  border-left-color: var(--accent);
+}
+
+.legible-callout-title {
+  margin-bottom: 6px;
+  color: var(--brand);
+  font-weight: 600;
+}
+
+.legible-callout > :last-child {
+  margin-bottom: 0;
+}
+
+/* ── component: Figure ────────────────────────────────────────────────────────────────────────
+ * Image, caption and citation as one thing, because that is how they are read. */
+
+.legible-figure {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 0;
+  margin: 0;
+}
+
+/* The image is sized by its own aspect ratio inside the pane's width, and the caption follows it
+ * immediately — not the foot of the pane. `flex: none` is what keeps that true: left to flex the
+ * image would be handed the height of the whole pane and then letterbox itself inside it, opening a
+ * gap between a figure and the words describing it. A figure taller than its pane is capped rather
+ * than allowed to run off the slide; size it for the pane, which is what the helper's canvas px are
+ * for. */
+.legible-figure img {
+  flex: none;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  object-position: left top;
+}
+
+.legible-figure figcaption {
+  color: var(--neutral);
+  /* dense: a caption labels the evidence, it is not the evidence. */
+  font-size: var(--dense-px);
+  line-height: 1.4;
+}
+
+.legible-figure figcaption sup {
+  margin-left: 2px;
+}
+
+/* ── components: Footnote / Footnotes ─────────────────────────────────────────────────────────
+ * Manual numbering, paired with the `references` layout. Sits on the bottom edge of the evidence
+ * pane, under a hairline, at the smallest size the canon carries — dense: a citation is
+ * attribution, and the room is not asked to read it from the back. */
+
+.legible-footnotes {
+  margin-top: auto;
+  padding-top: 10px;
+  display: grid;
+  gap: 4px;
+}
+
+.legible-footnotes-separated {
+  border-top: 1px solid var(--hairline);
+}
+
+.legible-footnote {
+  display: flex;
+  gap: 6px;
+  color: var(--neutral);
+  font-size: var(--dense-xs-px);
+  line-height: 1.35;
+}
+
+/* Markers line up under each other, so a column of them reads as a list. */
+.legible-footnote-number {
+  font-variant-numeric: tabular-nums;
+}
