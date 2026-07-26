@@ -25,7 +25,7 @@ copy here to update:
 ```python
 from legible import DELTA_E_FLOOR, rule_thresholds
 
-rule_thresholds("separation-floor")   # {'delta-e-floor': '15.0', 'delta-e-metric': …}
+rule_thresholds("separation-floor")   # {'delta-e-floor': …, 'delta-e-metric': …, 'cvd-severity': …}
 ```
 
 What the package adds on top of the rule is fixed by
