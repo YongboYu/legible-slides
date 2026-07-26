@@ -26,6 +26,15 @@ def test_every_shipped_theme_loads_and_passes(themes_dir, theme):
     assert report.passed
 
 
+@pytest.mark.parametrize("theme", SHIPPED)
+def test_a_shipped_theme_that_declares_a_logo_ships_the_file(themes_dir, theme):
+    """A brand-free theme omits the key; a branded one must not point at nothing."""
+    palette = load_palette(themes_dir / theme)
+
+    if palette.logo is not None:
+        assert (themes_dir / palette.logo).is_file()
+
+
 def test_the_reference_theme_achieves_its_documented_minima(themes_dir):
     report = validate(load_palette(themes_dir / "kuleuven.json"))
 
