@@ -102,8 +102,9 @@ The four calls that need understanding, applied by the agent against the rules l
 - **Two-tier authority.**
   - **Mechanical linter = hard gate** — exit 0/1, CI-integratable, mirroring `cvd-validate` (#9).
     Objective violations block. One exception, declared by the canon rather than by the skill: a rule
-    whose threshold line sets its own severity to `warning` reports without blocking. Today that is
-    only `no-inflated-register`, which `established-terminology` can legitimately override.
+    whose threshold line sets its own severity to `warning` reports without blocking. The canon says
+    which rules those are and why — `no-inflated-register` is one, because
+    `established-terminology` can legitimately override it.
   - **Semantic review = advisory** — LLM judgments are fallible, so they never block CI.
 - **Output = one merged per-slide markdown report.** Findings grouped by slide, each tagged severity
   **error** (mechanical gate) or **warning** (advisory judgment) and **linked to the `method.md`

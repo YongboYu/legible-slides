@@ -177,8 +177,8 @@ Fixed by the method, not by the brand and not per slide. On the logical canvas, 
 floor: it projects to roughly 34px at 1920, which is what the back row of a lecture hall can read.
 The two dense sizes exist for tight figure panels and are marked exceptions, not knobs.
 
-**Decided by** script · **Threshold** `canvas-width-px = 1280`, `body-px = 23`, `headline-px = 37`,
-`dense-px = 18`, `dense-xs-px = 16`
+**Decided by** script · **Threshold** `canvas-width-px = 1280`, `canvas-aspect-ratio = 16:9`,
+`body-px = 23`, `headline-px = 37`, `dense-px = 18`, `dense-xs-px = 16`
 
 ### `fonts`: one text family, one mono family, both bundled
 
@@ -226,6 +226,10 @@ the message needs discrimination, not by default.
 ### `decorative-neutral-never-text`: the softest neutral is not a text colour
 
 It exists for rules, gridlines and ghost edges. Text on it fails contrast.
+
+The same test governs every other role used for text: it clears WCAG contrast at the size it is set,
+or it does not carry text at that size. A mid-contrast chrome colour such as `brand-strong` clears it
+only at large sizes.
 
 **Decided by** script (role usage)
 
@@ -305,9 +309,14 @@ Counted over a passage of prose or notes, not over one sentence.
 Every rule in this subsection is **Decided by** judgment, and none carries a threshold. These are the
 tells a wordlist cannot catch.
 
-#### `no-contrast-for-emphasis`: no "not X, it's Y"
+#### `no-contrast-for-emphasis`: no foil invented to make a claim sound bigger
 
-The construction manufactures emphasis by inventing a foil. State the claim.
+The tell is "not just X, it's Y", where X is a position nobody held and the negation exists only to
+set up the reveal. State the claim on its own.
+
+A contrast that names a **real alternative** the audience might otherwise choose is not this rule's
+target: "the headline is the claim, not a label" earns its second clause, because labels are what
+most decks actually put there.
 
 #### `no-reflexive-tricolon`: three items because the claim has three
 
@@ -356,8 +365,9 @@ Beats 2, 4 and 12 teach no rule: they carry the argument for why the rules exist
 rules in [§7](#7-voice) get **no beat** — the deck obeys them silently, because a slide dated to
 "don't sound like AI" would age badly and pull focus from the timeless part of the method.
 
-Structural notes the outline commits to: beat 13 reuses the cover layout rather than introducing a
-closing layout (`no-section-dividers`), and beats 3, 6 and 10 are the two-column evidence slides.
+The outline commits to no layout: which beat lands on which layout is the reference implementation's
+call ([`slidev-reference-impl.md`](slidev-reference-impl.md) §2). What the outline does commit to is
+that no beat needs a layout `no-section-dividers` forbids, the close included.
 
 ---
 

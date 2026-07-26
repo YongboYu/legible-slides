@@ -203,8 +203,8 @@ package). Semantic layout tokens: `--scholarly-header-height: 50px`, `--scholarl
 | colorSchema | `both` | `both` | **`light` locked** (`light-ground`) |
 | Accent | n/a | free decorative `--scholarly-accent` | `accent-is-attention` |
 | Citations | manual `Footnote`/`Footnotes` | full BibTeX pipeline + CLI + VS Code | (open) |
-| Chrome | global `Pagination` only | header + footer + TOC nav + preview cards | locator pill + accent rule + page number, nothing else |
-| Section dividers | none | `section`/`agenda`/`end` | **forbidden** (locator carries orientation) |
+| Chrome | global `Pagination` only | header + footer + TOC nav + preview cards | `ae-skeleton` |
+| Section dividers | none | `section`/`agenda`/`end` | **forbidden** (`no-section-dividers`) |
 | Deps | 2 (`@slidev/types`, unocss) | many + `@slidev/client`, markdown-it-citation | wants to start clean re: dep debt |
 | License | MIT | MIT | — |
 
@@ -265,8 +265,8 @@ package). Semantic layout tokens: `--scholarly-header-height: 50px`, `--scholarl
 6. **Emphasis + divider layouts** — scholarly's `section`, `agenda`, `end`, `statement`, `focus`,
    `fact`, `quote`, `timeline`. Section dividers and single-word emphasis slides directly violate
    `no-section-dividers`.
-7. **Beamer footer-TOC navigation + preview cards** (scholarly). Heavy chrome; our model is locator
-   pill + accent rule + page number and nothing else.
+7. **Beamer footer-TOC navigation + preview cards** (scholarly). Heavy chrome; our model is
+   `ae-skeleton` and nothing else.
 8. **The full BibTeX pipeline + `markdown-it-citation` dependency + CLI + VS Code extension**
    (scholarly). Large dependency and tooling surface for a template explicitly trying to start clean
    on dependency debt. Academic's manual `Footnote` is the proportionate choice unless reference

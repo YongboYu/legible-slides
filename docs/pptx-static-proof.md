@@ -100,7 +100,8 @@ The 12 theme slots therefore carry only the **native-surface roles**.
 
 **Type scale — height-ratio derived.** `type-scale` fixes the canvas sizes; this is the one place they
 are converted, never restated. PowerPoint's 16:9 slide is 13.333″×7.5″ = 960×540pt, and the canon's
-canvas is 16:9 at `canvas-width-px`, so the slide is **0.75×** the canvas height. Point sizes preserve
+canvas is `canvas-aspect-ratio` at `canvas-width-px`, so the slide is **0.75×** the canvas height in
+the units each is expressed in. Point sizes preserve
 the **font-height-to-slide-height ratio** at that factor (the ratio is what actually governs back-row
 legibility), rounded to even points and **never below the legibility floor**:
 

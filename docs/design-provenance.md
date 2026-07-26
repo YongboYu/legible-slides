@@ -9,8 +9,8 @@ starts from evidence rather than memory. It is deliberately descriptive: it reco
 does today, not what the template should do.
 
 **It states no rules.** The rules the deck's practice became, and every number they turn on, live in
-[`method.md`](method.md); this file is the trail of where they came from. Rule IDs below
-(`one-message`, `type-scale`, …) link there.
+[`method.md`](method.md); this file is the trail of where they came from. The rule IDs named below
+(`one-message`, `type-scale`, …) are defined there.
 
 ---
 
@@ -101,10 +101,8 @@ The family trio was **colour-vision-deficiency verified via Machado (2009) simul
 recorded the five-line plot set (truth + baseline + 3 families) as staying **≥39 apart** under
 deuteranopia, protanopia, tritanopia *and* grayscale.
 
-> **That `≥39` is retired.** It is a raw sRGB distance, not a perceptual ΔE: the same colours,
-> measured with a different ruler than the canon's `separation-floor`. Never read it as headroom
-> above the canon's floor. The full reckoning is in
-> [`cvd-validator-contract.md`](cvd-validator-contract.md) §2.
+> **That `≥39` is retired**, and never means headroom above the canon's `separation-floor`. Why, in
+> full: [`cvd-validator-contract.md`](cvd-validator-contract.md) §2.
 
 The deck also never let colour carry meaning alone: multi-line plots carried **redundant dash +
 marker cues** and bars carried **direct labels**, which is now `never-sole-channel`. Chronos was

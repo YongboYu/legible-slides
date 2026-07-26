@@ -48,7 +48,7 @@ Keys are **kebab-case**, mirroring the CSS custom properties they become (`ink` 
 
   // ── brand & accent (universal) ──
   "brand":        "#00407a",   // headings, the "highlighted group" in 2-group charts
-  "brand-strong": "#1d8db0",   // emphasis / links / chrome — large text only
+  "brand-strong": "#1d8db0",   // emphasis / links / chrome        (`decorative-neutral-never-text`)
   "accent":       "#dd8a2e",   // the attention role: arrows, "our method"  (`accent-is-attention`)
 
   // ── data-encoding roles (the generalization) ──
@@ -89,11 +89,11 @@ them is restated here.
 
 | Role | Governing rule |
 |---|---|
-| `accent` | `accent-is-attention` — attention only, never a data series |
+| `accent` | `accent-is-attention` |
 | `muted` + one highlight vs. the full `series[]` ramp | `spend-colour-on-discrimination` |
-| `series[]` in a chart | `never-sole-channel` — dash/marker in line charts, direct labels on bars |
+| `series[]` in a chart | `never-sole-channel` |
 | `neutral-soft` | `decorative-neutral-never-text` |
-| every `series[]` pair, plus `reference` / `muted` / `brand` | `separation-floor` — validator-gated; add as many series as you like and the validator tells you when you've added one too many |
+| every `series[]` pair, plus `reference` / `muted` / `brand` | `separation-floor` (validator-gated) |
 
 The review skill ([#12](https://github.com/YongboYu/legible-slides/issues/12)) enforces them and the
 validator ([#9](https://github.com/YongboYu/legible-slides/issues/9)) checks the last one.

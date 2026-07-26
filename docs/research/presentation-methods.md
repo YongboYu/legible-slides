@@ -40,9 +40,9 @@ From the Penn State
   film, or *words and equations arranged visually* — and **avoids bulleted text lists**.
 - One assertion per slide. If the headline isn't the takeaway, the slide has no message.
 
-> **Fit with our canon:** this is exactly our model. Our "≤12 words per bullet" is looser
-> than Alley's "8–14 words in the *headline*"; the two are compatible, but we can adopt
-> the tighter headline discipline (full sentence, ≤2 lines, 8–14 words) verbatim.
+> **Fit with our canon:** this is exactly our model. Our word ceiling governs bullets and
+> Alley's band governs the *headline*, so the two are compatible, and the tighter headline
+> discipline (full sentence, ≤2 lines) is worth adopting.
 
 ### The evidence (this is why it is the foundation, not a preference)
 
@@ -106,7 +106,7 @@ Cognitive Style of PowerPoint* (2003/2006).
 ([Saylor](https://saylordotorg.github.io/text_business-information-systems-design-an-app-for-that/s07-01-c-r-a-p-principles-of-graphic-.html)).
 
 - **Contrast** — make different things look *clearly* different (size, weight, colour) to
-  build hierarchy. (Our accent colour = "attention only" is a contrast rule already.)
+  build hierarchy. (Our `accent-is-attention` role is a contrast rule already.)
 - **Repetition** — reuse fonts, colours, layouts so the deck reads as one system. (Our
   token architecture + fixed Slidev layouts already enforce this.)
 - **Alignment** — put nothing arbitrarily; every element lines up to an invisible grid.
@@ -177,9 +177,9 @@ the next, at the speaker's pace. So the evidence splits cleanly:
   **separates a label from its referent in time** (temporal contiguity warns against
   splitting corresponding words and pictures across successive reveals).
 
-> This is a precise, evidence-backed sharpening of our existing "animations ≤15s and
-> purposeful" rule: **purposeful = segmenting or process-depiction that is apprehensible
-> and congruent; everything else is noise.**
+> This is a precise, evidence-backed sharpening of our existing animation ceiling:
+> **purposeful = segmenting or process-depiction that is apprehensible and congruent;
+> everything else is noise.**
 
 ---
 
@@ -224,14 +224,14 @@ and are backed by evidence or strong consensus:
 
 1. **Tighten the AE headline recipe** (Alley): headline is a **full-sentence claim**,
    **left-justified, ≤2 lines, 8–14 words**; body is **visual evidence, not bullets**.
-   Confirms our model; makes the headline rule sharper than the current "≤12 words."
+   Confirms our model; makes the headline rule sharper than the word ceiling alone.
 2. **Coherence / signal-to-noise as the top-level rule** (Mayer d ≈ 0.86; Reynolds;
    Tufte): if an element doesn't serve the slide's one message, **delete it**. This is the
    evidence-backed generalization of "one message per slide."
 3. **Redundancy rule** (Mayer): **don't put the speaker's script on the slide as text** —
    visual evidence + spoken words. Reinforces the no-bullets stance with trial evidence.
 4. **Signaling rule** (Mayer): cue the eye to the one thing that matters (our accent =
-   "attention only" is already this; state it as a general rule).
+   `accent-is-attention` is already this; state it as a general rule).
 5. **CRAP as the layout checklist** (Williams): Contrast, Repetition, Alignment,
    Proximity — plus **whitespace/grid discipline** (Reynolds). Cheap, low-risk, governs
    *how* the evidence is arranged. Our tokens + fixed layouts already deliver Repetition.
@@ -241,7 +241,7 @@ and are backed by evidence or strong consensus:
 7. **Animation guardrail** (Tversky/Mayer): animation is allowed **only** when it is
    **segmenting** (speaker-paced progressive disclosure of congruent chunks) or **directly
    depicts a process**, and is **apprehensible + congruent**. **No decorative motion or
-   transitions.** This is the evidence-backed reading of our "≤15s and purposeful."
+   transitions.** This is the evidence-backed reading of our animation ceiling.
 8. **Standard terminology** (already canon; keep).
 
 ### v2 — defer

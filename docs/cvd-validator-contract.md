@@ -32,8 +32,8 @@ the two lines that appear in every chart (`reference`, `muted`):
 - **`brand ↔ series` is *not* checked** — they never co-occur on one axis, and requiring it is both
   wrong on the merits and empirically impossible for the reference palette (brand `#00407a` vs
   series-3 `#4c3a78` collapse to ΔE ≈ 0.7 under protanopia, because both are dark blue-purples).
-- **Excluded roles:** `accent` (attention only, never data; carries ink text + shape/position
-  redundancy) and all structural neutrals (`ink`, `neutral`, `neutral-soft`, `surface*`,
+- **Excluded roles:** `accent` (`accent-is-attention` keeps it off every data axis, and it carries
+  shape and position redundancy of its own) and all structural neutrals (`ink`, `neutral`, `neutral-soft`, `surface*`,
   `hairline`) — those are governed by WCAG *contrast*, not categorical ΔE.
 
 A theme with fewer series still works: the groups are formed pairwise over whatever roles are
@@ -110,8 +110,8 @@ A single Python core with two faces, shipped as an installable package (`pyproje
 def validate(palette, threshold: float = DELTA_E_FLOOR) -> Report: ...
 ```
 
-`DELTA_E_FLOOR` is quoted from the canon (`separation-floor`) — the package reads the number from
-there rather than carrying its own copy.
+`DELTA_E_FLOOR` is quoted from the canon (`separation-floor`); the package reads the number from
+there rather than carrying its own copy, and the same name is used throughout this document.
 
 ```
 Report:
@@ -154,8 +154,9 @@ share one palette-loader that reads the token-contract schema.
 import itertools, math
 from colorspacious import cspace_convert, deltaE
 
-# CVD_TYPES, SEVERITY and THRESHOLD are quoted from method.md `separation-floor`.
-# The canon owns those values; nothing here re-derives or re-states them.
+# The canon owns the conditions, the severity and the floor; the package quotes
+# method.md `separation-floor` rather than keeping a second copy of any of them.
+from legible.method import CVD_TYPES, SEVERITY, DELTA_E_FLOOR
 
 def _simulate(rgb1, *, cvd_type=None, grayscale=False):
     if grayscale:                                   # drop chroma in a uniform space
@@ -175,7 +176,7 @@ def _min_pairwise(colours):                          # colours: list of sRGB1
         for a, b in itertools.combinations(colours, 2)
     )
 
-def validate(palette, threshold=THRESHOLD):
+def validate(palette, threshold=DELTA_E_FLOOR):
     # groups built from token-contract roles present in the palette
     g1 = ["reference", "muted", *palette["series"]-roles]     # per-series ramp + anchors
     g2 = ["reference", "muted", "brand"]                      # two-group highlight + anchors
