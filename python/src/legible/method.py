@@ -5,7 +5,9 @@ how Python reads a number out of it, so the package quotes the canon rather than
 copy that can drift. Every rule carries a stable ID and a ``**Threshold**`` footer of
 ``key = value`` pairs; ``rule_thresholds`` returns one rule's pairs.
 
-The colour numbers below all belong to `separation-floor`. Change that rule and they change here.
+The constants below are grouped by the rule that owns them — `separation-floor` for the colour
+numbers, `type-scale` and `fonts` for what a generated figure is set in. Change a rule and they
+change here.
 """
 
 from __future__ import annotations
@@ -97,3 +99,25 @@ CVD_CONDITIONS = tuple(
 
 #: The conditions that need simulating — everything but normal vision.
 CVD_TYPES = tuple(condition for condition in CVD_CONDITIONS if condition != "normal")
+
+
+_TYPE_SCALE = rule_thresholds("type-scale")
+
+#: The logical canvas a deck's px values are written against. A figure is sized in these same
+#: pixels, so a chart drawn 960 wide occupies 960 of the layout's own units when it lands.
+CANVAS_WIDTH_PX = int(_TYPE_SCALE["canvas-width-px"])
+
+#: The canvas' height, from the ratio the canon fixes rather than from a second number.
+_ASPECT_W, _ASPECT_H = (int(part) for part in _TYPE_SCALE["canvas-aspect-ratio"].split(":"))
+CANVAS_HEIGHT_PX = CANVAS_WIDTH_PX * _ASPECT_H // _ASPECT_W
+
+#: Body type, which `type-scale` puts at the floor, and the two sizes it marks as exceptions
+#: beneath. The canon owns which of them may be used where.
+BODY_PX = int(_TYPE_SCALE["body-px"])
+DENSE_PX = int(_TYPE_SCALE["dense-px"])
+DENSE_XS_PX = int(_TYPE_SCALE["dense-xs-px"])
+
+
+#: The family the deck's text is set in. `fonts` says where it has to be bundled and registered,
+#: and why; ``legible.fonts`` is what does it.
+FONT_TEXT = rule_thresholds("fonts")["font-text"]

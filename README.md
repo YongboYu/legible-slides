@@ -48,6 +48,13 @@ its CSS custom properties (`legible gen-css`), so the token schema is understood
 and no second copy of it can drift. The generated stylesheet is committed and CI checks it against
 its palette — which is why building a deck needs no Python at all.
 
+Charts are regenerated from data rather than redrawn, so the swap reaches them too. There are two
+chart shapes, deliberately — the multi-series comparison, where every line gets a dash and a marker
+of its own because colour is never allowed to be the only channel, and the headline chart, where a
+de-emphasised comparison stands against one highlight. Either can render itself as a
+colour-vision deficiency sees it, using the validator's own simulation. See
+[`python/README.md`](python/README.md#the-figure-helper).
+
 ## Running the floor
 
 The validator is a command with an exit code, so the accessibility claim is evidence rather than a

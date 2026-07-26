@@ -1,6 +1,7 @@
 # `legible`
 
-The mechanical half of [`legible-slides`](../README.md): everything that reads a theme file.
+The mechanical half of [`legible-slides`](../README.md): everything that reads a theme file — the
+validator, the CSS emitter, and the figure archetypes.
 
 A theme is one JSON palette with named roles ([`docs/token-contract.md`](../docs/token-contract.md)).
 This package is the single reader of that schema, so nothing downstream re-implements it and drifts.
@@ -112,6 +113,94 @@ legible gen-css themes/kuleuven.json --output theme/styles/tokens.css --check
 
 Without `--output` the stylesheet goes to stdout. **Exit code** — `0` written or already current,
 `1` stale under `--check`, `2` if the theme file cannot be read.
+
+## The figure helper
+
+Result charts are **regenerated from data, never redrawn** — which is the whole reason a palette
+swap propagates. Two archetypes, because two is what the method prescribes
+([`docs/slidev-reference-impl.md`](../docs/slidev-reference-impl.md) §4). This is not a charting
+library, and a third shape belongs in a ticket rather than a keyword argument.
+
+```python
+from legible import load_palette
+from legible.figures import Series, multi_series, two_group, save
+
+palette = load_palette("themes/kuleuven.json")
+
+save(
+    multi_series(
+        palette,
+        [
+            Series("Chronos", chronos_mae),
+            Series("MOIRAI", moirai_mae),
+            Series("Ground truth", truth_mae, role="reference"),
+            Series("XGBoost", xgb_mae, role="muted"),
+        ],
+        x=windows,
+        x_label="forecast window",
+        y_label="MAE",
+    ),
+    "deck/public/figures/mae-by-window.png",
+)
+```
+
+A `Series` carries **no dash and no marker**. Both are assigned by position, so `never-sole-channel`
+holds by construction and there is nowhere to opt out of it — and a chart asking for more series
+than there are distinct dashes is refused rather than quietly repeating one. Leave `role` unset and
+a line takes the next colour off the theme's ramp; set it to pin the anchors.
+
+The two-group archetype is the default headline chart — the de-emphasised comparison against one
+highlight, every bar labelled where it stands, so it needs no legend and no value axis:
+
+```python
+two_group(palette, {"ARIMA": 0.51, "XGBoost": 0.44}, {"Ours": 0.29}, y_label="MAE")
+```
+
+### What the archetypes will not draw
+
+- **Colour comes only from palette roles.** Nothing here takes a hex, which is what keeps the theme
+  file the single authority the deck's CSS and the validator already read.
+- **Only roles the validator measured may encode data** — the anchors and the ramp for a
+  multi-series chart, the de-emphasised role plus one highlight for a two-group one. That puts the
+  attention role out of reach (`accent-is-attention`) along with every structural neutral, because
+  a pair nobody checked is a pair nobody can vouch for.
+- **The deck's typeface is registered before anything is drawn**, and a resolution landing outside
+  the bundle is an error. See [`theme/assets/fonts/`](../theme/assets/fonts/).
+
+### Rendering under a colour-vision deficiency
+
+Any chart can render as one pair of eyes receives it — the demonstration two of the flagship's
+beats are built on, and the reason a hand-drawn approximation would not do:
+
+```python
+multi_series(palette, series, condition="deuteranomaly")
+multi_series(palette, series, condition="grayscale")
+```
+
+The simulation is the validator's own. There is one implementation of Machado (2009) in this
+package, so a chart showing a palette collapse and a report saying it holds cannot disagree.
+
+### Sizes, and why the same figure comes back twice
+
+Sizes are in the canon's **canvas pixels** — the units a slide layout is written in — so a chart
+asked for at 640 wide occupies 640 of them when it lands. `save` writes PNG at twice that by
+default, for the projector.
+
+Type is set at the **body** size, which `type-scale` puts at the floor. The two dense sizes it
+marks as exceptions for tight figure panels are reachable as exactly that, and not as a
+preference:
+
+```python
+multi_series(palette, series, size_px=(420, 300), tight_panel=True)
+```
+
+```python
+save(figure, path, scale=2)          # a 960 × 540 chart → a 1920 × 1080 file
+```
+
+`save` is deterministic: an unchanged palette and unchanged data produce a byte-identical file, so
+rerunning the generation rewrites without churning and the one figure that did change is the one
+you see in the diff.
 
 ## Development
 

@@ -17,7 +17,16 @@ from colorspacious import cspace_convert, deltaE
 
 from legible.method import CVD_CONDITIONS, CVD_TYPES, DELTA_E_METRIC, SEVERITY
 
-__all__ = ["CVD_CONDITIONS", "CVD_TYPES", "GRAYSCALE", "delta_e", "hex_to_rgb1", "simulate"]
+__all__ = [
+    "CVD_CONDITIONS",
+    "CVD_TYPES",
+    "GRAYSCALE",
+    "NORMAL",
+    "delta_e",
+    "hex_to_rgb1",
+    "rgb1_to_hex",
+    "simulate",
+]
 
 RGB1 = Sequence[float]
 
@@ -32,6 +41,18 @@ def hex_to_rgb1(value: str) -> tuple[float, float, float]:
     """``'#1b6fb0'`` → sRGB1 floats in [0, 1]."""
     value = value.lstrip("#")
     return tuple(int(value[i : i + 2], 16) / 255 for i in (0, 2, 4))
+
+
+def rgb1_to_hex(colour: RGB1) -> str:
+    """sRGB1 floats → ``'#1b6fb0'``, clipped to what a display can show.
+
+    Simulating a colour can land it outside the gamut, and a figure has to paint *something*.
+    Clipping here is what the screen would do anyway, and doing it in one place means no caller
+    invents its own answer to the same question.
+    """
+    return "#" + "".join(
+        f"{int(round(min(max(channel, 0.0), 1.0) * 255)):02x}" for channel in colour
+    )
 
 
 def simulate(colours: Sequence[RGB1], condition: str) -> list[RGB1]:

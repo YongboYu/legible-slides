@@ -16,6 +16,13 @@ dependencies = [
     # Bumping this pin means re-running the theme tests and updating those
     # tables. colorspacious' last release is 2018, so the pin costs nothing.
     "colorspacious==1.1.2",
+    # Floated within a major, unlike colorspacious above. A ΔE is a published
+    # measurement and must not move; a figure is a regenerated artifact, and a
+    # matplotlib bump that shifts a few pixels shows up as a reviewable diff in
+    # the committed PNGs rather than as a claim quietly going false. 3.8 is the
+    # floor because the archetypes build a bare `Figure` and save it without
+    # pyplot, which needs no backend and leaks no global state.
+    "matplotlib>=3.8,<4",
 ]
 
 [project.optional-dependencies]

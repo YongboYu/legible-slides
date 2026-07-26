@@ -80,3 +80,15 @@ jobs:
           uv pip install --python "$RUNNER_TEMP/venv/bin/python" "$RUNNER_TEMP"/dist/*.whl
           cd "$RUNNER_TEMP/outside"
           "$RUNNER_TEMP/venv/bin/cvd-validate" my-palette.json
+      # The canon is not the only thing the build has to carry: a figure drawn without the bundled
+      # typeface would not match the deck, and `legible.fonts` raises rather than substituting one.
+      # A runner has no Inter installed, so this fails loudly if the wheel forgot the fonts.
+      - name: Draw a figure outside this repo
+        run: |
+          cd "$RUNNER_TEMP/outside"
+          "$RUNNER_TEMP/venv/bin/python" -c "
+          from legible import load_palette
+          from legible.figures import Series, multi_series, save
+          palette = load_palette('my-palette.json')
+          save(multi_series(palette, [Series('a', [1, 2, 3]), Series('b', [3, 2, 1])]), 'chart.png')
+          "

@@ -23,8 +23,7 @@ themes/
 ```
 
 A theme file is the **single source of truth** for one palette, consumed by three things at once —
-the deck CSS, the (optional) figure helper, and the CVD validator. Nothing downstream hardcodes a
-colour.
+the deck CSS, the figure helper, and the CVD validator. Nothing downstream hardcodes a colour.
 
 ## 2. The palette schema
 
@@ -123,4 +122,6 @@ build imports a stylesheet rather than running a Python toolchain.
 - The **validator metric + threshold** that gates `series[]` was decided in **#9**
   ([`cvd-validator-contract.md`](cvd-validator-contract.md)) and now lives in the canon as
   `separation-floor`. This contract fixes the *shape*; the canon owns the *number*.
-- Whether a **Python figure helper** is a third consumer in v1 is decided in **#10**.
+- Whether a **Python figure helper** is a third consumer in v1 was decided in **#10** (it is) and
+  built in **#18**: `legible.figures`, bounded to the two archetypes, drawing only from the roles
+  in §2 and only from the ones the validator measured against each other.

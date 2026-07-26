@@ -3,6 +3,8 @@ from pathlib import Path
 
 import pytest
 
+from legible import load_palette
+
 THEMES_DIR = Path(__file__).resolve().parents[2] / "themes"
 
 
@@ -41,6 +43,12 @@ def base_palette() -> dict:
         "muted": "#778496",
         "series": ["#1b6fb0", "#57c0ae", "#4c3a78"],
     }
+
+
+@pytest.fixture
+def palette(base_palette: dict, write_theme):
+    """``base_palette`` loaded, for the callers that take a Palette rather than a file."""
+    return load_palette(write_theme(base_palette))
 
 
 @pytest.fixture
