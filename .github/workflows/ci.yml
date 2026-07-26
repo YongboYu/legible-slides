@@ -1,0 +1,64 @@
+name: CI
+
+on: [push, pull_request]
+
+permissions:
+  contents: read
+
+jobs:
+  # The gate. A theme whose data colours fall below the floor cannot merge — enforcement lives
+  # here rather than in the opt-in pre-commit hook, which any author can skip.
+  #
+  # Blocking is the half a workflow cannot grant itself: this job has to be a required status
+  # check in the branch ruleset, or a red run merges anyway.
+  palette:
+    name: palette floor
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+      # Every theme this repo ships, in one invocation: a non-zero exit from any of them turns
+      # this check red. Grayscale collisions are advisory and leave the exit code alone.
+      - run: uv run --project python cvd-validate themes/*.json
+
+  python:
+    name: python
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: python
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+      - run: uv sync --extra dev
+      - run: uv run ruff check .
+      - run: uv run ruff format --check .
+      # Asserts the shipped palettes' achieved minima, so a colorspacious bump that shifted the
+      # simulation or the distance surfaces here rather than in a theme someone already trusts.
+      - run: uv run pytest
+
+  # An external theme author is offered the CLI and gated by nothing, so the package has to work
+  # with no checkout to read: installed from a built wheel, against a palette living elsewhere.
+  package:
+    name: package installs standalone
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+      # Builds the sdist, then the wheel from that sdist — the path where a canon the build forgot
+      # to carry would go missing.
+      - run: uv build python --out-dir "$RUNNER_TEMP/dist"
+      - name: Check a palette outside this repo
+        run: |
+          mkdir -p "$RUNNER_TEMP/outside"
+          cp themes/neutral.json "$RUNNER_TEMP/outside/my-palette.json"
+          uv venv "$RUNNER_TEMP/venv"
+          uv pip install --python "$RUNNER_TEMP/venv/bin/python" "$RUNNER_TEMP"/dist/*.whl
+          cd "$RUNNER_TEMP/outside"
+          "$RUNNER_TEMP/venv/bin/cvd-validate" my-palette.json

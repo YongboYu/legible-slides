@@ -154,6 +154,20 @@ Report:
 - **`--json`** emits the `Report` verbatim for CI logs / tooling.
 - **Exit code** `0` on pass, `1` on any CVD failure. **Warnings never change the exit code.**
 
+The command takes **one or more** theme paths, so the CI gate and the pre-commit hook are one
+invocation over whatever they were handed. Three consequences of that, settled in implementation:
+
+- **`2`, not `1`, for a theme that cannot be read** (missing file, malformed JSON, a role the token
+  contract requires). `1` is a measurement — *these two colours are this far apart, and that is too
+  close*. A file that was never measured must not make that claim. `2` is also argparse's code for a
+  malformed command line, which is the same statement about a different mistake: the check did not
+  run. Consumers that only gate on "did it pass" are unaffected — both are non-zero.
+- **An unreadable theme does not stop the run.** Every other theme is still checked and reported. If
+  any palette came back below the floor the exit is `1` — the more actionable verdict — and `2` only
+  when nothing was measured as failing.
+- **`--json` emits one report per line**, in argument order, so a report's shape never depends on how
+  many themes were asked for. One theme — the documented call — is therefore one JSON object.
+
 The importable `validate()` is what tests, CI, and the (optional) figure helper [#10] call; they can
 share one palette-loader that reads the token-contract schema.
 
@@ -162,13 +176,20 @@ share one palette-loader that reads the token-contract schema.
 - **Scope** — every `themes/*.json` shipped in this repo (v1: `kuleuven.json`, `neutral.json`;
   `*.dark.json` is a v2 concern). External authors get the CLI to self-check their own themes but are
   not blocked.
-- **Hard gate — a GitHub Actions job** runs `cvd-validate` over every shipped theme on push/PR; a
-  non-zero exit turns the check red and blocks merge. Enforcement lives in CI, not a skippable hook.
+- **Hard gate — a GitHub Actions job** (`.github/workflows/ci.yml`) runs `cvd-validate` over every
+  shipped theme on push/PR; a non-zero exit turns the check red and blocks merge. Enforcement lives
+  in CI, not a skippable hook. *Blocking* is the one half a workflow file cannot grant itself: the
+  `palette floor` job has to be listed as a required status check in the repo's branch ruleset, or a
+  red check merges anyway.
 - **Package test** — the suite asserts the shipped reference palettes pass, so a future
   `colorspacious` version bump that shifts the numbers is caught by tests, not silently in prod.
 - **No deck-build coupling** — the Slidev (JS) build does **not** invoke the validator; it trusts CI.
   The validator stays a Python authoring/CI tool, never a deck-runtime dependency.
-- **Optional pre-commit hook** — shipped as opt-in for fast local feedback; the CI job is the gate.
+- **Optional pre-commit hook** — `.pre-commit-config.yaml`, opt-in for fast local feedback; the CI
+  job is the gate.
+- **Installable without a checkout** — the build carries `method.md` into the package, so an external
+  author's `cvd-validate` quotes the same canon rather than a hardcoded floor. CI proves it by
+  installing the built wheel and checking a palette outside the repo.
 
 ## 6. Reference recipe
 

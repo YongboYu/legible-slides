@@ -24,8 +24,22 @@ class MethodError(LookupError):
     """The canon could not be read, or does not carry what was asked of it."""
 
 
-#: The canon, read in place rather than vendored — one copy, and the package quotes it.
-CANON = Path(__file__).resolve().parents[3] / "docs" / "method.md"
+#: Where the canon may live, in preference order: `docs/method.md` in a checkout of this repo,
+#: then the copy the build vendors beside this module for an author who installed the package and
+#: has no checkout to read. The checkout wins, so editing the canon takes effect immediately; the
+#: vendored copy is written from that same file at build time, so it is a build artifact rather
+#: than a second version anyone maintains.
+_CANON_CANDIDATES = (
+    Path(__file__).resolve().parents[3] / "docs" / "method.md",
+    Path(__file__).resolve().parent / "method.md",
+)
+
+#: The canon this install reads. Falls back to the checkout path so a failure names where the
+#: canon was expected.
+CANON = next(
+    (path for path in _CANON_CANDIDATES if path.is_file()),
+    _CANON_CANDIDATES[0],
+)
 
 
 def read_canon() -> str:
@@ -33,7 +47,10 @@ def read_canon() -> str:
     try:
         return CANON.read_text(encoding="utf-8")
     except OSError as error:
-        raise MethodError(f"cannot read the canon at {CANON} to quote its thresholds") from error
+        looked_in = " or ".join(str(path) for path in _CANON_CANDIDATES)
+        raise MethodError(
+            f"cannot read the canon to quote its thresholds; looked for {looked_in}"
+        ) from error
 
 
 def rule_thresholds(rule_id: str, canon: str | None = None) -> dict[str, str]:

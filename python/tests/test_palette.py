@@ -13,6 +13,16 @@ def test_loads_a_shipped_theme_with_series_expanded_to_indexed_roles(themes_dir)
     assert palette.series_roles == ("series-1", "series-2", "series-3")
 
 
+def test_a_file_that_is_not_json_fails_as_a_palette_error(tmp_path):
+    """A malformed file is as much a bad theme as a missing role, and reads as one — the CLI
+    hands this loader files it has never seen."""
+    path = tmp_path / "broken.json"
+    path.write_text('{"ink": "#102a43",')
+
+    with pytest.raises(PaletteError, match="broken.json"):
+        load_palette(path)
+
+
 def test_a_missing_role_is_reported_by_name(write_theme, base_palette):
     del base_palette["muted"]
 

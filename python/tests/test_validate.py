@@ -1,10 +1,8 @@
 from legible import load_palette, validate
 
 
-def test_a_colliding_pair_fails_naming_both_roles_and_the_condition(write_theme, base_palette):
-    base_palette["series"][1] = "#1b70b2"  # a hair off series-1 — indistinguishable everywhere
-
-    report = validate(load_palette(write_theme(base_palette)))
+def test_a_colliding_pair_fails_naming_both_roles_and_the_condition(write_theme, colliding_palette):
+    report = validate(load_palette(write_theme(colliding_palette)))
 
     assert not report.passed
     pairs = {(failure.role_a, failure.role_b) for failure in report.failures}
@@ -13,11 +11,8 @@ def test_a_colliding_pair_fails_naming_both_roles_and_the_condition(write_theme,
     assert all(failure.delta_e < report.threshold for failure in report.failures)
 
 
-def test_a_grayscale_only_collision_warns_but_still_passes(write_theme, base_palette):
-    # A rust that stays well clear of series-1 in colour but shares its lightness almost exactly.
-    base_palette["series"][1] = "#a34a2a"
-
-    report = validate(load_palette(write_theme(base_palette)))
+def test_a_grayscale_only_collision_warns_but_still_passes(write_theme, grayscale_clash_palette):
+    report = validate(load_palette(write_theme(grayscale_clash_palette)))
 
     assert report.passed
     assert report.failures == ()

@@ -41,3 +41,19 @@ def base_palette() -> dict:
         "muted": "#778496",
         "series": ["#1b6fb0", "#57c0ae", "#4c3a78"],
     }
+
+
+@pytest.fixture
+def colliding_palette(base_palette: dict) -> dict:
+    """A palette whose series-2 sits a hair off series-1 — indistinguishable under every
+    condition, so it breaks the floor rather than only warning."""
+    base_palette["series"][1] = "#1b70b2"
+    return base_palette
+
+
+@pytest.fixture
+def grayscale_clash_palette(base_palette: dict) -> dict:
+    """A palette whose series-2 is a rust: well clear of series-1 in colour, near-identical to it
+    in lightness, so only the grayscale check — the advisory one — notices."""
+    base_palette["series"][1] = "#a34a2a"
+    return base_palette

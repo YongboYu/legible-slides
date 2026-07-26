@@ -21,8 +21,17 @@ dependencies = [
 [project.optional-dependencies]
 dev = ["pytest>=8.0", "ruff>=0.6"]
 
+[project.scripts]
+# Its own entry point, because this is the artifact external theme authors are pointed at.
+cvd-validate = "legible.cli:main"
+
 [tool.hatch.build.targets.wheel]
 packages = ["src/legible"]
+
+# Copies docs/method.md into the built package so an install outside this repo still reads its
+# thresholds from the canon. See hatch_build.py.
+[tool.hatch.build.hooks.custom]
+path = "hatch_build.py"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

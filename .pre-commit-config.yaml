@@ -1,0 +1,18 @@
+# Opt-in, for fast local feedback on a palette edit. Install it with:
+#
+#     uv tool install pre-commit && pre-commit install
+#
+# The real gate is CI — .github/workflows/ci.yml runs the same check over every shipped theme on
+# push and pull request, and a non-zero exit blocks merge. A hook any author can skip with
+# `--no-verify` is convenience, never enforcement.
+repos:
+  - repo: local
+    hooks:
+      - id: cvd-validate
+        name: data colours clear the separation floor
+        # The package in this repo, so the hook and CI run the same code against the same pin.
+        entry: uv run --project python cvd-validate
+        language: system
+        files: ^themes/.*\.json$
+        # Only the staged theme files, so editing one palette does not re-check the others.
+        pass_filenames: true

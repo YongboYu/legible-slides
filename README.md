@@ -43,6 +43,25 @@ proves itself on one real brand is worth more than one that proves itself on lor
 > **Note:** the KU Leuven theme is derived from the university's house style for use by its own
 > researchers. This project is not an official KU Leuven product and carries no endorsement.
 
+## Running the floor
+
+The validator is a command with an exit code, so the accessibility claim is evidence rather than a
+promise — including for a palette this project has never seen:
+
+```bash
+uv tool install "git+https://github.com/YongboYu/legible-slides#subdirectory=python"
+cvd-validate my-theme.json
+```
+
+It names each failing pair by role rather than by hex, prints the achieved minimum even when you
+pass — so you can see whether you have headroom — and exits non-zero if any pair falls below the
+floor. See [`python/README.md`](python/README.md).
+
+Inside this repo the same command gates CI over every theme in [`themes/`](themes) on push and pull
+request: a palette that fails cannot merge. The hook in `.pre-commit-config.yaml` runs it locally and
+is opt-in, because enforcement belongs somewhere nobody can skip. Your own themes are yours — the
+command is offered, not imposed.
+
 ## Provenance
 
 This is not a greenfield idea. It is an extraction from a deck that shipped: the CAiSE 2026

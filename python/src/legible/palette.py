@@ -62,7 +62,13 @@ def _is_hex_colour(value: object) -> bool:
 def load_palette(path: str | Path) -> Palette:
     """Load and check a theme file, returning its roles flattened."""
     path = Path(path)
-    raw = json.loads(path.read_text())
+    try:
+        raw = json.loads(path.read_text())
+    except json.JSONDecodeError as error:
+        # A file that is not JSON is a theme this loader cannot honour, so it comes back as the
+        # same error type as a missing role. What the file *is* is this module's business; whether
+        # it could be read at all stays the caller's.
+        raise PaletteError(f"{path}: not valid JSON: {error}") from error
 
     meta = raw.get("meta", {})
 
