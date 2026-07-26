@@ -1,7 +1,7 @@
 # `legible`
 
-The mechanical half of [`legible-slides`](../README.md): everything that reads a theme file — the
-validator, the CSS emitter, and the figure archetypes.
+The mechanical half of [`legible-slides`](../README.md): the deck linter, and everything that reads
+a theme file — the validator, the CSS emitter, and the figure archetypes.
 
 A theme is one JSON palette with named roles ([`docs/token-contract.md`](../docs/token-contract.md)).
 This package is the single reader of that schema, so nothing downstream re-implements it and drifts.
@@ -113,6 +113,57 @@ legible gen-css themes/kuleuven.json --output theme/styles/tokens.css --check
 
 Without `--output` the stylesheet goes to stdout. **Exit code** — `0` written or already current,
 `1` stale under `--check`, `2` if the theme file cannot be read.
+
+## `legible lint`
+
+The rules the canon marks **decided by script**, as a command with an exit code — so the objective
+half of a review is something CI runs rather than something a reader has to remember:
+
+```bash
+legible lint deck/slides.md --theme themes/kuleuven.json
+```
+
+```
+FAIL  deck/slides.md — 2 errors, 1 warning
+
+  slide 4
+    error    bullet-ceiling        … bullets, ceiling …
+    warning  no-inflated-register  '…' inflates register without adding information
+  deck
+    error    separation-floor      FAIL  themes/mine.json — min ΔE … (floor …); …
+```
+
+Findings are grouped by slide and named by the rule they enforce, so a finding is something you can
+look up in [`docs/method.md`](../docs/method.md) and disagree with. Five rules are decided per
+slide — `bullet-ceiling`, `word-ceiling`, `no-em-dash-headline`, `no-inflated-register` and
+`opener-variety` — and `separation-floor` is decided per theme, for each `--theme` named. A deck
+does not record which palette it wears, so naming none checks the slides alone.
+
+```python
+from legible import lint
+
+report = lint("deck/slides.md", themes=["themes/kuleuven.json"])
+report.passed      # False if any finding is an error
+report.findings    # (Finding(rule=…, severity=…, slide=…, message=…), …)
+report.unchecked   # themes cvd-validate could not measure; neither a pass nor a violation
+```
+
+**Exit code** — `0` clean, `1` on any violation, `2` if the deck or a theme could not be read.
+Severity is the canon's call rather than the linter's: a rule whose threshold sets
+`… -severity = warning` reports without ever changing the exit code, because
+`established-terminology` can legitimately override the inflated-register wordlist. `--json` emits
+the report verbatim.
+
+### What it refuses to decide
+
+- **The rules the canon marks `judgment`.** Whether a slide carries one message, whether a headline
+  is a claim. Those are the review skill's, and they are advisory because they are fallible; this is
+  a gate, and a gate may only hold what is decidable.
+- **Colour.** `separation-floor` is checked by **running `cvd-validate` and reading its exit code**
+  — which is what that exit code is for. There is one implementation of Machado (2009) in this
+  package, so a linter saying a palette collapses and a report saying it holds cannot disagree.
+- **Its own thresholds.** Every number and wordlist above is quoted from the rule that owns it in
+  the canon. Change `bullets-per-slide` there and this command enforces the new one.
 
 ## The figure helper
 

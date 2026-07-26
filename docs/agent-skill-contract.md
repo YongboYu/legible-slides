@@ -67,6 +67,11 @@ and CI-able; semantic checks need an LLM's judgment.
 Lives in the existing **`legible` Python package** (one Python home, alongside the figure helper and
 the validator, sharing the pinned `colorspacious`). Objective, reproducible, CI-integratable.
 
+Built in **#19** as `legible lint DECK [--theme THEME …]`, exiting 0 clean, 1 on any violation and 2
+when the deck or a theme could not be read — the same three the validator publishes. Its report is
+grouped by slide and names each finding's rule; see
+[`python/README.md`](../python/README.md#legible-lint).
+
 | Check | Rule | How |
 |---|---|---|
 | Bullet ceiling | `bullet-ceiling` | count list items per slide, against the rule's threshold |

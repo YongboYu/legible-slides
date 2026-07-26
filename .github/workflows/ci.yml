@@ -80,6 +80,14 @@ jobs:
           uv pip install --python "$RUNNER_TEMP/venv/bin/python" "$RUNNER_TEMP"/dist/*.whl
           cd "$RUNNER_TEMP/outside"
           "$RUNNER_TEMP/venv/bin/cvd-validate" my-palette.json
+      # The linter shells out to cvd-validate rather than importing it, so it has to find that
+      # command with nothing activated — the arrangement an installed tool actually runs in, and
+      # the one thing the test suite cannot prove from inside its own virtualenv.
+      - name: Lint a deck outside this repo
+        run: |
+          cd "$RUNNER_TEMP/outside"
+          printf '# A deck can be linted with no checkout to read\n\n- one point\n' > slides.md
+          "$RUNNER_TEMP/venv/bin/legible" lint slides.md --theme my-palette.json
       # The canon is not the only thing the build has to carry: a figure drawn without the bundled
       # typeface would not match the deck, and `legible.fonts` raises rather than substituting one.
       # A runner has no Inter installed, so this fails loudly if the wheel forgot the fonts.

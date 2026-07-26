@@ -27,7 +27,8 @@ Three things, in order of how much they matter:
 
 1. **A method.** A short set of rules about what a slide is *for*, built on Assertion-Evidence
    (Alley & Neeley) and the cognitive-load research underneath it. They live in
-   [`docs/method.md`](docs/method.md) — the canon, and the only place any of them is stated.
+   [`docs/method.md`](docs/method.md) — the canon, and the only place any of them is stated. The
+   ones a script can settle are settled by one (`legible lint`), reproducibly and in CI.
 2. **A verified accessibility floor.** A type scale tuned for real projection distance, and a
    colour-vision-deficiency validator you can run against *your* palette — not just a promise that
    ours passes.
@@ -73,6 +74,25 @@ Inside this repo the same command gates CI over every theme in [`themes/`](theme
 request: a palette that fails cannot merge. The hook in `.pre-commit-config.yaml` runs it locally and
 is opt-in, because enforcement belongs somewhere nobody can skip. Your own themes are yours — the
 command is offered, not imposed.
+
+## Running the method
+
+Bullet ceilings, word ceilings, em-dashes in a headline, inflated register and monotonous sentence
+openers are all decidable, so a script decides them rather than a reader:
+
+```bash
+legible lint deck/slides.md --theme themes/kuleuven.json
+```
+
+Findings arrive grouped by slide and named by the rule they enforce, which is what makes one
+possible to look up and disagree with. Every threshold comes out of `docs/method.md` at import, so
+changing a rule there changes what the command enforces and nothing here holds a second copy of the
+number. The palette check is the validator above, shelled out to: there is exactly one
+implementation of the simulation in this project, and the linter is deliberately not it. See
+[`python/README.md`](python/README.md#legible-lint).
+
+What is left is judgment — whether a slide carries one message, whether its headline is a claim —
+and judgment stays with a reader, or with the coding-agent skill that reviews on your behalf.
 
 ## Provenance
 

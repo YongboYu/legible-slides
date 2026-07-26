@@ -1,14 +1,19 @@
 """Smoke tests for the `legible` command.
 
-A thin gate over a tested seam. What the emitter produces is settled in test_css.py; what is
-checked here is the part only the command has — where the bytes go, and the exit code the CI
-staleness gate keys on.
+A thin gate over a tested seam. What the emitter produces is settled in test_css.py and what
+counts as a violation in test_lint.py; what is checked here is the part only the command has —
+where the bytes go, and the exit codes the CI gates key on.
 """
+
+import json
+from pathlib import Path
 
 import pytest
 
 from legible import gen_css, load_palette
 from legible.command import main
+
+DECKS = Path(__file__).resolve().parent / "fixtures" / "decks"
 
 
 def test_gen_css_writes_the_stylesheet_to_stdout_by_default(capsys, base_palette, write_theme):
@@ -107,3 +112,80 @@ def test_checking_without_an_output_path_is_an_argument_error(base_palette, writ
         main(["gen-css", str(write_theme(base_palette)), "--check"])
 
     assert exit_.value.code == 2
+
+
+def test_lint_exits_zero_on_a_deck_that_breaks_no_rule(capsys, themes_dir):
+    code = main(["lint", str(DECKS / "clean.md"), "--theme", str(themes_dir / "kuleuven.json")])
+
+    assert code == 0
+    assert capsys.readouterr().out.startswith("PASS")
+
+
+def test_lint_exits_non_zero_on_a_violation_and_names_the_slide_and_the_rule(capsys):
+    """The whole point of a mechanical gate: an objective violation blocks, and the report says
+    which slide to open and which rule to read."""
+    code = main(["lint", str(DECKS / "bullet-ceiling.md")])
+
+    out = capsys.readouterr().out
+    assert code == 1
+    assert out.startswith("FAIL")
+    assert "slide 2" in out
+    assert "bullet-ceiling" in out
+
+
+def test_a_warning_alone_leaves_the_exit_code_at_zero(capsys):
+    """`established-terminology` can override the wordlist, so a hit reports without blocking."""
+    code = main(["lint", str(DECKS / "no-inflated-register.md")])
+
+    out = capsys.readouterr().out
+    assert code == 0
+    assert out.startswith("PASS")
+    assert "no-inflated-register" in out
+
+
+def test_lint_fails_on_a_theme_below_the_floor(capsys, write_theme, colliding_palette):
+    code = main(["lint", str(DECKS / "clean.md"), "--theme", str(write_theme(colliding_palette))])
+
+    out = capsys.readouterr().out
+    assert code == 1
+    assert "separation-floor" in out
+
+
+def test_a_deck_that_cannot_be_read_is_not_a_violation(capsys, tmp_path):
+    """Exit 1 means "this deck breaks a rule". A file nobody could read cannot say that."""
+    code = main(["lint", str(tmp_path / "absent.md")])
+
+    assert code == 2
+    assert "absent.md" in capsys.readouterr().err
+
+
+def test_a_theme_that_could_not_be_checked_is_not_a_violation_either(capsys, tmp_path):
+    code = main(["lint", str(DECKS / "clean.md"), "--theme", str(tmp_path / "absent.json")])
+
+    assert code == 2
+    assert "absent.json" in capsys.readouterr().err
+
+
+def test_a_violation_outranks_a_theme_that_could_not_be_checked(tmp_path):
+    """Both are non-zero, so either blocks — but 1 is the more actionable of the two."""
+    code = main(
+        ["lint", str(DECKS / "bullet-ceiling.md"), "--theme", str(tmp_path / "absent.json")]
+    )
+
+    assert code == 1
+
+
+def test_lint_json_emits_the_findings_verbatim(capsys):
+    code = main(["lint", str(DECKS / "word-ceiling.md"), "--json"])
+
+    report = json.loads(capsys.readouterr().out)
+    assert code == 1
+    assert report["passed"] is False
+    assert report["findings"] == [
+        {
+            "rule": "word-ceiling",
+            "severity": "error",
+            "slide": 2,
+            "message": report["findings"][0]["message"],
+        }
+    ]

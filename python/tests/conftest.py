@@ -1,5 +1,6 @@
 import json
 from pathlib import Path
+from textwrap import dedent
 
 import pytest
 
@@ -11,6 +12,18 @@ THEMES_DIR = Path(__file__).resolve().parents[2] / "themes"
 @pytest.fixture
 def themes_dir() -> Path:
     return THEMES_DIR
+
+
+@pytest.fixture
+def write_deck(tmp_path: Path):
+    """Write a slide markdown deck to a temp file and hand back the path."""
+
+    def _write(markdown: str, name: str = "slides.md") -> Path:
+        path = tmp_path / name
+        path.write_text(dedent(markdown), encoding="utf-8")
+        return path
+
+    return _write
 
 
 @pytest.fixture

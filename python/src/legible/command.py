@@ -2,22 +2,26 @@
 
 Two console scripts, on purpose. `cvd-validate` stands alone because it is the artifact external
 theme authors are pointed at, and a stranger's palette is all it needs. Everything else this
-package does acts on a *deck* — emitting its tokens today, drawing its figures and linting its
-slides in due course — and hangs off this one command instead.
+package does acts on a *deck* — emitting its tokens, linting its slides, and drawing its figures in
+due course — and hangs off this one command instead.
 
 Each subcommand stays a thin shell over the package's public functions: what a stylesheet contains
-is ``gen_css``' business, and what follows here is only where the bytes go and what the exit code
-says about them.
+is ``gen_css``' business and what breaks a rule is ``lint``'s, and what follows here is only where
+the bytes go and what the exit code says about them.
 """
 
 from __future__ import annotations
 
 import argparse
+import json
 import sys
 from collections.abc import Sequence
+from dataclasses import asdict
+from itertools import groupby
 from pathlib import Path
 
 from legible.css import gen_css
+from legible.lint import ERROR, WARNING, Finding, LintReport, lint
 from legible.palette import PaletteError, load_palette
 
 #: 0 says the stylesheet is current — just written, or already matching its palette. 1 says it is
@@ -25,6 +29,16 @@ from legible.palette import PaletteError, load_palette
 #: it has in ``cli`` and in argparse: nothing was measured, because the arguments or the theme
 #: behind them could not be read, and a file nobody generated makes no claim about being stale.
 CURRENT, STALE, NOT_GENERATED = 0, 1, 2
+
+#: The same three, for a deck: clean, broke a rule, or was never read. `lint` is a hard gate
+#: (``docs/agent-skill-contract.md`` §5), so 1 is what blocks a merge — and only a finding the
+#: canon calls an error reaches it. A warning is reported and costs nothing.
+CLEAN, VIOLATIONS, NOT_LINTED = 0, 1, 2
+
+#: Column widths for the severity and the rule, so a report of many findings reads as a table. The
+#: severity column is measured off the severities themselves; the rule column off the rules a run
+#: actually found, because the canon may grow one longer than any here today.
+_SEVERITY_WIDTH = max(len(severity) for severity in (ERROR, WARNING)) + 2
 
 
 def main(argv: Sequence[str] | None = None) -> int:
@@ -66,6 +80,37 @@ def _parser() -> argparse.ArgumentParser:
     )
     gen_css_parser.set_defaults(run=_gen_css, parser=gen_css_parser)
 
+    lint_parser = subcommands.add_parser(
+        "lint",
+        help="check a deck against the rules the canon decides by script",
+        description=(
+            "Check a Slidev deck against every rule docs/method.md marks as decided by script — "
+            "the bullet and word ceilings, em-dashes in a headline, inflated register, the "
+            "sentence-opener share, and, for each theme named, the separation floor. Exits 0 when "
+            "clean, 1 on any violation, and 2 if the deck or a theme could not be read. Findings "
+            "the canon marks a warning are reported and never change the exit code."
+        ),
+    )
+    lint_parser.add_argument("deck", metavar="DECK", type=Path, help="the deck's slides markdown")
+    lint_parser.add_argument(
+        "--theme",
+        dest="themes",
+        metavar="THEME",
+        type=Path,
+        action="append",
+        default=[],
+        help=(
+            "check this theme's palette too, by running cvd-validate over it; repeatable. A deck "
+            "does not record which palette it wears, so naming none checks the slides alone."
+        ),
+    )
+    lint_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="emit the report verbatim as JSON instead of the per-slide report",
+    )
+    lint_parser.set_defaults(run=_lint, parser=lint_parser)
+
     return parser
 
 
@@ -94,6 +139,67 @@ def _gen_css(args: argparse.Namespace) -> int:
     args.output.write_text(stylesheet, encoding="utf-8", newline="\n")
     print(f"legible gen-css: wrote {args.output}")
     return CURRENT
+
+
+def _lint(args: argparse.Namespace) -> int:
+    try:
+        report = lint(args.deck, themes=args.themes)
+    except OSError as error:
+        print(f"legible lint: {error}", file=sys.stderr)
+        return NOT_LINTED
+
+    print(_as_json(report) if args.json else _as_report(args.deck, report, args.themes))
+    for unchecked in report.unchecked:
+        # On stderr, and never as a finding: the deck did not break a rule here, and a theme
+        # nobody could measure makes no claim about its colours either way.
+        print(f"legible lint: {unchecked.detail}", file=sys.stderr)
+
+    # A rule broken outranks a theme that went unmeasured — it is the more actionable of the two,
+    # and both are non-zero, so a gate blocks either way. The same order `cvd-validate` takes.
+    if not report.passed:
+        return VIOLATIONS
+    return NOT_LINTED if report.unchecked else CLEAN
+
+
+def _as_report(deck: Path, report: LintReport, themes: Sequence[Path]) -> str:
+    """The findings as an author reads them: grouped by slide, each tagged and named by its rule."""
+    errors = sum(1 for finding in report.findings if finding.severity == ERROR)
+    verdict = "PASS" if report.passed else "FAIL"
+
+    lines = [f"{verdict}  {deck} — {_tally(errors, len(report.findings) - errors)}"]
+    if not themes:
+        # Said out loud rather than left to be inferred from a report with no palette line in it.
+        # A deck does not record which palette it wears, so silence here would read as a pass.
+        lines.append("      no theme named, so `separation-floor` was not checked")
+
+    width = max((len(finding.rule) for finding in report.findings), default=0) + 2
+    for slide, findings in groupby(report.findings, key=lambda finding: finding.slide):
+        lines.append("")
+        lines.append(f"  {'deck' if slide is None else f'slide {slide}'}")
+        lines.extend(f"    {_as_line(finding, width)}" for finding in findings)
+    return "\n".join(lines)
+
+
+def _as_line(finding: Finding, width: int) -> str:
+    return f"{finding.severity:<{_SEVERITY_WIDTH}}{finding.rule:<{width}}{finding.message}"
+
+
+def _tally(errors: int, warnings: int) -> str:
+    if not errors and not warnings:
+        return "no findings"
+    return f"{_count(errors, 'error')}, {_count(warnings, 'warning')}"
+
+
+def _count(number: int, noun: str) -> str:
+    return f"{number} {noun}" if number == 1 else f"{number} {noun}s"
+
+
+def _as_json(report: LintReport) -> str:
+    """The report verbatim — every field under its own name, and nothing added."""
+    data = asdict(report)
+    data["findings"] = [finding._asdict() for finding in report.findings]
+    data["unchecked"] = [unchecked._asdict() for unchecked in report.unchecked]
+    return json.dumps(data)
 
 
 def _report_if_stale(stylesheet: str, output: Path, theme: Path) -> int:
