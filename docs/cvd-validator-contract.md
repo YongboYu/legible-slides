@@ -84,6 +84,11 @@ inclusive comparison and the grayscale carve-out. What this section records is t
   parameter rather than a physical constant.
 - **The inclusive comparison is safe because the numbers are deterministic.** With `colorspacious`
   pinned, a value that lands exactly on the floor is a reproducible pass rather than a coin flip.
+- **ΔE is measured, reported and compared at one decimal place.** One precision throughout, so the
+  verdict can never disagree with the figure printed beside it: the reference palette's binding pair
+  measures 14.9609 and is published below at one decimal, and "published at the floor" therefore
+  means "passes the floor". That precision is far finer than the floor's own derivation warrants —
+  the canon settles a design parameter, not a constant known to a hundredth.
 - **Grayscale is advisory because the method already mandates the fix** (`never-sole-channel`).
   Grayscale is precisely the condition redundant encoding exists to cover, so it produces a warning
   and leaves the exit code alone.
@@ -100,6 +105,23 @@ floor: the validator is correctly signalling the 3-series ramp is **at capacity 
 4th series would fail without retuning, which is exactly the behaviour token contract §4 asks for
 ("the validator tells you when you've added one too many"). The grayscale 10.9 is a lightness clash
 (`muted` J′ 57 vs `series-1` J′ 46) — warned, covered by redundant encoding.
+
+### Verified against the brand-free palette (`themes/neutral.json`)
+
+| | min ΔE (normal + CVD) | grayscale min | verdict |
+|---|---|---|---|
+| **G1** `{reference, muted, series[]}` | **25.4** | 11.8 | pass |
+| **G2** `{reference, muted, brand}` | **21.5** | 13.2 | pass |
+
+The brand-free theme carries real headroom where the reference palette sits at capacity, because it
+is not constrained to one institution's colours: its ramp is derived from the Okabe-Ito
+colour-vision-safe set, with Okabe-Ito's blue darkened one step so the three series separate by
+lightness as well as by hue. Lightness is what survives into grayscale, which is why the same
+adjustment lifts its grayscale minimum above the reference palette's.
+
+Both tables are asserted by the package tests. They are the **dependency-bump guard**: a
+`colorspacious` release that shifted the simulation or the distance would move these numbers and
+turn the suite red, rather than quietly re-rating a palette someone already trusted.
 
 ## 4. Interface
 

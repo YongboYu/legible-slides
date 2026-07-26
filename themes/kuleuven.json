@@ -1,0 +1,22 @@
+{
+  "meta": {
+    "name": "kuleuven",
+    "description": "KU Leuven house-style-derived theme. Not an official KU Leuven product and carries no endorsement.",
+    "logo": "logos/kuleuven-liris.png"
+  },
+
+  "ink": "#102a43",
+  "neutral": "#486581",
+  "neutral-soft": "#93a4b8",
+  "surface": "#ffffff",
+  "surface-alt": "#f4f7fb",
+  "hairline": "#dde5ee",
+
+  "brand": "#00407a",
+  "brand-strong": "#1d8db0",
+  "accent": "#dd8a2e",
+
+  "reference": "#111111",
+  "muted": "#778496",
+  "series": ["#1b6fb0", "#57c0ae", "#4c3a78"]
+}

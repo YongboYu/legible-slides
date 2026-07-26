@@ -1,0 +1,38 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "legible"
+version = "0.1.0"
+description = "The mechanical half of legible-slides: palette loading and CVD validation."
+readme = "README.md"
+requires-python = ">=3.10"
+license = "MIT"
+dependencies = [
+    # Pinned, not floated. The achieved minima published in
+    # docs/cvd-validator-contract.md §3 are this library's output; a version
+    # that shifted the simulation or the distance would move every one of them.
+    # Bumping this pin means re-running the theme tests and updating those
+    # tables. colorspacious' last release is 2018, so the pin costs nothing.
+    "colorspacious==1.1.2",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0", "ruff>=0.6"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/legible"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+# Matches the 100-column prose the docs are written to.
+line-length = 100
+target-version = "py310"
+# Prose, and the aligned comments in its examples, are the repo's to format — not ruff's.
+extend-exclude = ["*.md"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]

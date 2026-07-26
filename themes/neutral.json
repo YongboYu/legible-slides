@@ -1,0 +1,21 @@
+{
+  "meta": {
+    "name": "neutral",
+    "description": "Brand-free reference theme. Structural neutrals are true grays; the data-encoding ramp is derived from the Okabe-Ito colour-vision-safe set, with its blue darkened one step so the ramp separates by lightness as well as hue."
+  },
+
+  "ink": "#1a1a1a",
+  "neutral": "#595959",
+  "neutral-soft": "#a3a3a3",
+  "surface": "#ffffff",
+  "surface-alt": "#f5f7fa",
+  "hairline": "#e2e6ea",
+
+  "brand": "#1f4e79",
+  "brand-strong": "#0072b2",
+  "accent": "#e69f00",
+
+  "reference": "#111111",
+  "muted": "#686868",
+  "series": ["#004f8f", "#d55e00", "#56b4e9"]
+}
