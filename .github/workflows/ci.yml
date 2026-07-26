@@ -23,6 +23,24 @@ jobs:
       # this check red. Grayscale collisions are advisory and leave the exit code alone.
       - run: uv run --project python cvd-validate themes/*.json
 
+  # The other half of the palette's authority. theme/styles/tokens.css is generated from the deck's
+  # theme and committed like a lockfile, which is what lets the deck build import it and never
+  # invoke Python. Nothing enforces that but this: an author who edited the palette and forgot to
+  # regenerate would otherwise ship a deck wearing the previous colours.
+  #
+  # Like the floor above, it only blocks if the branch ruleset makes it a required check.
+  tokens:
+    name: token stylesheet is current
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+      - run: >
+          uv run --project python
+          legible gen-css themes/kuleuven.json --output theme/styles/tokens.css --check
+
   python:
     name: python
     runs-on: ubuntu-latest

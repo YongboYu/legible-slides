@@ -43,6 +43,11 @@ proves itself on one real brand is worth more than one that proves itself on lor
 > **Note:** the KU Leuven theme is derived from the university's house style for use by its own
 > researchers. This project is not an official KU Leuven product and carries no endorsement.
 
+Editing that one file recolours the whole deck. The same Python that validates a palette also emits
+its CSS custom properties (`legible gen-css`), so the token schema is understood in one language
+and no second copy of it can drift. The generated stylesheet is committed and CI checks it against
+its palette — which is why building a deck needs no Python at all.
+
 ## Running the floor
 
 The validator is a command with an exit code, so the accessibility claim is evidence rather than a

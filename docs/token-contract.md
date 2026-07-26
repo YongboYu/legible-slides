@@ -113,6 +113,11 @@ pmf proved, now brand-swappable.
 }
 ```
 
+Who performs the mapping is fixed by
+[`slidev-reference-impl.md`](slidev-reference-impl.md) §5: `legible gen-css`, and nothing else. Its
+output is committed at `theme/styles/tokens.css` and CI checks it against this palette, so the deck
+build imports a stylesheet rather than running a Python toolchain.
+
 ## 6. Open dependencies
 
 - The **validator metric + threshold** that gates `series[]` was decided in **#9**

@@ -16,3 +16,17 @@ repos:
         files: ^themes/.*\.json$
         # Only the staged theme files, so editing one palette does not re-check the others.
         pass_filenames: true
+
+      # Regenerates rather than reports: the fix for a stale stylesheet is one command, so running
+      # it is friendlier than naming it. pre-commit fails the commit when a hook writes, which
+      # leaves the author staging the regenerated file — exactly what CI is about to check for.
+      - id: gen-css
+        name: the token stylesheet follows its palette
+        # Only the deck's theme feeds the committed stylesheet, so the command names its own paths
+        # rather than taking whichever palettes happen to be staged.
+        entry: >
+          uv run --project python
+          legible gen-css themes/kuleuven.json --output theme/styles/tokens.css
+        language: system
+        files: ^themes/kuleuven\.json$
+        pass_filenames: false

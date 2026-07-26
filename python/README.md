@@ -82,6 +82,37 @@ The build copies `docs/method.md` in beside the module, so an install with no ch
 its thresholds out of the canon instead of a hardcoded copy (see `hatch_build.py`). Only the themes
 *this* repo ships are gated by its CI; your palette is yours.
 
+## `legible gen-css`
+
+The same palette, emitted as the deck's CSS custom properties — every scalar role a property of the
+same name, `series` expanded to `--series-1 … --series-n`. The mapping is
+[`docs/token-contract.md`](../docs/token-contract.md) §5's:
+
+```bash
+legible gen-css themes/kuleuven.json --output theme/styles/tokens.css
+```
+
+```python
+from legible import gen_css, load_palette
+
+gen_css(load_palette("themes/kuleuven.json"))    # '/* Generated … */\n\n:root {\n  --ink: …;\n}\n'
+```
+
+Python emits the CSS because Python already reads this schema to validate a palette and to draw a
+figure: the token contract is understood in exactly one language, so there is no JavaScript copy of
+it to drift. The output is **committed and regenerated when the palette changes, like a lockfile**,
+which is what lets a deck build import it and never invoke Python.
+
+`--check` writes nothing and exits `1` when the file is not what the theme emits today — the gate
+that keeps that lockfile honest, and what CI runs here:
+
+```bash
+legible gen-css themes/kuleuven.json --output theme/styles/tokens.css --check
+```
+
+Without `--output` the stylesheet goes to stdout. **Exit code** — `0` written or already current,
+`1` stale under `--check`, `2` if the theme file cannot be read.
+
 ## Development
 
 ```bash

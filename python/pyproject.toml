@@ -24,6 +24,9 @@ dev = ["pytest>=8.0", "ruff>=0.6"]
 [project.scripts]
 # Its own entry point, because this is the artifact external theme authors are pointed at.
 cvd-validate = "legible.cli:main"
+# Everything that acts on a deck rather than on a stranger's palette: `gen-css` today, the figure
+# commands and `lint` as they land.
+legible = "legible.command:main"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/legible"]
