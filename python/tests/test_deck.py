@@ -69,9 +69,49 @@ def test_a_slides_own_frontmatter_is_not_its_content():
     assert slides[1].prose == ()
 
 
-def test_a_separator_followed_by_a_heading_starts_a_slide_rather_than_a_frontmatter_block():
-    """The blank line after a separator is a convention, not a guarantee. A block that does not
-    read as `key: value` is content, and swallowing it would hide the slide from every check."""
+def test_a_frontmatter_block_that_opens_with_a_comment_is_still_frontmatter():
+    """A comment before the first key is where a deck says why it wears the theme it wears, so a
+    reading that took the block for content would make every deck that explains itself slide 1."""
+    slides = deck(
+        """\
+        ---
+        # The theme by path, until the package is on npm.
+        theme: ../theme
+        ---
+
+        # First
+        """
+    )
+
+    assert len(slides) == 1
+    assert slides[0].headline == "First"
+
+
+def test_a_closed_block_after_a_separator_is_frontmatter_whatever_it_opens_with():
+    """Slidev asks only whether the line after the separator is blank, and takes everything up to
+    the closing separator as frontmatter if it is not. A heading written there never reaches the
+    room, so a reading that showed it would hold the deck to a slide nobody sees."""
+    slides = deck(
+        """\
+        # First
+
+        ---
+        # Second
+
+        Evidence follows.
+
+        ---
+
+        # Third
+        """
+    )
+
+    assert [slide.headline for slide in slides] == ["First", "Third"]
+
+
+def test_a_block_the_author_never_closed_is_content():
+    """The other half of Slidev's rule: with no closing separator there is no frontmatter to
+    strip, so the lines are a slide — and hiding them would take it out of every check."""
     slides = deck(
         """\
         # First

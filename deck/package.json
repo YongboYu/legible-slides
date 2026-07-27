@@ -1,0 +1,17 @@
+{
+  "name": "legible-slides-flagship",
+  "version": "0.1.0",
+  "type": "module",
+  "private": true,
+  "description": "The flagship deck: the method, taught by being the method.",
+  "license": "MIT",
+  "scripts": {
+    "dev": "slidev slides.md --open",
+    "build": "slidev build slides.md --base ./ --out dist",
+    "export": "slidev export slides.md --format pdf --output dist/legible-slides.pdf"
+  },
+  "devDependencies": {
+    "@slidev/cli": "^52.18.0",
+    "playwright-chromium": "^1.62.0"
+  }
+}

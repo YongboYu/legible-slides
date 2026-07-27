@@ -401,6 +401,10 @@ html.dark {
 /* ── component: Callout ───────────────────────────────────────────────────────────────────── */
 
 .legible-callout {
+  /* The gap a paragraph carries, so evidence that continues under the box is separated from it
+   * (`layout-discipline`). Zeroed again by the pane's `:last-child` rule where the box ends the
+   * evidence, which is the common case. */
+  margin-bottom: var(--zone-gap);
   padding: 16px 24px;
   border-left: 4px solid var(--brand-strong);
   background: var(--surface-alt);

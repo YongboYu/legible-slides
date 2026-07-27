@@ -107,6 +107,11 @@ single-word-emphasis layout, because the method forbids the slides they build.
 A deck consumes it by path until it is published. See [`theme/README.md`](theme/README.md), and
 [`theme/example.md`](theme/example.md) for every layout exercised once.
 
+[`deck/`](deck) is the flagship: the deck that teaches the method by being it, and the artifact to
+read if you would rather see the rules applied than read them. It is being written beat by beat —
+what stands today is the frame, the cover and the sources around one worked assertion-evidence
+slide, wired to the theme and green in CI. See [`deck/README.md`](deck/README.md).
+
 ## Provenance
 
 This is not a greenfield idea. It is an extraction from a deck that shipped: the CAiSE 2026

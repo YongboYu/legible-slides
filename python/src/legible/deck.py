@@ -6,9 +6,11 @@ as trustworthy as the answer to "what is a bullet", and that answer belongs some
 tested on its own.
 
 The review surface is Slidev markdown (``docs/agent-skill-contract.md`` §3), so the split follows
-Slidev's own: a line of three dashes ends a slide, and the block after it is that slide's
-frontmatter when it reads as ``key: value`` rather than as content. The deck's headmatter falls out
-of the same rule, being the frontmatter of a slide that has not started yet.
+Slidev's own: a line of three dashes ends a slide, and what follows it is that slide's frontmatter
+when the next line is not blank and a closing line of three dashes arrives. Slidev asks nothing
+else of the block — not that it read as ``key: value``, not that it parse as YAML — so neither does
+this. The deck's headmatter falls out of the same rule, being the frontmatter of a slide that has
+not started yet.
 
 What comes back per slide is what the canon's script-decided rules ask about — the headline, the
 bullets, the prose and the speaker notes — and nothing else. Layouts, components and code blocks
@@ -27,10 +29,6 @@ __all__ = ["Slide", "parse_deck", "read_deck"]
 #: A slide separator: three dashes alone on a line. Four or more is a horizontal rule, which is
 #: what Slidev's own parser makes of it too.
 _SEPARATOR = re.compile(r"^---\s*$")
-
-#: The opening line of a frontmatter block — `layout: cover`, `clicks: 3`. A block that does not
-#: start this way is content, and a parser that swallowed it would hide a slide from every check.
-_FRONTMATTER = re.compile(r"^[A-Za-z_][\w.-]*\s*:(\s|$)")
 
 _FENCE = re.compile(r"^\s*(```|~~~)")
 _HEADING = re.compile(r"^\s{0,3}#{1,6}\s+(?P<text>.*?)\s*#*\s*$")
@@ -110,8 +108,15 @@ def _fence_end(lines: Sequence[str], opened: int) -> int:
 
 
 def _frontmatter_end(lines: Sequence[str], separator: int) -> int | None:
-    """The line closing the frontmatter block this separator opens, if it opens one at all."""
-    if separator + 1 >= len(lines) or not _FRONTMATTER.match(lines[separator + 1]):
+    """The line closing the frontmatter block this separator opens, if it opens one at all.
+
+    Two conditions, both Slidev's. The line after the separator has to carry something — the blank
+    line every slide starts with is what tells the two apart — and the block has to close, because
+    a block that never closes is a slide Slidev renders rather than frontmatter it strips. What the
+    block *says* decides nothing: a comment before the first key opens a frontmatter block, and a
+    heading written where a key belongs is swallowed by one.
+    """
+    if separator + 1 >= len(lines) or not lines[separator + 1].strip():
         return None
     for index in range(separator + 2, len(lines)):
         if _SEPARATOR.match(lines[index].rstrip()):

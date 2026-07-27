@@ -1,0 +1,63 @@
+# The flagship deck
+
+The primary teaching artifact of [`legible-slides`](../README.md): a deck that teaches the method by
+being it. Every rule it demonstrates is stated once, in [`docs/method.md`](../docs/method.md), and
+the [thirteen beats](../docs/method.md#the-flagship-deck-13-beats) it grows into are the outline
+there.
+
+> **The frame, so far.** The cover, one assertion-evidence beat and the sources. The remaining beats
+> are [#22](https://github.com/YongboYu/legible-slides/issues/22); what is here is the path through
+> the whole stack — palette, generated stylesheet, theme, a deck that renders — with the chrome
+> proved before there is an argument sitting on top of it.
+
+## Running it
+
+```bash
+pnpm install
+pnpm dev      # with hot reload
+pnpm build    # what CI builds
+```
+
+The deck names the theme by path (`theme: ../theme`), which is how a deck consumes
+[`slidev-theme-legible`](../theme/README.md) until the package is on npm. Nothing else is configured
+here, because everything the method fixes arrives with the theme — see that README for what.
+
+**No Python is needed to build it.** The palette reaches these slides as
+[`theme/styles/tokens.css`](../theme/styles/tokens.css), which is generated from
+[`themes/kuleuven.json`](../themes/kuleuven.json) and committed like a lockfile — so recolouring the
+deck is an edit to that one file and a `legible gen-css` run, with nothing to change here. CI checks
+that the colour on the built slides is still the colour in the theme file.
+
+## A PDF to present from
+
+```bash
+pnpm exec playwright install chromium-headless-shell   # once: the renderer, ~95 MB
+pnpm export                                            # → dist/legible-slides.pdf
+```
+
+The browser is a manual step because pnpm does not run a dependency's install scripts, and that is
+the right default — a 95 MB download should be something you asked for. CI installs the package with
+everything else and never downloads the browser, because it never exports.
+
+## Held to the method
+
+```bash
+uv run --project ../python legible lint slides.md --theme ../themes/kuleuven.json
+```
+
+Every rule [`docs/method.md`](../docs/method.md) marks *decided by script* — `bullet-ceiling`,
+`word-ceiling`, `no-em-dash-headline`, `no-inflated-register`, `opener-variety` and
+`separation-floor`. CI runs exactly this line, and a finding it calls an error turns the run red.
+
+The rules the canon marks *judgment* — `one-message`, `assertion-headline`, `evidence-is-visual` and
+the rest — are a reviewer's, human or agent. See
+[`docs/agent-skill-contract.md`](../docs/agent-skill-contract.md).
+
+## What lives where
+
+| | |
+|---|---|
+| `slides.md` | the deck. The first frontmatter block is the deck's headmatter *and* the cover's own frontmatter, which is why the cover's props sit up there. |
+| `public/` | what the deck serves. The brand mark sits here as a copy of the one in [`themes/logos/`](../themes/logos/README.md), because a mark belongs to the deck rather than to the machinery — nothing wires the two, so changing it is an edit here and one line of `themeConfig`. |
+
+The speaker and venue on the cover are the presenter's to set, and a `date` is theirs to add.

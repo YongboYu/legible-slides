@@ -79,6 +79,57 @@ jobs:
           enable-cache: true
       - run: uv run --project ../python legible lint example.md
 
+  # The flagship deck, built the way it is presented. The theme job above proves the machinery on
+  # its own example; this one is the only place the two halves meet — a deck that names the theme by
+  # path, and therefore the whole thin path from the palette to something that renders.
+  #
+  # It is held to the method it teaches, so the linter runs over it here rather than over the
+  # example alone. A flagship that breaks its own rules is worse than no flagship.
+  deck:
+    name: flagship deck builds
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: deck
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: deck/pnpm-lock.yaml
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run build
+      - name: The deck asks no font provider for anything
+        run: '! grep -rq "fonts.googleapis.com\|fonts.gstatic.com\|api.fonts.coollabs.io" dist'
+      - name: Both bundled families shipped with it
+        run: ls dist/assets/Inter-*.woff2 dist/assets/JetBrainsMono-*.woff2
+      # The claim that a palette edit reaches the deck with nothing edited in it. The value is read
+      # from the theme file at check time rather than written here, so recolouring keeps this green
+      # and cutting the deck off from the generated stylesheet turns it red.
+      #
+      # Read back from the built CSS rather than grepped for, because the minifier shortens a hex
+      # where it can — #ffffff arrives as #fff — and a grep would call that a missing palette.
+      - name: The palette reached the slides through the generated stylesheet
+        run: |
+          built=$(awk 'match($0, /--brand: *#[0-9a-fA-F]+/) {
+                         hex = substr($0, RSTART, RLENGTH)
+                         sub(/.*#/, "#", hex)
+                         print tolower(hex)
+                         exit
+                       }' dist/assets/*.css)
+          built=$(printf '%s' "$built" | sed -E 's/^#(.)(.)(.)$/#\1\1\2\2\3\3/')
+          want=$(jq -r .brand ../themes/kuleuven.json | tr 'A-Z' 'a-z')
+          echo "deck: $built  palette: $want"
+          test "$built" = "$want"
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+      - run: uv run --project ../python legible lint slides.md --theme ../themes/kuleuven.json
+
   python:
     name: python
     runs-on: ubuntu-latest
