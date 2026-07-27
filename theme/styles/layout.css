@@ -179,8 +179,11 @@ html.dark {
 }
 
 /* At body size, like the rest of the evidence. A table that only fits at a dense size is a table
- * with too much in it for one slide, and shrinking it is the knob `type-scale` refuses. */
+ * with too much in it for one slide, and shrinking it is the knob `type-scale` refuses. It carries
+ * the same bottom margin a paragraph does, so evidence continuing under it is separated from its
+ * last row rather than sitting on the row's rule (`layout-discipline`). */
 .slidev-layout table {
+  margin: 0 0 var(--zone-gap) 0;
   border-collapse: collapse;
 }
 

@@ -1,0 +1,135 @@
+/* The deck's own two demonstrations, and deliberately nothing else.
+ *
+ * Everything a slide here normally needs arrives with the theme, which is why this file is short and
+ * why it should stay that way: a deck that accumulates styles is a deck drifting off the method one
+ * slide at a time. What is below exists because two beats have to show a room something the method
+ * *refuses*, and the theme will not build it — a stock-template slide (beat 2), and body type below
+ * the floor (beat 3).
+ *
+ * Both are **pictures of a slide**, not slides. They are set at reduced scale on purpose, the way a
+ * screenshot would be, and every size below is derived from the theme's own custom properties rather
+ * than written as a number — so a change to `type-scale` in the canon reaches these too, and neither
+ * demonstration can quietly become a place where the deck invents a size for itself.
+ *
+ * Colours are custom properties for the same reason the theme's are: nothing here may hardcode a hex,
+ * so recolouring the deck recolours the demonstrations with it.
+ */
+
+/* ── beat 2: a stock-template slide, drawn small ───────────────────────────────────────────────
+ * A topic-phrase title, more bullets than anyone can hold, a logo, a decorative band and a footer:
+ * the slide the method's five zones are a reaction to. It is evidence, so it is framed like a
+ * figure rather than presented as this deck's own content. */
+
+.demo-stock {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  gap: 0.7em;
+  aspect-ratio: 16 / 9;
+  padding: 1.4em 1.6em;
+  border: 1px solid var(--hairline);
+  background: var(--surface-alt);
+  /* The scale of the whole picture. Every size in it is a multiple of this one, so the mock shrinks
+   * and grows as a single object and no part of it can drift out of proportion with the rest. */
+  font-size: calc(var(--body-px) * 0.55);
+  line-height: 1.35;
+}
+
+.demo-stock-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1em;
+}
+
+/* Where a template puts the mark: on every slide, at whatever size is left over. */
+.demo-stock-logo {
+  padding: 0.2em 0.7em;
+  border: 1px dashed var(--neutral-soft);
+  color: var(--neutral);
+  letter-spacing: 0.08em;
+}
+
+.demo-stock-deco {
+  flex: 1;
+  height: 0.5em;
+  background: linear-gradient(90deg, var(--brand), var(--brand-strong));
+}
+
+/* A topic phrase, which is what the audience is given instead of the claim. */
+.demo-stock-title {
+  color: var(--brand);
+  font-size: 1.7em;
+  font-weight: 600;
+}
+
+/* Two columns, because that is how a slide absorbs a second message and then a third. The auto block
+ * margins centre it in whatever the title and the footer leave, the way a template's own body
+ * placeholder does, and they push the footer onto the mock's bottom edge.
+ *
+ * Written through the parent so it outranks the theme's own `.slidev-layout ul`, which is qualified
+ * by an element and would otherwise win on specificity however late this file is loaded. */
+.demo-stock .demo-stock-list {
+  margin-block: auto;
+  margin-inline: 0;
+  padding-left: 1.2em;
+  columns: 2;
+  column-gap: 1.6em;
+  list-style: square;
+}
+
+.demo-stock-list li {
+  margin-bottom: 0.35em;
+  line-height: 1.35;
+}
+
+.demo-stock-footer {
+  display: flex;
+  justify-content: space-between;
+  padding-top: 0.6em;
+  border-top: 1px solid var(--hairline);
+  color: var(--neutral);
+  font-size: 0.85em;
+}
+
+/* What the mock is, in the words the theme's own figure captions use: the same role, the same size,
+ * and the same reason for the dense exception — a caption labels the evidence, it is not the
+ * evidence. The mock is not a `Figure`, because it is markup rather than an image. */
+.demo-caption {
+  color: var(--neutral);
+  font-size: var(--dense-px);
+  line-height: 1.4;
+}
+
+/* ── beat 3: the same sentence above and below the floor ───────────────────────────────────────
+ * The back row's half of that beat, demonstrated at real size rather than sketched: whatever is
+ * projecting these slides is projecting both samples, so the room settles it and no arithmetic has
+ * to be believed. Beat 9 is where the arithmetic then arrives. */
+
+.demo-type {
+  display: grid;
+  gap: 22px;
+  margin-bottom: var(--zone-gap);
+}
+
+.demo-type-row {
+  display: grid;
+  gap: 6px;
+}
+
+/* dense: a label on the sample, not the sample. The same exception the theme takes for a caption. */
+.demo-type-label {
+  color: var(--neutral);
+  font-size: var(--dense-xs-px);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Roughly half the floor, which is where a placeholder that shrinks text on overflow ends up. It is
+ * the one place in this deck type is set below the floor, and the point is that you cannot read it. */
+.demo-type-shrunk {
+  font-size: calc(var(--body-px) * 0.52);
+}
+
+.demo-type-floor {
+  font-size: var(--body-px);
+}

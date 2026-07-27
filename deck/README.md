@@ -5,10 +5,8 @@ being it. Every rule it demonstrates is stated once, in [`docs/method.md`](../do
 the [thirteen beats](../docs/method.md#the-flagship-deck-13-beats) it grows into are the outline
 there.
 
-> **The frame, so far.** The cover, one assertion-evidence beat and the sources. The remaining beats
-> are [#22](https://github.com/YongboYu/legible-slides/issues/22); what is here is the path through
-> the whole stack — palette, generated stylesheet, theme, a deck that renders — with the chrome
-> proved before there is an argument sitting on top of it.
+Fourteen slides: the thirteen beats, then the sources they cite. Two of the beats are demonstrations
+that could not be faked, and [the figures](#the-figures) below is where they come from.
 
 ## Running it
 
@@ -39,6 +37,21 @@ The browser is a manual step because pnpm does not run a dependency's install sc
 the right default — a 95 MB download should be something you asked for. CI installs the package with
 everything else and never downloads the browser, because it never exports.
 
+## The figures
+
+```bash
+uv run --project ../python python figures.py
+```
+
+Three PNGs into `public/`, from [`themes/kuleuven.json`](../themes/kuleuven.json) under real Machado
+simulation — figures are regenerated, never redrawn. Beat 3 shows the deck's five-series chart with
+colour as the only channel and beat 10 shows it with the dash and the marker back on, under
+deuteranomaly and in grayscale; a hand-drawn approximation of either would gut the demonstration.
+[`figures.py`](figures.py) records why each of the three is drawn the way it is.
+
+They are **committed**, and nothing regenerates them for you: the deck build never runs Python, the
+same way it never runs `gen-css`. Re-run the line above when the palette changes.
+
 ## Held to the method
 
 ```bash
@@ -58,6 +71,8 @@ the rest — are a reviewer's, human or agent. See
 | | |
 |---|---|
 | `slides.md` | the deck. The first frontmatter block is the deck's headmatter *and* the cover's own frontmatter, which is why the cover's props sit up there. |
-| `public/` | what the deck serves. The brand mark sits here as a copy of the one in [`themes/logos/`](../themes/logos/README.md), because a mark belongs to the deck rather than to the machinery — nothing wires the two, so changing it is an edit here and one line of `themeConfig`. |
+| `figures.py` | the three generated figures, and why each is drawn as it is. |
+| `style.css` | the two demonstrations the theme will not build, because the method refuses them: a stock-template slide, and body type below the floor. Slidev loads it for you. Every size in it derives from the theme's own custom properties, so nothing here invents one. |
+| `public/` | what the deck serves: the generated figures, and the brand mark as a copy of the one in [`themes/logos/`](../themes/logos/README.md) — a mark belongs to the deck rather than to the machinery, so changing it is an edit here and one line of `themeConfig`. |
 
 The speaker and venue on the cover are the presenter's to set, and a `date` is theirs to add.
