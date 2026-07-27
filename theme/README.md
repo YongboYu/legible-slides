@@ -85,10 +85,11 @@ orientation is on every slide, so no slide is spent announcing where the talk ha
 
 The `cover` layout carries no chrome, whether or not it says so.
 
-A per-slide layer rather than a global one, which is a deliberate correction to the pattern this
-borrows from `slidev-theme-academic`: a global layer is mounted once outside the slide, so its px are
-the viewport's, and its chrome neither scales with the canvas `type-scale` is written against nor
-lands on an exported page.
+A per-slide layer (`slide-top.vue`) rather than the global one this borrows from
+`slidev-theme-academic`, because the chrome is per-slide. Slidev hands a slide's frontmatter and its
+number to components inside that slide; a global layer is mounted outside every slide and can only ask
+where the deck currently *is* — a different question, and the wrong one wherever more than one slide
+is on screen, as in the overview and a printed export.
 
 ## Components
 
@@ -103,6 +104,19 @@ Citations are numbered by hand, which is the whole mechanism: write `<sup>1</sup
 give the matching `Footnote` the same number, and put the source at that position in the references
 slide's `indexEntries`. A talk cites a handful of sources, and a BibTeX toolchain is a large
 dependency bought for a small job.
+
+**Leave a blank line inside a component** if its content is markdown:
+
+```md
+<Callout title="Refused">
+
+No `section`, no `intro`, no one-word emphasis.
+
+</Callout>
+```
+
+Without the blank lines markdown-it takes the whole block for raw HTML, and backticks, emphasis and
+links stay as typed. On one line, write the HTML instead (`<code>…</code>`).
 
 ## Styles
 

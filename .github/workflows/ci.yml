@@ -71,6 +71,13 @@ jobs:
         run: '! grep -rq "fonts.googleapis.com\|fonts.gstatic.com\|api.fonts.coollabs.io" dist'
       - name: Both bundled families shipped with it
         run: ls dist/assets/Inter-*.woff2 dist/assets/JetBrainsMono-*.woff2
+      # The example is shipped as an exemplar, so it is held to the method like any other deck. The
+      # linter runs beside the build rather than inside it: what must never depend on Python is the
+      # build, and this is a separate command.
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+      - run: uv run --project ../python legible lint example.md
 
   python:
     name: python

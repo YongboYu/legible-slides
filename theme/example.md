@@ -19,18 +19,19 @@ locator: The skeleton
 
 # The theme ships four layouts, and refuses the ones the method forbids.
 
-<Callout title="What you are looking at">
-The locator above, the accent rule under this headline and the page number below are one component,
-injected on every slide. No layout opts in, so none can forget.
-</Callout>
-
 - `cover` for the title, and for nothing else
 - `assertion-evidence` for a claim and its one pane of evidence
 - `two-col-evidence` when the evidence needs two panes
 - `references` for the sources, from data
 
-There is no `section`, no `intro`, no `end` and no one-word emphasis layout. A slide spent on
-navigation proves nothing, so the theme offers no way to build one.
+<!-- The blank lines are load-bearing: without them markdown-it takes the block for raw HTML and
+     leaves the backticks as backticks. -->
+<Callout title="Refused">
+
+No `section`, no `intro`, no `end`, no one-word emphasis. A slide spent on navigation proves nothing,
+so there is no layout that builds one.
+
+</Callout>
 
 ---
 layout: two-col-evidence
@@ -51,8 +52,10 @@ locator: Evidence
 ::right::
 
 <Callout accent title="At capacity">
+
 Three series pass. A fourth fails without retuning the ramp, and the validator says so rather than
 quietly repeating a colour.
+
 </Callout>
 
 The chart is regenerated from the same theme file this slide is coloured from, so a palette swap
@@ -68,8 +71,9 @@ chrome: false
 
 # A slide can drop the chrome, and this one has.
 
-No locator, no rule, no page number: `chrome: false` in a slide's frontmatter takes them off, and the
-`cover` layout is without them already.
+The locator pill, the accent rule and the page number are one component, injected on every other
+slide in this deck. No layout opts in, so none can forget. `chrome: false` in a slide's frontmatter
+takes all three off, and the `cover` layout is without them already.
 
 This slide also names no layout. `default` is `assertion-evidence` under the name Slidev falls back
 to, so the skeleton is what a slide gets by default rather than something it has to ask for.

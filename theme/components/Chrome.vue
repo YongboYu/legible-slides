@@ -12,12 +12,8 @@ import { useSlideContext } from '@slidev/client'
 
 const { $slidev, $frontmatter, $page } = useSlideContext()
 
-/**
- * Layouts that carry no chrome. The cover is where orientation starts, so there is nothing for a
- * locator to remind anyone of, and a page number on a title slide counts a slide nobody is
- * counting.
- */
-const CHROME_FREE_LAYOUTS = ['cover']
+/** The one layout that carries no chrome: a cover is where orientation starts. */
+const CHROME_FREE_LAYOUT = 'cover'
 
 /**
  * Which layout this slide is on — resolved the way Slidev resolves it, not merely read.
@@ -30,12 +26,17 @@ const layout = computed(
   () =>
     $frontmatter.layout ??
     $slidev.configs.defaults?.layout ??
-    ($page.value === 1 ? 'cover' : 'default'),
+    ($page.value === 1 ? CHROME_FREE_LAYOUT : 'default'),
 )
 
 const shown = computed(
-  () => $frontmatter.chrome !== false && !CHROME_FREE_LAYOUTS.includes(layout.value),
+  () => $frontmatter.chrome !== false && layout.value !== CHROME_FREE_LAYOUT,
 )
+
+/** One slide's frontmatter, by number. Slidev keeps it on the slide's route. */
+function frontmatterOf(no: number) {
+  return $slidev.nav.slides[no - 1]?.meta?.slide?.frontmatter ?? {}
+}
 
 /**
  * This slide's locator, or the last one a slide before it set.
@@ -47,7 +48,7 @@ const shown = computed(
 const locator = computed(() => {
   if ($frontmatter.locator !== undefined) return $frontmatter.locator
   for (let no = $page.value - 1; no >= 1; no--) {
-    const declared = $slidev.nav.slides[no - 1]?.meta?.slide?.frontmatter?.locator
+    const declared = frontmatterOf(no).locator
     if (declared !== undefined) return declared
   }
   return undefined

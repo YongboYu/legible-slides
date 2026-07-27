@@ -6,8 +6,12 @@
  * deck actually writes. One file also makes the theme's central promise greppable — no colour is
  * stated here, only the custom properties `tokens.css` generates from the palette.
  *
- * The sizes are the canon's, quoted from `type-scale` in `docs/method.md`. Change a number there
- * and it changes here; do not invent a size in a component.
+ * The numbers below are the canon's, from `type-scale` and `headline-shape` in `docs/method.md`.
+ * They are the one place in this theme a canon number is written, and they are **held to it**:
+ * `python/tests/test_theme.py` reads this file and `package.json` and fails if either has drifted
+ * from `docs/method.md`. A stylesheet cannot parse the canon the way `legible.method` does, so the
+ * copy is verified instead of avoided. Change a number in the canon and the suite says so here.
+ * Nothing downstream may invent a size: derive it from these, as the zones below do.
  */
 
 :root {
@@ -21,6 +25,10 @@
   --dense-px: 18px;
   --dense-xs-px: 16px;
 
+  /* `headline-shape`: the ceiling is what the room can read in a glance, in rendered lines. */
+  --headline-lines-max: 2;
+  --headline-line-height: 1.28;
+
   /* ── the five zones of `ae-skeleton`, as canvas px ──
    * locator → assertion headline → accent rule → evidence → page number. The zone heights are
    * fixed rather than content-driven, which is what makes the chrome land in the same place on
@@ -30,9 +38,12 @@
   --edge-bottom: 36px;
   --zone-gap: 20px;
   --zone-locator-h: 28px;
-  /* Two rendered lines of headline, which is what `headline-lines-max` allows. A third line has
-   * nowhere to go and collides with the accent rule — the ceiling, made visible. */
-  --zone-headline-h: 96px;
+  /* The headline's ceiling, in the height it actually takes: a third line has nowhere to go and
+   * collides with the accent rule. Derived rather than measured once and pasted, so the ceiling
+   * cannot come loose from the two numbers it is made of. */
+  --zone-headline-h: calc(
+    var(--headline-px) * var(--headline-line-height) * var(--headline-lines-max)
+  );
   --zone-rule-h: 3px;
   /* Room under the evidence for the page number. */
   --zone-footer-h: 28px;
@@ -51,14 +62,28 @@
 
   /* Slidev's own primary, aliased onto the palette so the built-in UI cannot render off-palette. */
   --slidev-theme-primary: var(--brand);
-  --slidev-slide-container-background: var(--ink);
 
-  /* Code is evidence, so it is not left at Slidev's 12px default. Dense: a code block is a tight
-   * panel by definition. */
+  /* What surrounds the slide in a browser, where the canvas does not fill the window. Slidev's
+   * default is black, which is the ink-on-white-against-near-black `light-ground` was locked to
+   * avoid; a surface role keeps the surround on the ground the deck was verified on. */
+  --slidev-slide-container-background: var(--surface-alt);
+
+  /* Code is evidence and is read from the back row like everything else, so it sits at body size
+   * rather than at Slidev's 12px default. Not a dense exception: a code block is not a tight panel
+   * by virtue of being code, and if it does not fit at body size it is too much code for a slide. */
   --slidev-code-background: var(--surface-alt);
   --slidev-code-foreground: var(--ink);
-  --slidev-code-font-size: var(--dense-px);
+  --slidev-code-font-size: var(--body-px);
   --slidev-code-line-height: 1.5;
+}
+
+/* `light-ground` is locked in `package.json`, and Slidev treats that as a default a deck's headmatter
+ * can still override. It cannot be stopped from doing so, but it can be stopped from taking the
+ * palette with it: the client's own dark values for these would otherwise win over the block above,
+ * and put a dark code block on a white slide. */
+html.dark {
+  --slidev-code-background: var(--surface-alt);
+  --slidev-code-foreground: var(--ink);
 }
 
 /* ── the slide ground ─────────────────────────────────────────────────────────────────────── */
@@ -114,8 +139,10 @@
   line-height: 1.45;
 }
 
+/* `neutral` rather than the softest neutral: an ordered list's markers are numerals, and numerals
+ * are text (`decorative-neutral-never-text`). */
 .slidev-layout li::marker {
-  color: var(--neutral-soft);
+  color: var(--neutral);
 }
 
 .slidev-layout strong,
@@ -151,9 +178,10 @@
   font-size: var(--body-px);
 }
 
+/* At body size, like the rest of the evidence. A table that only fits at a dense size is a table
+ * with too much in it for one slide, and shrinking it is the knob `type-scale` refuses. */
 .slidev-layout table {
   border-collapse: collapse;
-  font-size: var(--dense-px); /* dense: a table is a tight panel */
 }
 
 .slidev-layout th,
@@ -293,7 +321,11 @@
 
 /* The evidence pane, filling what is left under the rule. A column, and `min-height: 0` on both
  * ends of it, so a figure inside shrinks to fit rather than pushing the slide past its bottom
- * edge — and so a `Footnotes` block can be pushed to that edge. */
+ * edge — and so a `Footnotes` block can be pushed to that edge.
+ *
+ * On the default layout the pane is the layout itself, which wears this class: there, the evidence
+ * is whatever follows the headline in the slide's own markdown, with no element of its own to hang
+ * it on. Everything below therefore addresses the pane, not the layout. */
 .legible-evidence {
   display: flex;
   flex: 1;
@@ -302,11 +334,8 @@
   min-height: 0;
 }
 
-/* On the default layout there is no pane element: the evidence is whatever follows the headline in
- * the slide's own markdown, so the layout is the column. */
 .legible-evidence > :last-child,
-.legible-column > :last-child,
-.slidev-layout.assertion-evidence > :last-child {
+.legible-column > :last-child {
   margin-bottom: 0;
 }
 
@@ -327,8 +356,7 @@
 
 /* A figure is the pane's content rather than a block in it: it takes the room that is left. */
 .legible-evidence > .legible-figure,
-.legible-column > .legible-figure,
-.slidev-layout.assertion-evidence > .legible-figure {
+.legible-column > .legible-figure {
   flex: 1;
 }
 

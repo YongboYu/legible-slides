@@ -35,7 +35,10 @@
       "fonts": {
         "sans": "Inter",
         "mono": "JetBrains Mono",
-        "local": ["Inter", "JetBrains Mono"],
+        "local": [
+          "Inter",
+          "JetBrains Mono"
+        ],
         "provider": "none"
       },
       "themeConfig": {
