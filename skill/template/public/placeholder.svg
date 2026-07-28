@@ -1,0 +1,16 @@
+<!-- A blank where the evidence goes, so the skeleton renders as a form rather than as a broken
+     image. Delete it once both skeleton slides point at figures of your own.
+
+     The one file in this deck allowed to write a colour down: an <img> is isolated from the page,
+     so it cannot read the palette's custom properties the way every stylesheet here does. The greys
+     below are therefore deliberately *not* palette roles — a placeholder that quietly copied three
+     of them would go stale on the first recolour, and a blank is the one thing in a deck that has
+     no business tracking the brand. A chart is the opposite case: it is drawn from
+     themes/palette.json, whose colours the validator has measured. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" width="640" height="360"
+     role="img" aria-label="Placeholder for a figure">
+  <rect x="1" y="1" width="638" height="358" rx="4" fill="#eeeeee" stroke="#b4b4b4"
+        stroke-width="2" stroke-dasharray="10 8" />
+  <text x="320" y="188" text-anchor="middle" font-family="Inter, system-ui, sans-serif"
+        font-size="26" fill="#6e6e6e">your figure here</text>
+</svg>

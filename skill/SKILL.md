@@ -1,6 +1,6 @@
 ---
 name: legible-slides
-description: Review a Slidev deck against the legible-slides method — the mechanical gate a script settles, plus the judgments it cannot. Use when asked to review a deck, check slides against the method, or vet a deck before it is presented or merged.
+description: Start a Slidev deck to the legible-slides method, or review an existing one against it — the mechanical gate a script settles, plus the judgments it cannot. Use when asked to scaffold or start a deck to the method, review a deck, check slides against the method, or vet a deck before it is presented or merged.
 ---
 
 # legible-slides
@@ -10,8 +10,82 @@ because the method is stated once, in the canon at `docs/method.md`, and a secon
 thing to keep true. What is here is the order to work in, which checks a script settles and which
 need reading, and what the report looks like.
 
-Rules are **loaded from the canon at review time** (step 3). A rule edited there changes this
-review with nothing edited here.
+Rules are **loaded from the canon at review time** (review, step 3). A rule edited there changes
+this review with nothing edited here.
+
+Two modes, and the second is the first one's acceptance bar:
+
+- **scaffold** — start a new deck, method-compliant before a word of it is written.
+- **review** — check a deck that exists, and say what breaks and how to fix it.
+
+## Mode: scaffold
+
+Stamp a new Slidev deck wired to the theme, to its palette and to both checks. It is a **clean
+start, not a worked deck**: the flagship deck in this project is the artifact that teaches the
+method, and a second one here would be a second thing to keep true.
+
+### 1. Settle the three things the template cannot
+
+Ask only for what the author has not already said.
+
+| What | And what to take as given |
+|---|---|
+| Where the deck goes | a new directory, named by the author. |
+| Where the theme is | slidev-theme-legible is not on npm yet, so a deck consumes it by path — the theme directory inside a checkout of legible-slides. Ask which checkout. |
+| Which palette it wears | the brand-free one the template already carries. The worked example is `themes/kuleuven.json` in that same checkout — verified, and the project's own default; offer it, and stamp it only for an author who is at that university. A palette carries a name, and putting one on somebody else's talk claims an endorsement nobody gave. |
+
+### 2. Stamp the template
+
+`template/` beside this file is the deck. Copy all of it, in one go, from wherever this file lives:
+
+```bash
+cp -R /path/to/this/skill/template/. path/to/new-deck/
+```
+
+The trailing `/.` is load-bearing: the checks are dotfiles, and a copy that skipped them would stamp
+a deck with no gate on it. Check that the deck's own workflow and its pre-commit config arrived
+before going on, because a scaffold whose whole claim is that the checks are already wired is worth
+nothing if they are not.
+
+### 3. Fill in what the author named, and nothing else
+
+| Where | What |
+|---|---|
+| the headmatter of `slides.md` | the theme's path, the title, the author, and the cover's own venue and date |
+| `package.json` | the deck's name and its description |
+| `themes/palette.json` | the chosen palette's contents, if it is not the one stamped. Keep the path — everything else in the deck points at it, which is what makes a recolour one edit. |
+
+A skeleton slide is a blank for the author to fill, and not a slide for you to write. The method is
+about deciding what each slide is *for*, and that decision is theirs.
+
+### 4. Regenerate the stylesheet
+
+The palette reaches the slides as a committed stylesheet, so the deck's build never runs Python.
+What is stamped is current; a palette changed in step 3 leaves it stale:
+
+```bash
+cvd-validate themes/palette.json
+legible gen-css themes/palette.json --output styles/tokens.css
+```
+
+The floor first, deliberately. A palette that has not cleared it is not one to colour a deck from,
+and the validator names the pair to move rather than only refusing.
+
+### 5. Hand it over green
+
+```bash
+pnpm install && pnpm build
+```
+
+Then **run review mode below over the stamped deck**, and hand the report over with it. That is the
+acceptance bar, and the reason to stamp rather than retrofit: the report should carry no error at
+all, on a deck nobody has written a word of yet. If it carries one, the fault is in the template
+rather than in the author's deck — fix it here, and stamp again.
+
+It will carry warnings, and those are the blanks. A headline that says what belongs in it is not a
+claim, so `assertion-headline` is expected to fire on every skeleton slide, and each of those
+findings clears when the author writes the slide. Report them as what they are. Do not answer them
+by writing the author's headlines for them.
 
 ## Mode: review
 

@@ -1,0 +1,46 @@
+name: method
+
+on: [push, pull_request]
+
+permissions:
+  contents: read
+
+# The half of a review that gates, run where nobody can skip it. What is checked here is exactly
+# what docs/method.md marks decided by script; the rules it leaves to a reader are advisory and
+# never block, which is why they are not a job.
+#
+# Blocking is the half a workflow cannot grant itself: make this a required status check in the
+# branch ruleset, or a red run merges anyway.
+jobs:
+  method:
+    name: the deck holds to the method
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+      - run: uv tool install "git+https://github.com/YongboYu/legible-slides#subdirectory=python"
+      # uv installs a tool's commands here. The runner has it on PATH already; saying so is one
+      # line, and cheaper than a green run that silently ran nothing.
+      - run: echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      # The accessibility floor, over every palette this deck ships.
+      - run: cvd-validate themes/*.json
+
+      # The stylesheet the deck imports, against the palette it is generated from. Committed like a
+      # lockfile, so this is the only thing standing between a recoloured palette and a deck still
+      # wearing the previous colours.
+      - run: legible gen-css themes/palette.json --output styles/tokens.css --check
+
+      # The deck itself. A finding this calls an error turns the run red.
+      - run: legible lint slides.md --theme themes/palette.json
+
+# No build job, deliberately — and this is the one check above that is missing rather than refused.
+# slides.md names the theme by path until slidev-theme-legible is on npm, so a fresh runner has
+# nothing to resolve that path against and a build job here would fail for a reason about this
+# workflow rather than about the deck.
+#
+# Add one the moment that stops being true: when the package is published, or when you vendor the
+# theme into this repository. Until then `pnpm build` locally is the only place the deck is proved
+# to render, and the checks above are what a runner can settle without it.

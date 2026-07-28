@@ -94,16 +94,25 @@ implementation of the simulation in this project, and the linter is deliberately
 What is left is judgment — whether a slide carries one message, whether its headline is a claim —
 and judgment stays with a reader, or with the coding-agent skill that reviews on your behalf.
 
-## Reviewing with a coding agent
+## Starting and reviewing with a coding agent
 
-[`skill/`](skill) is that skill. It runs the linter for everything a script settles, loads the rules
-that need reading straight from the canon (`legible rules`), and reports both halves as one review,
-grouped per slide, with a proposed fix on every finding.
+[`skill/`](skill) is that skill, and it has two modes.
 
-The two halves keep different authority: the mechanical one has an exit code and blocks, the
-judgments are advisory and never do. And it flags rather than edits — it can hold a deck to a
-structure, but deciding your message stays yours. It states no rule of its own, which is what stops
-a review drifting from the method it claims to enforce. See [`skill/README.md`](skill/README.md).
+**review** runs the linter for everything a script settles, loads the rules that need reading
+straight from the canon (`legible rules`), and reports both halves as one review, grouped per slide,
+with a proposed fix on every finding. The two halves keep different authority: the mechanical one
+has an exit code and blocks, the judgments are advisory and never do. And it flags rather than
+edits — it can hold a deck to a structure, but deciding your message stays yours.
+
+**scaffold** stamps a new deck already wired to the theme, to a palette that clears the floor, and
+to both checks, with one skeleton slide per layout to fill in. It is lean on purpose — a correct
+starting point, not a second flagship — and it hands the deck over having run the review over it,
+so a deck is review-ready from slide one rather than retrofitted at the end. It defaults to the
+brand-free palette: the KU Leuven one is offered as the worked example, never stamped onto somebody
+else's talk.
+
+Neither mode states a rule of its own, which is what stops a review drifting from the method it
+claims to enforce. See [`skill/README.md`](skill/README.md).
 
 ## Presenting with Slidev
 

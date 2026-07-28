@@ -1,0 +1,39 @@
+# Fast local feedback, opt-in. Install it with:
+#
+#     uv tool install pre-commit && pre-commit install
+#
+# The gate is .github/workflows/method.yml, which runs the same three checks on push and pull
+# request. A hook any author can skip with `--no-verify` is convenience, never enforcement.
+#
+# All three commands come from the `legible` package:
+#
+#     uv tool install "git+https://github.com/YongboYu/legible-slides#subdirectory=python"
+repos:
+  - repo: local
+    hooks:
+      - id: cvd-validate
+        name: data colours clear the separation floor
+        entry: cvd-validate
+        language: system
+        files: ^themes/.*\.json$
+        # Only the staged palettes, so editing one does not re-check the others.
+        pass_filenames: true
+
+      # Regenerates rather than reports: the fix for a stale stylesheet is one command, so running
+      # it is friendlier than naming it. pre-commit fails the commit when a hook writes, which
+      # leaves you staging the regenerated file — exactly what the workflow is about to check for.
+      - id: gen-css
+        name: the token stylesheet follows its palette
+        entry: legible gen-css themes/palette.json --output styles/tokens.css
+        language: system
+        files: ^themes/palette\.json$
+        pass_filenames: false
+
+      # Every rule docs/method.md marks decided by script, over the deck and the palette it wears.
+      # The rules it leaves alone are the ones a reader settles — see the review mode of the skill.
+      - id: legible-lint
+        name: the deck holds to the method
+        entry: legible lint slides.md --theme themes/palette.json
+        language: system
+        files: ^(slides\.md|themes/palette\.json)$
+        pass_filenames: false

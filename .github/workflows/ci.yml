@@ -130,6 +130,54 @@ jobs:
           enable-cache: true
       - run: uv run --project ../python legible lint slides.md --theme ../themes/kuleuven.json
 
+  # What the skill's scaffold mode stamps, stamped and built. The Python suite lints the template
+  # and holds it to the theme's layouts and to its own palette; what it cannot reach is whether the
+  # result renders, and whether the palette that reaches it is the deck's own.
+  #
+  # That second half is the one worth a runner. The stamped deck carries its own generated tokens
+  # and consumes the theme by path, so a checkout wearing another palette is exactly what it has to
+  # outrank — and a deck that silently wore the theme's brand instead would look fine everywhere
+  # except in the built CSS.
+  scaffold:
+    name: the scaffold's template builds
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      # A plain copy, dotfiles included, which is what the skill's own step does. Stamped outside
+      # the checkout so nothing here can accidentally satisfy it.
+      - name: Stamp it
+        run: |
+          mkdir -p "$RUNNER_TEMP/stamped"
+          cp -R skill/template/. "$RUNNER_TEMP/stamped/"
+          # The one blank a runner has to fill for itself: the theme is consumed by path until the
+          # package is on npm, and the author is the one who says where their checkout is.
+          sed -i "s|^theme: .*|theme: $GITHUB_WORKSPACE/theme|" "$RUNNER_TEMP/stamped/slides.md"
+      # No lockfile is stamped: a deck resolves its own, and pinning one here would pin every deck
+      # scaffolded from it to whatever this repo last resolved.
+      - run: pnpm install
+        working-directory: ${{ runner.temp }}/stamped
+      - run: pnpm run build
+        working-directory: ${{ runner.temp }}/stamped
+      - name: The deck wears its own palette, not the theme checkout's
+        working-directory: ${{ runner.temp }}/stamped
+        run: |
+          built=$(awk 'match($0, /--brand: *#[0-9a-fA-F]+/) {
+                         hex = substr($0, RSTART, RLENGTH)
+                         sub(/.*#/, "#", hex)
+                         print tolower(hex)
+                         exit
+                       }' dist/assets/*.css)
+          built=$(printf '%s' "$built" | sed -E 's/^#(.)(.)(.)$/#\1\1\2\2\3\3/')
+          want=$(jq -r .brand themes/palette.json | tr 'A-Z' 'a-z')
+          echo "stamped: $built  palette: $want"
+          test "$built" = "$want"
+
   python:
     name: python
     runs-on: ubuntu-latest

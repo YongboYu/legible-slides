@@ -24,10 +24,11 @@ them.**
 Nothing else in this repo restates a rule. If you need one somewhere, name it by its rule ID
 (`one-message`, `separation-floor`, `bullet-ceiling`, …) so a rule change can never leave a copy
 behind. Where the rules came from is [`docs/design-provenance.md`](docs/design-provenance.md);
-how an agent turns them into a review is
-[`docs/agent-skill-contract.md`](docs/agent-skill-contract.md), and the skill that does it is
+how an agent stamps a deck to them and turns them into a review is
+[`docs/agent-skill-contract.md`](docs/agent-skill-contract.md), and the skill that does both is
 [`skill/SKILL.md`](skill/SKILL.md) — which states no rule either, and loads them with
-`legible rules` at review time.
+`legible rules` at review time. What it stamps is [`skill/template/`](skill/template), and that
+states none either: it names rules by ID, like everything else here.
 
 ## Agent skills
 

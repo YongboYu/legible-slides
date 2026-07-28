@@ -1,0 +1,14 @@
+{
+  "name": "my-deck",
+  "version": "0.1.0",
+  "type": "module",
+  "private": true,
+  "description": "A talk, built to the legible-slides method.",
+  "scripts": {
+    "dev": "slidev slides.md --open",
+    "build": "slidev build slides.md --base ./ --out dist"
+  },
+  "devDependencies": {
+    "@slidev/cli": "^52.18.0"
+  }
+}

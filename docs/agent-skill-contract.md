@@ -146,6 +146,24 @@ non-endorsement), but scaffolding a *third party's* deck onto KU Leuven branding
 since `neutral` is a one-file swap (#11), scaffold defaults to `neutral` and offers `kuleuven` as the
 worked example. Slidev-only for v1.
 
+Built in **#24** as the scaffold mode of [`skill/SKILL.md`](../skill/SKILL.md), which stamps
+[`skill/template/`](../skill/template) — files rather than instructions, so what a stamp produces is
+something a suite can be run over. It is: the deck wired to the theme by path, the palette at
+`themes/palette.json` with the stylesheet `legible gen-css` emits from it committed beside it, both
+checks as a pre-commit config and a workflow, and one skeleton slide per layout.
+
+The palette is named for its job rather than for the palette it arrives holding, because everything
+else in the stamped deck points at that path: choosing another one is a change to the file's
+contents and to nothing that names it, which is the same "one palette authority" this document asks
+of the theme.
+
+**The acceptance bar is §5's own review**, and it is enforced rather than asserted:
+`python/tests/test_scaffold.py` lints the template, so a template that would stamp an error fails
+this repo's CI, and the same suite holds it to the theme's layouts and to the palette it copies. CI
+also stamps the template and builds it, which is where the claim that the deck's own tokens outrank
+the theme checkout's is settled — a stamped deck wearing the wrong brand would be visible in the
+built CSS and nowhere else.
+
 ---
 
 ## Summary
