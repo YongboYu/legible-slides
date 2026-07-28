@@ -441,13 +441,19 @@ html.dark {
 }
 
 /* The image is sized by its own aspect ratio inside the pane's width, and the caption follows it
- * immediately — not the foot of the pane. `flex: none` is what keeps that true: left to flex the
- * image would be handed the height of the whole pane and then letterbox itself inside it, opening a
- * gap between a figure and the words describing it. A figure taller than its pane is capped rather
- * than allowed to run off the slide; size it for the pane, which is what the helper's canvas px are
- * for. */
+ * immediately — not the foot of the pane. Never growing is what keeps that true: handed the height
+ * of the whole pane, the image would letterbox itself inside it and open a gap between a figure and
+ * the words describing it.
+ *
+ * Shrinking is the other half, and it is not the same knob. `max-height` caps the image against the
+ * figure, and the figure is the pane — so an image at that cap leaves the caption nothing, and a
+ * caption with nowhere to go is drawn outside the box, over whatever sits at the foot of the pane.
+ * A citation, usually. Allowing the shrink flex would otherwise refuse means the image gives up the
+ * height the caption needs, which is the right way round: a caption labels the evidence, and a
+ * figure whose label has been pushed off it is not evidence of anything. */
 .legible-figure img {
-  flex: none;
+  flex: 0 1 auto;
+  min-height: 0;
   max-width: 100%;
   max-height: 100%;
   object-fit: contain;
