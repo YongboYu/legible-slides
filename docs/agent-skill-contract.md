@@ -47,6 +47,13 @@ rather than restate). The skill obeys the same rule:
 - `method.md` also marks each rule **`script`** or **`judgment`**, which is the same seam §4 splits
   the engine along. The canon decides which side a rule falls on; the skill only implements it.
 
+Built in **#23** as [`skill/SKILL.md`](../skill/SKILL.md), whose review procedure loads rules by
+running `legible rules [RULE …] [--decided-by script|judgment] [--section SECTION]`. It prints the
+canon's own markdown, and the package carries that canon into a wheel, so a review on a machine with
+no checkout still reads the rules rather than remembering them. The filters matter as much as the
+IDs: asking for a section and a side of the seam is how the anti-slop pass picks up a rule the canon
+grows without an edit here. See [`python/README.md`](../python/README.md#legible-rules).
+
 ## 3. Review surface — Slidev-coupled for v1
 
 The review parses a **Slidev deck**: the markdown slides, the `themes/*.json` palette, and the
@@ -114,6 +121,10 @@ The four calls that need understanding, applied by the agent against the rules l
 - **Output = one merged per-slide markdown report.** Findings grouped by slide, each tagged severity
   **error** (mechanical gate) or **warning** (advisory judgment) and **linked to the `method.md`
   rule** it enforces; semantic findings carry a suggested rewrite.
+
+The report's shape is fixed in [`skill/SKILL.md`](../skill/SKILL.md), and
+[`skill/fixtures/`](../skill/fixtures) is a deck built to fail it with the answer key beside it —
+every planted violation, by slide and by rule, and which half of the review surfaces it.
 
 ## 6. Scaffold — a minimal starter
 

@@ -175,6 +175,53 @@ def test_a_violation_outranks_a_theme_that_could_not_be_checked(tmp_path):
     assert code == 1
 
 
+def test_rules_prints_a_named_rule_as_the_canon_states_it(capsys):
+    """How the review loads what it is reviewing against, with or without a checkout to read."""
+    code = main(["rules", "one-message"])
+
+    out = capsys.readouterr().out
+    assert code == 0
+    assert "`one-message`" in out
+    assert "every slide answers exactly one question" in out
+    # One rule asked for is one rule printed: the canon is long, and a reviewer reads what it loads.
+    assert "bullet-ceiling" not in out
+
+
+def test_rules_selects_by_section_and_by_which_side_of_the_seam_decides(capsys):
+    """The anti-slop pass asks the canon which rules it has rather than carrying a list of them."""
+    code = main(["rules", "--section", "voice", "--decided-by", "judgment"])
+
+    out = capsys.readouterr().out
+    assert code == 0
+    assert "no-reflexive-tricolon" in out
+    assert "no-em-dash-headline" not in out
+
+
+def test_rules_json_carries_the_seam_and_the_thresholds(capsys):
+    code = main(["rules", "separation-floor", "--json"])
+
+    printed = json.loads(capsys.readouterr().out)
+    assert code == 0
+    assert printed[0]["id"] == "separation-floor"
+    assert printed[0]["decided_by"] == ["script"]
+    assert printed[0]["thresholds"]["delta-e-floor"] == "15.0"
+
+
+def test_a_rule_the_canon_does_not_carry_is_not_a_rule_to_review_against(capsys):
+    code = main(["rules", "one-message", "no-such-rule"])
+
+    assert code == 2
+    assert "no-such-rule" in capsys.readouterr().err
+
+
+def test_a_selection_matching_nothing_says_so_rather_than_printing_nothing(capsys):
+    """A review that loaded no rule would report no finding, and read as a pass."""
+    code = main(["rules", "--section", "prosody"])
+
+    assert code == 2
+    assert "prosody" in capsys.readouterr().err
+
+
 def test_lint_json_emits_the_findings_verbatim(capsys):
     code = main(["lint", str(DECKS / "word-ceiling.md"), "--json"])
 

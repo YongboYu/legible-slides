@@ -1,9 +1,15 @@
 """The canon, quoted.
 
 `docs/method.md` states every rule of the method and every number it turns on, once. This module is
-how Python reads a number out of it, so the package quotes the canon rather than keeping a second
-copy that can drift. Every rule carries a stable ID and a ``**Threshold**`` footer of
-``key = value`` pairs; ``rule_thresholds`` returns one rule's pairs.
+how Python reads one out of it, so the package quotes the canon rather than keeping a second copy
+that can drift. Every rule carries a stable ID and, where it has a number, a ``**Threshold**``
+footer of ``key = value`` pairs; ``rule_thresholds`` returns one rule's pairs, and ``rules`` returns
+whole rules — the statement, the prose that qualifies it, and which side of the script/judgment
+seam the canon puts it on.
+
+Two callers, one reader. A linter needs a number; the review skill needs the rule itself, because a
+reviewer handed a rule ID and nothing else would have to remember what it says. Neither of them may
+hold a copy, which is what ``docs/agent-skill-contract.md`` §2 means by a thin pointer.
 
 The constants below are grouped by the rule that owns them — `separation-floor` for the colour
 numbers, `type-scale` and `fonts` for what a generated figure is set in. Change a rule and they
@@ -13,18 +19,65 @@ change here.
 from __future__ import annotations
 
 import re
+from collections.abc import Mapping
+from dataclasses import dataclass, field
 from pathlib import Path
 
-#: A rule heading: `### \`rule-id\`: statement`. Any depth from `###` down, because the voice rules
-#: sit one level deeper under a subsection heading and a rule is a rule wherever it is stated.
-_RULE = re.compile(r"^#{3,6}\s+`(?P<rule>[a-z0-9-]+)`", re.MULTILINE)
+#: Any heading the canon states, from a section down to the deepest rule.
+_HEADING = re.compile(r"^(?P<hashes>#{2,6})[ \t]+(?P<title>.+?)[ \t]*$", re.MULTILINE)
+
+#: A fenced block, and what a heading inside one is: an example of a heading rather than one. The
+#: canon fences a diagram today and documents markdown, so a rule invented inside a fence is a
+#: reachable mistake rather than a hypothetical one.
+_FENCED = re.compile(r"^(?P<fence>```|~~~).*?^(?P=fence)", re.MULTILINE | re.DOTALL)
+
+#: What makes a heading a rule's: it opens with the rule's stable ID in backticks, and what follows
+#: is the rule's statement. Any depth, because the voice rules sit one level deeper under a
+#: subsection heading and a rule is a rule wherever it is stated. The colon the canon writes after
+#: the ID is optional here: an ID in backticks at the head of a heading is the whole signal, and a
+#: rule that stopped being one over a missing colon would be a rule nothing checks.
+_RULE_TITLE = re.compile(r"^`(?P<rule>[a-z0-9-]+)`\s*:?\s*(?P<statement>.*)$")
 
 #: One `key = value` pair inside a **Threshold** footer.
 _THRESHOLD = re.compile(r"`(?P<key>[a-z0-9-]+)\s*=\s*(?P<value>[^`]+)`")
 
+#: The footers a rule's own metadata lives in.
+_DECIDED_BY, _THRESHOLD_MARKER = "**Decided by**", "**Threshold**"
+
+#: The two sides of the seam, and the only words a `**Decided by**` footer may name. `script` is a
+#: rule `legible lint` settles; `judgment` is one only a reader can.
+DECIDERS = ("script", "judgment")
+
+#: A section's number, which is navigation rather than part of its name: `## 7. Voice` is the voice
+#: section whatever it is numbered next year.
+_ENUMERATION = re.compile(r"^\d+[a-z]?\.\s*")
+
+_NOT_IN_A_SLUG = re.compile(r"[^a-z0-9]+")
+
+#: A separator line, which belongs to the canon's typography rather than to the rule above it.
+_SEPARATOR = re.compile(r"^\s*---+\s*$")
+
 
 class MethodError(LookupError):
     """The canon could not be read, or does not carry what was asked of it."""
+
+
+@dataclass(frozen=True)
+class Rule:
+    """One rule of the method, as the canon states it.
+
+    ``text`` is the rule's own markdown, verbatim, because a reviewer weighing a slide against a
+    rule should read the canon's words and not a paraphrase of them. The rest is what a caller
+    selects on: ``section`` and ``decided_by`` are how the review picks up a rule the canon added
+    without anybody editing the reviewer.
+    """
+
+    id: str
+    section: str
+    statement: str
+    decided_by: tuple[str, ...]
+    text: str
+    thresholds: Mapping[str, str] = field(default_factory=dict)
 
 
 #: Where the canon may live, in preference order: `docs/method.md` in a checkout of this repo,
@@ -56,33 +109,153 @@ def read_canon() -> str:
         ) from error
 
 
+def rules(
+    canon: str | None = None,
+    *,
+    decided_by: str | None = None,
+    section: str | None = None,
+) -> tuple[Rule, ...]:
+    """Every rule the canon states, in the order it states them, narrowed by what is asked for.
+
+    ``decided_by`` and ``section`` are filters rather than lookups: a caller after "the judgment
+    rules of the voice section" is asking the canon which those are, so a rule added there is
+    picked up with nothing edited here or in whatever loaded them.
+    """
+    selected = _parse(read_canon() if canon is None else canon)
+    if decided_by is not None:
+        selected = [rule_ for rule_ in selected if decided_by in rule_.decided_by]
+    if section is not None:
+        selected = [rule_ for rule_ in selected if rule_.section == section]
+    return tuple(selected)
+
+
+def rule(rule_id: str, canon: str | None = None) -> Rule:
+    """One rule, by its stable ID."""
+    for candidate in rules(canon):
+        if candidate.id == rule_id:
+            return candidate
+    raise MethodError(f"the canon carries no rule `{rule_id}`")
+
+
 def rule_thresholds(rule_id: str, canon: str | None = None) -> dict[str, str]:
     """The ``key = value`` thresholds one rule declares, as written in the canon.
 
     Values come back as the strings the canon wrote, because the canon is the authority on both
     the number and its units; callers convert to whatever type they need.
     """
-    text = read_canon() if canon is None else canon
-
-    starts = {match.group("rule"): match.span()[0] for match in _RULE.finditer(text)}
-    if rule_id not in starts:
-        raise MethodError(f"the canon carries no rule `{rule_id}`")
-
-    start = starts[rule_id]
-    following = [pos for pos in starts.values() if pos > start]
-    body = text[start : min(following)] if following else text[start:]
-
-    _, marker, footer = body.partition("**Threshold**")
-    if not marker:
+    found = rule(rule_id, canon)
+    if _THRESHOLD_MARKER not in found.text:
         raise MethodError(f"rule `{rule_id}` declares no threshold")
+    return dict(found.thresholds)
 
-    # The footer is one paragraph, however many lines the canon wraps it over. Stopping at the
-    # blank line keeps prose that merely follows a rule from being read as one of its thresholds.
-    footer, _, _ = footer.partition("\n\n")
 
+def _parse(text: str) -> list[Rule]:
+    """Walk the canon's headings, and make a rule of each one that names a rule.
+
+    Order matters twice over. A rule belongs to the section heading above it, and — where the canon
+    declares `**Decided by**` once for a whole subsection rather than on each rule under it — it is
+    also decided by the nearest declaration above it. Both are the canon's own way of stating
+    something once, so both are read rather than made up for here.
+    """
+    parsed: list[Rule] = []
+    section = ""
+    # What each depth of heading declares for the rules beneath it. A heading closes the headings
+    # at or below its own depth and nothing above them, so a plain `#### Notes` written inside a
+    # subsection cannot silently strip that subsection's declaration off the rules that follow —
+    # which would drop them out of a review that asked for them and leave it reporting a pass.
+    declared: dict[int, tuple[str, ...]] = {}
+
+    headings = _headings(text)
+    for position, heading in enumerate(headings):
+        end = headings[position + 1].start() if position + 1 < len(headings) else len(text)
+        block = text[heading.start() : end]
+        body = text[heading.end() : end]
+        depth = len(heading.group("hashes"))
+
+        title = _RULE_TITLE.match(heading.group("title"))
+        if title is None:
+            # A section heading, whose prose may decide the rules beneath it.
+            if depth == 2:
+                section = _slug(heading.group("title"))
+            declared = {level: at for level, at in declared.items() if level < depth}
+            declared[depth] = _decided_by(body)
+            continue
+
+        inherited = next(
+            (declared[level] for level in sorted(declared, reverse=True) if declared[level]),
+            (),
+        )
+
+        parsed.append(
+            Rule(
+                id=title.group("rule"),
+                section=section,
+                statement=title.group("statement").strip(),
+                decided_by=_decided_by(body) or inherited,
+                text=_trimmed(block),
+                thresholds=_thresholds(body),
+            )
+        )
+
+    return parsed
+
+
+def _headings(text: str) -> list[re.Match[str]]:
+    """Every heading the canon states, and none of the ones it merely shows inside a fence."""
+    fenced = [match.span() for match in _FENCED.finditer(text)]
+    return [
+        heading
+        for heading in _HEADING.finditer(text)
+        if not any(start <= heading.start() < end for start, end in fenced)
+    ]
+
+
+def _decided_by(body: str) -> tuple[str, ...]:
+    """Which side of the seam a `**Decided by**` footer puts its rule on, in the order it says so.
+
+    A mixed rule names both, and the canon states which half is which in prose the caller reads for
+    itself: what is decidable here is that both words are present.
+    """
+    footer = _footer(body, _DECIDED_BY)
+    found = [(footer.find(decider), decider) for decider in DECIDERS if _names(footer, decider)]
+    return tuple(decider for _, decider in sorted(found))
+
+
+def _thresholds(body: str) -> dict[str, str]:
     return {
-        match.group("key"): match.group("value").strip() for match in _THRESHOLD.finditer(footer)
+        match.group("key"): match.group("value").strip()
+        for match in _THRESHOLD.finditer(_footer(body, _THRESHOLD_MARKER))
     }
+
+
+def _footer(body: str, marker: str) -> str:
+    """One footer of a rule, from its marker to the end of its own paragraph.
+
+    A footer is one paragraph, however many lines the canon wraps it over. Stopping at the blank
+    line keeps prose that merely follows a rule from being read as one of its thresholds.
+    """
+    _, found, footer = body.partition(marker)
+    if not found:
+        return ""
+    footer, _, _ = footer.partition("\n\n")
+    return footer
+
+
+def _names(footer: str, word: str) -> bool:
+    return re.search(rf"\b{re.escape(word)}\b", footer) is not None
+
+
+def _trimmed(block: str) -> str:
+    """A rule's markdown without the blank lines and the separator that follow it on the page."""
+    lines = block.rstrip().split("\n")
+    while lines and (not lines[-1].strip() or _SEPARATOR.match(lines[-1])):
+        lines.pop()
+    return "\n".join(lines)
+
+
+def _slug(title: str) -> str:
+    """A section's name as something to pass on a command line: `## 7. Voice` is `voice`."""
+    return _NOT_IN_A_SLUG.sub("-", _ENUMERATION.sub("", title).lower()).strip("-")
 
 
 def _listed(value: str) -> tuple[str, ...]:

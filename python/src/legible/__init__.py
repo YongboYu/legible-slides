@@ -12,7 +12,7 @@ import away — ``from legible.deck import parse_deck`` — for whoever eventual
 
 from legible.css import gen_css
 from legible.lint import Finding, LintReport, Unchecked, lint
-from legible.method import DELTA_E_FLOOR, MethodError, rule_thresholds
+from legible.method import DELTA_E_FLOOR, MethodError, Rule, rule, rule_thresholds, rules
 from legible.palette import Palette, PaletteError, load_palette
 from legible.validate import Failure, GrayscaleWarning, GroupReport, Report, validate
 
@@ -27,10 +27,13 @@ __all__ = [
     "Palette",
     "PaletteError",
     "Report",
+    "Rule",
     "Unchecked",
     "gen_css",
     "lint",
     "load_palette",
+    "rule",
     "rule_thresholds",
+    "rules",
     "validate",
 ]

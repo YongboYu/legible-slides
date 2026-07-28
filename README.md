@@ -94,6 +94,17 @@ implementation of the simulation in this project, and the linter is deliberately
 What is left is judgment — whether a slide carries one message, whether its headline is a claim —
 and judgment stays with a reader, or with the coding-agent skill that reviews on your behalf.
 
+## Reviewing with a coding agent
+
+[`skill/`](skill) is that skill. It runs the linter for everything a script settles, loads the rules
+that need reading straight from the canon (`legible rules`), and reports both halves as one review,
+grouped per slide, with a proposed fix on every finding.
+
+The two halves keep different authority: the mechanical one has an exit code and blocks, the
+judgments are advisory and never do. And it flags rather than edits — it can hold a deck to a
+structure, but deciding your message stays yours. It states no rule of its own, which is what stops
+a review drifting from the method it claims to enforce. See [`skill/README.md`](skill/README.md).
+
 ## Presenting with Slidev
 
 [`theme/`](theme) is `slidev-theme-legible`, the method as machinery: four layouts, the persistent

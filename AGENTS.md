@@ -25,7 +25,9 @@ Nothing else in this repo restates a rule. If you need one somewhere, name it by
 (`one-message`, `separation-floor`, `bullet-ceiling`, …) so a rule change can never leave a copy
 behind. Where the rules came from is [`docs/design-provenance.md`](docs/design-provenance.md);
 how an agent turns them into a review is
-[`docs/agent-skill-contract.md`](docs/agent-skill-contract.md).
+[`docs/agent-skill-contract.md`](docs/agent-skill-contract.md), and the skill that does it is
+[`skill/SKILL.md`](skill/SKILL.md) — which states no rule either, and loads them with
+`legible rules` at review time.
 
 ## Agent skills
 

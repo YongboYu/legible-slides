@@ -165,6 +165,52 @@ the report verbatim.
 - **Its own thresholds.** Every number and wordlist above is quoted from the rule that owns it in
   the canon. Change `bullets-per-slide` there and this command enforces the new one.
 
+## `legible rules`
+
+The other way the canon reaches a caller. `lint` quotes the numbers; this prints the rules
+themselves, verbatim from [`docs/method.md`](../docs/method.md), for the half of a review no script
+settles:
+
+```bash
+legible rules one-message assertion-headline
+legible rules --section voice --decided-by judgment
+```
+
+```
+### `one-message`: …
+
+…the rule's own paragraphs, as the canon writes them…
+
+**Decided by** judgment
+```
+
+Elided here, and only here: what the command prints is the canon word for word. This file is not
+allowed to carry the words, which is the same rule every other document in the repo follows.
+
+The reviewer this exists for is the agent skill ([`skill/`](../skill)), which carries the procedure
+and none of the rules. Loading them at review time is what keeps the two in sync: edit a rule in the
+canon and the next review is against the new one. A wheel built from this package carries the canon,
+so the command works on a machine with no checkout to read.
+
+**Filters are questions to the canon, not lists kept here.** `--decided-by` splits the rules a
+script settles from the rules a reader must; `--section` narrows to one part of the method. Asking
+for `--section voice --decided-by judgment` is how a caller reviews a rule that section grows
+without being edited to know about it. `--json` emits each rule as an object — ID, section,
+statement, seam, thresholds and markdown.
+
+```python
+from legible import rule, rules
+
+rule("bullet-ceiling").decided_by          # ('script',)
+rule("never-sole-channel").decided_by      # ('script', 'judgment') — the canon splits it
+rules(section="voice", decided_by="judgment")
+```
+
+**Exit code** — `0` having printed, `2` if the canon cannot be read, names a rule that is not in it,
+or carries nothing matching the selection. There is no `1`: quoting a rule is not a check, so
+nothing about it can fail. An empty selection is loud rather than silent, because the caller is a
+review, and one that loaded no rule would find no fault and read as a pass.
+
 ## The figure helper
 
 Result charts are **regenerated from data, never redrawn** — which is the whole reason a palette

@@ -12,7 +12,9 @@ from legible.method import (
     OPENER_WORDS,
     WORDS_PER_BULLET,
     MethodError,
+    rule,
     rule_thresholds,
+    rules,
 )
 
 CANON_EXCERPT = dedent(
@@ -50,6 +52,16 @@ SUBSECTION_EXCERPT = dedent(
 )
 
 
+def test_a_rule_comes_back_as_the_canon_states_it():
+    """What the review loads is the rule itself — its claim, and the prose that qualifies it —
+    because a reviewer handed a rule ID and nothing else would have to remember the rest."""
+    floor = rule("separation-floor", canon=CANON_EXCERPT)
+
+    assert floor.statement == "data colours stay perceptually separated"
+    assert "Every pair of data colours that can share one chart axis" in floor.text
+    assert floor.thresholds["delta-e-floor"] == "22.5"
+
+
 def test_a_threshold_is_quoted_from_the_canon_rather_than_re_derived():
     """Change the canon and the number changes — that is what "quote it" has to mean."""
     thresholds = rule_thresholds("separation-floor", canon=CANON_EXCERPT)
@@ -83,6 +95,90 @@ def test_a_threshold_footer_stops_at_the_end_of_its_own_paragraph():
     thresholds = rule_thresholds("opener-variety", canon=SUBSECTION_EXCERPT)
 
     assert "not-a-rule" not in thresholds
+
+
+def test_a_rule_states_which_side_of_the_seam_it_falls_on():
+    """The seam the review is built along: what a script settles, and what a reader must."""
+    assert rule("bullet-ceiling").decided_by == ("script",)
+    assert rule("one-message").decided_by == ("judgment",)
+    # A mixed rule names both halves, in the order the canon splits them.
+    assert rule("never-sole-channel").decided_by == ("script", "judgment")
+
+
+def test_a_rule_inherits_the_decision_its_subsection_states_once():
+    """The canon says `**Decided by** judgment` once for a subsection rather than on each rule
+    under it. A reader takes that as read, and so must anything reading the same page."""
+    assert rule("no-reflexive-tricolon").decided_by == ("judgment",)
+
+
+def test_the_judgment_rules_of_a_section_are_the_canons_to_name():
+    """What the review's anti-slop pass loads. It asks for a section and a side of the seam rather
+    than for a list of IDs, so a voice rule the canon grows is reviewed with nothing else edited."""
+    voice = {rule_.id for rule_ in rules(section="voice", decided_by="judgment")}
+
+    assert "no-contrast-for-emphasis" in voice
+    assert "no-reflexive-tricolon" in voice
+    # The script-decided half of the same section stays with the linter.
+    assert "no-em-dash-headline" not in voice
+
+
+def test_a_section_the_canon_does_not_have_selects_nothing():
+    assert rules(section="prosody") == ()
+
+
+def test_a_heading_between_a_subsection_and_its_rules_does_not_strip_their_decision():
+    """A subsection declares once, for everything under it. A plain heading written inside it is
+    deeper, not a new declaration — and a rule that lost its side of the seam would drop out of the
+    review that asked for it and leave the deck reading clean."""
+    canon = dedent(
+        """\
+        ## 7. Voice
+
+        ### 7b. Judgment
+
+        Every rule in this subsection is **Decided by** judgment.
+
+        #### A note on reading these
+
+        Read them aloud.
+
+        #### `no-reflexive-tricolon`: three items because the claim has three
+
+        Not because three sounds complete.
+        """
+    )
+
+    assert rules(canon, decided_by="judgment")[0].id == "no-reflexive-tricolon"
+
+
+def test_a_rule_shown_inside_a_fence_is_an_example_rather_than_a_rule():
+    """The canon fences a diagram already, and it is a document about writing documents."""
+    canon = dedent(
+        """\
+        ## 1. Structure
+
+        ### `one-message`: every slide answers exactly one question
+
+        Write the heading of a rule like this:
+
+        ```markdown
+        ### `invented-rule`: whatever you like
+        ```
+
+        **Decided by** judgment
+        """
+    )
+
+    assert [rule_.id for rule_ in rules(canon)] == ["one-message"]
+    assert rules(canon)[0].decided_by == ("judgment",)
+
+
+def test_every_rule_the_shipped_canon_states_says_who_decides_it():
+    """The canon's own integrity, and the one property the review cannot check for itself: a rule
+    that named neither side would be quietly absent from both halves of it."""
+    undecided = [rule_.id for rule_ in rules() if not rule_.decided_by]
+
+    assert undecided == []
 
 
 def test_the_shipped_canon_carries_the_separation_floor():

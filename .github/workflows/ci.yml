@@ -177,6 +177,13 @@ jobs:
           cd "$RUNNER_TEMP/outside"
           printf '# A deck can be linted with no checkout to read\n\n- one point\n' > slides.md
           "$RUNNER_TEMP/venv/bin/legible" lint slides.md --theme my-palette.json
+      # The review skill carries no rule of its own and loads them here, so a wheel that reached a
+      # stranger's machine without the canon would leave it reviewing against nothing. The linter
+      # above only quotes numbers out of that file; this reads whole rules out of it.
+      - name: Quote the canon outside this repo
+        run: |
+          cd "$RUNNER_TEMP/outside"
+          "$RUNNER_TEMP/venv/bin/legible" rules --section voice --decided-by judgment
       # The canon is not the only thing the build has to carry: a figure drawn without the bundled
       # typeface would not match the deck, and `legible.fonts` raises rather than substituting one.
       # A runner has no Inter installed, so this fails loudly if the wheel forgot the fonts.
