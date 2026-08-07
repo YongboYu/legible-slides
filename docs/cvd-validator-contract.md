@@ -178,9 +178,12 @@ share one palette-loader that reads the token-contract schema.
   not blocked.
 - **Hard gate — a GitHub Actions job** (`.github/workflows/ci.yml`) runs `cvd-validate` over every
   shipped theme on push/PR; a non-zero exit turns the check red and blocks merge. Enforcement lives
-  in CI, not a skippable hook. *Blocking* is the one half a workflow file cannot grant itself: the
-  `palette floor` job has to be listed as a required status check in the repo's branch ruleset, or a
-  red check merges anyway.
+  in CI, not a skippable hook. *Blocking* is the one half a workflow file cannot grant itself, and
+  the branch ruleset on `main` now grants it
+  ([#26](https://github.com/YongboYu/legible-slides/issues/26)): `palette floor` is a required
+  status check there, so a red check holds the merge instead of decorating it. Repo admins are a
+  bypass actor — this repo is authored by direct push to `main` — so the gate binds what arrives by
+  pull request and is discipline for the author.
 - **Package test** — the suite asserts the shipped reference palettes pass, so a future
   `colorspacious` version bump that shifts the numbers is caught by tests, not silently in prod.
 - **No deck-build coupling** — the Slidev (JS) build does **not** invoke the validator; it trusts CI.

@@ -5,12 +5,21 @@ on: [push, pull_request]
 permissions:
   contents: read
 
+# Every job below is a required status check on `main` (#26), so a red run holds a merge open rather
+# than merely reporting on one. Blocking is the one half a workflow file cannot grant itself; the
+# branch ruleset grants it, and names each check by the `name:` on its job. Keep the two in step.
+#
+# That coupling fails closed, which is the direction worth having: rename a job here and the check
+# the ruleset still expects never reports, so the merge waits rather than slipping through. The
+# other direction is the quiet one — a job added here is advisory until it is added there.
+#
+# One deliberate hole. Repo admins are a bypass actor, because this repo is authored by direct push
+# to `main` and required checks reject those outright. So the gate binds whatever arrives by pull
+# request, and is discipline for the author — which is worth knowing before reading a green history
+# as proof that every commit in it was ever gated.
 jobs:
   # The gate. A theme whose data colours fall below the floor cannot merge — enforcement lives
   # here rather than in the opt-in pre-commit hook, which any author can skip.
-  #
-  # Blocking is the half a workflow cannot grant itself: this job has to be a required status
-  # check in the branch ruleset, or a red run merges anyway.
   palette:
     name: palette floor
     runs-on: ubuntu-latest
@@ -27,8 +36,6 @@ jobs:
   # theme and committed like a lockfile, which is what lets the deck build import it and never
   # invoke Python. Nothing enforces that but this: an author who edited the palette and forgot to
   # regenerate would otherwise ship a deck wearing the previous colours.
-  #
-  # Like the floor above, it only blocks if the branch ruleset makes it a required check.
   tokens:
     name: token stylesheet is current
     runs-on: ubuntu-latest
