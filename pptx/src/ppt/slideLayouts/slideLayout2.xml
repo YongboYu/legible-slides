@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--
+  Assertion-Evidence — mirrors the theme's `assertion-evidence` layout, and is the default.
+
+  There is nothing to configure, which is the design: the headline is the claim, everything under
+  the rule is the one piece of evidence that proves it, and a slide's only decision is what it is
+  trying to land (`one-message`).
+
+  Every placeholder here is declared with an empty `p:spPr` on purpose. A layout placeholder with no
+  geometry of its own inherits the master's, so the five zones are written once — in
+  slideMaster1.xml — and a zone that moved there moves on all three content layouts rather than on
+  whichever ones someone remembered.
+-->
+<p:sldLayout xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main" type="obj" preserve="1">
+  <p:cSld name="Assertion-Evidence">
+    <p:spTree>
+      <p:nvGrpSpPr>
+        <p:cNvPr id="1" name=""/>
+        <p:cNvGrpSpPr/>
+        <p:nvPr/>
+      </p:nvGrpSpPr>
+      <p:grpSpPr>
+        <a:xfrm>
+          <a:off x="0" y="0"/><a:ext cx="0" cy="0"/>
+          <a:chOff x="0" y="0"/><a:chExt cx="0" cy="0"/>
+        </a:xfrm>
+      </p:grpSpPr>
+
+      <p:sp>
+        <p:nvSpPr>
+          <p:cNvPr id="2" name="Locator"/>
+          <p:cNvSpPr><a:spLocks noGrp="1"/></p:cNvSpPr>
+          <p:nvPr><p:ph type="ftr" sz="quarter" idx="10"/></p:nvPr>
+        </p:nvSpPr>
+        <p:spPr/>
+        <p:txBody><a:bodyPr/><a:lstStyle/><a:p><a:endParaRPr lang="en-GB"/></a:p></p:txBody>
+      </p:sp>
+
+      <p:sp>
+        <p:nvSpPr>
+          <p:cNvPr id="3" name="Assertion headline"/>
+          <p:cNvSpPr><a:spLocks noGrp="1"/></p:cNvSpPr>
+          <p:nvPr><p:ph type="title"/></p:nvPr>
+        </p:nvSpPr>
+        <p:spPr/>
+        <p:txBody>
+          <a:bodyPr/>
+          <a:lstStyle/>
+          <a:p><a:r><a:rPr lang="en-GB"/><a:t>Write the claim this slide proves, as a sentence</a:t></a:r></a:p>
+        </p:txBody>
+      </p:sp>
+
+      <p:sp>
+        <p:nvSpPr>
+          <p:cNvPr id="4" name="Evidence"/>
+          <p:cNvSpPr><a:spLocks noGrp="1"/></p:cNvSpPr>
+          <p:nvPr><p:ph type="body" idx="1"/></p:nvPr>
+        </p:nvSpPr>
+        <p:spPr/>
+        <p:txBody>
+          <a:bodyPr/>
+          <a:lstStyle/>
+          <a:p><a:r><a:rPr lang="en-GB"/><a:t>Prove it, visually</a:t></a:r></a:p>
+        </p:txBody>
+      </p:sp>
+
+      <p:sp>
+        <p:nvSpPr>
+          <p:cNvPr id="5" name="Page number"/>
+          <p:cNvSpPr><a:spLocks noGrp="1"/></p:cNvSpPr>
+          <p:nvPr><p:ph type="sldNum" sz="quarter" idx="12"/></p:nvPr>
+        </p:nvSpPr>
+        <p:spPr/>
+        <p:txBody>
+          <a:bodyPr/>
+          <a:lstStyle/>
+          <a:p>
+            <a:fld id="{4B2C0E1A-6D3F-4A97-9F1B-2E5C7A8D0B31}" type="slidenum">
+              <a:rPr lang="en-GB"/>
+              <a:t>2</a:t>
+            </a:fld>
+            <a:endParaRPr lang="en-GB"/>
+          </a:p>
+        </p:txBody>
+      </p:sp>
+    </p:spTree>
+  </p:cSld>
+  <p:clrMapOvr><a:masterClrMapping/></p:clrMapOvr>
+</p:sldLayout>

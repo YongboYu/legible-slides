@@ -30,3 +30,18 @@ repos:
         language: system
         files: ^themes/kuleuven\.json$
         pass_filenames: false
+
+      # Same bargain as the stylesheet above, for the other committed artifact nobody runs anything
+      # to get. The .pptx is a zip of hand-authored parts plus the fonts, the mark and the figure it
+      # takes from elsewhere in the repo, so editing any of those without repacking ships a file
+      # that no longer matches its own sources. Stdlib only, so it needs nothing installed.
+      #
+      # The directories are named rather than the individual files pack.py pulls out of them: which
+      # figure or which weight the package carries is pack.py's to say, and a hook listing them
+      # would be a second copy of that map to keep in step.
+      - id: pack-pptx
+        name: the PowerPoint proof follows its sources
+        entry: python3 pptx/pack.py
+        language: system
+        files: ^(pptx/src/|theme/assets/fonts/|themes/logos/|deck/public/)
+        pass_filenames: false

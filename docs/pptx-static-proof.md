@@ -11,8 +11,12 @@ the reference-impl structure ([#10](https://github.com/YongboYu/legible-slides/i
 The v1 static proof is **ONE PowerPoint delivery** that carries the method — the Assertion-Evidence
 masters, the palette as native theme colours, and the type scale — into a tool the audience already
 uses **and can edit**. Its job is to prove the method is not Slidev-specific, and to hand over a
-recipe that reruns in Keynote / Google Slides in v2. **Plan-only: this doc fixes the recipe; building
-the `.pptx` is execution, deferred to handoff.**
+recipe that reruns in Keynote / Google Slides in v2.
+
+**This doc fixes the recipe, and the recipe is the deliverable.** The `.pptx` it produced is built
+and shipped in [`pptx/`](../pptx/README.md) ([#25](https://github.com/YongboYu/legible-slides/issues/25));
+where the two could disagree, this file is the authority, because it is the half that survives being
+rerun in a tool that cannot read a PowerPoint theme.
 
 ---
 
@@ -103,7 +107,9 @@ are converted, never restated. PowerPoint's 16:9 slide is 13.333″×7.5″ = 96
 canvas is `canvas-aspect-ratio` at `canvas-width-px`, so the slide is **0.75×** the canvas height in
 the units each is expressed in. Point sizes preserve
 the **font-height-to-slide-height ratio** at that factor (the ratio is what actually governs back-row
-legibility), rounded to even points and **never below the legibility floor**:
+legibility), rounded **up** to an even point. Up rather than to the nearest: the two agree on every
+size the canon carries today, and agreeing today is not the same as being safe — up is the direction
+that cannot land under the ratio whatever `type-scale` says next:
 
 | Method role (`type-scale` key) | PowerPoint pt |
 |---|---|
@@ -111,7 +117,11 @@ legibility), rounded to even points and **never below the legibility floor**:
 | Body — `body-px` | **18** |
 | `dense-px` | **14** |
 | `dense-xs-px` | **12** |
-| Locator (mono) | **~11** |
+
+The locator and the page number take `dense-xs-px` — **12pt**, not a size of their own. They are
+orientation rather than evidence, which is the exception the canon already marks that size for, and
+it is the exception the theme takes for them too. A fifth size derived some other way would be the
+first step of the drift this table exists to prevent.
 
 These are baked into the master's placeholder text styles. Fonts come from `fonts`: Inter for
 headline and body, JetBrains Mono for the locator only.
@@ -119,10 +129,22 @@ headline and body, JetBrains Mono for the locator only.
 **Fonts — embed + fallback + install.** Inter and JetBrains Mono are both SIL OFL (embeddable) and
 already bundled in the theme. For a cross-platform academic audience the proof does all three:
 
-1. **Embed** the fonts in the shipped `.pptx` (best fidelity on Windows PowerPoint);
-2. Set a **graceful fallback** in the theme font scheme (Inter → generic sans; JetBrains Mono →
-   Consolas/mono) for Mac / web that strip embeds;
-3. Ship the font files alongside with a one-line install note.
+1. **Embed** the fonts in the shipped `.pptx`, whole rather than subset, so the deck stays editable
+   and not merely viewable (best fidelity on Windows PowerPoint);
+2. Set a **graceful fallback** in the theme font scheme for Mac / web that strip embeds. OOXML has
+   no named-alternate list, so the fallback is the substitution metadata it does have: `panose` read
+   from the shipped face, plus `pitchFamily` — 34 (variable pitch, Swiss) resolves Inter to a generic
+   sans, 49 (fixed pitch, Modern) resolves JetBrains Mono to a mono. Named alternates would be a
+   Windows-font list this deliberately does not depend on;
+3. Ship the font files with the delivery, and an install note that names where they are. They are
+   **not copied in beside the `.pptx`**: the repo already ships them at `theme/assets/fonts/`, the
+   embedding is read straight from there, and a second copy is a second set of outlines to keep in
+   step with the one the figures are drawn in. §7 records the same decision from the other end.
+
+One limit is PowerPoint's, not the method's: the embedding slots are regular / bold / italic /
+bold-italic **per family**, so the theme's Medium and SemiBold cannot travel. A headline is therefore
+set in Inter Bold where the Slidev delivery sets it in SemiBold — one weight heavier, in the
+direction that costs a projected slide nothing.
 
 ## 6. Source coupling — hand-set once, the mapping is canonical
 
@@ -150,9 +172,18 @@ Python-generated, CVD-validated PNG the flagship uses — figures regenerated, n
 **Repo location.** A new sibling directory alongside `deck/` (structure fixed in #10):
 
 ```
-pptx/       the static proof: legible-master.pptx (master + 4-slide example deck),
-            embedded font files, README (build + font-install notes)
+pptx/       the static proof: legible-master.pptx (master + 4-slide example deck, both
+            typefaces embedded), src/ (every XML part, hand-authored), pack.py (the
+            container step), README (use + font-install notes)
 ```
+
+The four slides are the flagship's beat 1 on `Cover`, beat 10 on `Assertion-Evidence` with the
+generated figure, beat 6 on `Two-Col Evidence`, and the sources on `References`.
+
+**The font files are not copied in beside the `.pptx`.** They already ship at
+`theme/assets/fonts/`, and `pack.py` reads the embeddings straight from there — so the slides, the
+figures and the install note all point at one set of outlines rather than at three copies that can
+fall out of step. The install note in `pptx/README.md` names that path.
 
 ## 8. The recipe (tool-agnostic — reruns in Keynote / Google Slides for v2)
 
@@ -174,7 +205,9 @@ verbatim in Keynote / Google Slides (a v2 item, per the map's Out-of-scope):
 
 - **Public flip** is gated by [#8](https://github.com/YongboYu/legible-slides/issues/8) (KU Leuven
   visual-identity confirmation) — the same gate as the flagship, not a new one.
-- **Building the `.pptx`** is execution, out of scope for this plan-only map (per the map's
-  Out-of-scope) — it happens after handoff via `/to-prd → /to-issues → /tdd`.
+- **Building the `.pptx`** was execution, and is done:
+  [#25](https://github.com/YongboYu/legible-slides/issues/25) shipped it in `pptx/`. The one thing
+  the build could not verify from a runner is how the file renders in PowerPoint proper; the
+  structure, the mapping and the scale are all held by `python/tests/test_pptx.py`.
 - **Keynote / Google Slides** executions are **v2**, produced by rerunning §8 verbatim.
 - **`gen-thmx`** codegen is deferred future work (§6).

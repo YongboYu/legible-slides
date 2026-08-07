@@ -25,6 +25,8 @@ screenshots/
 # os / editor
 .DS_Store
 Thumbs.db
+# PowerPoint's lock file, written beside pptx/legible-master.pptx while it is open.
+~$*
 .idea/
 .vscode/
 

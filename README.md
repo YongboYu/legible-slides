@@ -132,6 +132,22 @@ read if you would rather see the rules applied than read them. It is being writt
 what stands today is the frame, the cover and the sources around one worked assertion-evidence
 slide, wired to the theme and green in CI. See [`deck/README.md`](deck/README.md).
 
+## Presenting with PowerPoint
+
+[`pptx/`](pptx) is the same method as a **native, editable Slide Master** — four custom layouts
+mirroring the theme's four, the palette on PowerPoint's twelve theme colour slots, the type scale in
+points, and both typefaces embedded. `legible-master.pptx` ships with a four-slide worked example
+built from real flagship content, and [`pptx/README.md`](pptx/README.md) is how to use it.
+
+It is hand-authored native XML rather than an export, because an export is not a starter: it emits
+one background image per slide and no editable master at all.
+
+What actually generalises is not the file. Keynote and Google Slides cannot read a PowerPoint theme,
+so the artifact is the **documented mapping** in
+[`docs/pptx-static-proof.md`](docs/pptx-static-proof.md), applied per tool — and no codegen path was
+added. The price of that is twelve colours and four sizes typed in by hand, and it is paid by a test
+that reads the shipped file back and holds every one of them to the palette and the canon.
+
 ## Provenance
 
 This is not a greenfield idea. It is an extraction from a deck that shipped: the CAiSE 2026

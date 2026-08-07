@@ -363,7 +363,7 @@ locator: Deliveries
 |---|---|
 | this Slidev theme, and this deck | shipped, and on the screen |
 | a PDF to present from | `slidev export`, from the same file |
-| PowerPoint, as an editable native master | the recipe is fixed, the file is next |
+| PowerPoint, as an editable native master | shipped, with a worked example |
 | Keynote and Google Slides | the same recipe, run again |
 | a skill for coding agents | the contract is fixed, the skill is next |
 
