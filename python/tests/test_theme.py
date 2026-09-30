@@ -4,8 +4,8 @@ The canon owns every number the method turns on, and `legible.method` is how thi
 rather than keeping a second copy. A stylesheet and a `package.json` cannot do that: CSS has no way
 to read `docs/method.md`, and the deck build is deliberately barred from running Python to find out
 (``docs/slidev-reference-impl.md`` §5). So the theme writes the numbers down, and this is where the
-copy is held to the original — the same guard the spec asks for around the hand-authored PowerPoint
-master, for the same reason: a hand-typed number is exactly where a mapping drifts in silence.
+copy is held to the original, because a hand-typed number is exactly where a copy drifts in
+silence.
 
 One claim, in both directions: change a number in the canon without changing the theme, or change
 the theme's copy of one, and these tests fail naming which.

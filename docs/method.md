@@ -358,7 +358,7 @@ full.
 | 9 | _Body type is sized for the back row, not your laptop._ | Body sits at the floor; the projection arithmetic on screen | `type-scale` |
 | 10 | _If a colour dies under colour-blindness or grayscale, it's not in the palette._ | The 5-line chart under deuteranopia and grayscale, with dash and marker redundancy | `separation-floor`, `never-sole-channel` |
 | 11 | _Your brand is a swappable layer that must pass the validator._ | The worked KU Leuven example plus the non-endorsement note | `separation-floor` |
-| 12 | _Present in the tool you already use._ | Slidev and PowerPoint now, Keynote and Google Slides next, plus the coding-agent skill | — |
+| 12 | _One file is what you present, hand out and have reviewed._ | Slidev on screen, a PDF from the same file, plus the coding-agent skill | — |
 | 13 | _Everything you just watched was built to these rules._ | The close; a pointer to this file and a call to action | all of them |
 
 Beats 2, 4 and 12 teach no rule: they carry the argument for why the rules exist. The anti-slop

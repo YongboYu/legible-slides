@@ -123,7 +123,5 @@ legible gen-css themes/kuleuven.json  →  theme/styles/tokens.css   (committed,
 
 - The **agent skill** [#12] scaffolds decks on this theme and reviews against `method.md`; this doc
   fixes the theme/deck structure it stamps.
-- The **PPTX static proof** [#11] carries the same palette + AE masters + type scale into PowerPoint;
-  it shares the `themes/*.json` source but not the Slidev machinery.
 - A **validated dark variant** (a second `tokens.css` ground) stays **v2**, per the token contract's
   light-only lock.

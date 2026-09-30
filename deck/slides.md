@@ -357,26 +357,23 @@ whether they can add one more.
 locator: Deliveries
 ---
 
-# The method is not Slidev-specific, so it travels to the tool you present in.
+# One file is the slides on screen, the PDF you hand out and the deck an agent reviews.
 
 | Delivery | Where it stands |
 |---|---|
 | this Slidev theme, and this deck | shipped, and on the screen |
 | a PDF to present from | `slidev export`, from the same file |
-| PowerPoint, as an editable native master | shipped, with a worked example |
-| Keynote and Google Slides | the same recipe, run again |
-| a skill for coding agents | the contract is fixed, the skill is next |
+| a skill for coding agents | shipped: it scaffolds a deck and reviews one |
 
-<Callout accent title="What actually travels">
+<Callout accent title="Why only one">
 
-A palette, a type scale and five zones, none of them written in Slidev's terms.
+Every output reads the same markdown, so none of them can fall out of step with the others.
 
 </Callout>
 
 <!--
-Be straight about the second half of that table: the recipes are written and the artifacts are not
-built yet. Say which is which. A PowerPoint master can carry a palette, a scale and five zones,
-which is why the recipe generalises where a flat screenshot export proved nothing.
+Say why there is no PowerPoint master. An export is one screenshot per slide, and a hand-kept twin
+drifts from the deck it copies the first time either one changes.
 -->
 
 ---

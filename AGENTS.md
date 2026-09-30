@@ -1,8 +1,8 @@
 # legible-slides
 
 A presentation template that is a **method** first, files second: a short set of rules about what a
-slide is for, an accessibility floor anyone can re-run against their own palette, and deliveries for
-PowerPoint, Keynote, Google Slides and Slidev — plus a skill for coding agents. The rules are in
+slide is for, an accessibility floor anyone can re-run against their own palette, and a Slidev theme
+to present them in — plus a skill for coding agents. The rules are in
 [`docs/method.md`](docs/method.md).
 
 Extracted from the CAiSE 2026 deck in

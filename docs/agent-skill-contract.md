@@ -57,12 +57,8 @@ grows without an edit here. See [`python/README.md`](../python/README.md#legible
 ## 3. Review surface — Slidev-coupled for v1
 
 The review parses a **Slidev deck**: the markdown slides, the `themes/*.json` palette, and the
-generated figure PNGs. The mechanical linter is Slidev-markdown-aware. PPTX is **not** a review
-target in v1 — it is a hand-authored static *proof* (#11), not a user-authoring surface.
-
-**Future work** (noted, not v1): the review goes **format-agnostic** — working on extracted textual
-content + figures from any deck — and the scaffold side grows to let users work with PPTX / Keynote /
-other-format templates through the skill + a coding agent.
+generated figure PNGs. The mechanical linter is Slidev-markdown-aware. Slidev is the only
+authoring surface ([ADR 0001](adr/0001-personal-leuven-template.md)).
 
 ## 4. Review engine — a hybrid seam
 
@@ -172,7 +168,7 @@ built CSS and nowhere else.
 |---|---|
 | Packaging | One Claude Code `SKILL.md` in `skill/`; two modes; plugin + cross-agent deferred |
 | Rule sourcing | Thin pointer — procedure in `SKILL.md`, rules + thresholds loaded from `method.md` |
-| Review surface | Slidev-coupled (v1); format-agnostic + other-format templates later |
+| Review surface | Slidev only |
 | Review engine | Hybrid — mechanical linter in `legible` (palette via `cvd-validate`) + LLM for 4 semantic checks |
 | Review posture | Flag + suggest (human applies); two-tier gate/advisory; merged per-slide markdown report |
 | Scaffold | Minimal Slidev starter, `neutral` default, review-ready from slide one |
