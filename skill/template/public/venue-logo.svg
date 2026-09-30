@@ -1,0 +1,13 @@
+<!-- A blank for the venue's logo, so the cover renders the slot as a form rather than as a
+     broken image. Replace it with your own mark: drop the file into this public/ and point the
+     deck's headmatter at it. No institution's mark ships with this project.
+
+     Greys rather than palette roles: an <img> cannot read the palette's custom properties, and a
+     blank has no business tracking the palette. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 160" width="480" height="160"
+     role="img" aria-label="Placeholder for the venue's logo">
+  <rect x="1" y="1" width="478" height="158" rx="4" fill="#eeeeee" stroke="#b4b4b4"
+        stroke-width="2" stroke-dasharray="10 8" />
+  <text x="240" y="89" text-anchor="middle" font-family="Inter, system-ui, sans-serif"
+        font-size="26" fill="#6e6e6e">venue logo</text>
+</svg>

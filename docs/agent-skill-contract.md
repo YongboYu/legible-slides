@@ -137,10 +137,9 @@ It stamps:
 - **one skeleton slide per AE layout** — `cover`, `assertion-evidence`, `two-col-evidence`,
   `references` — as fill-in placeholders.
 
-**Theme default = `neutral`.** The repo's default validated theme is `kuleuven` (with
-non-endorsement), but scaffolding a *third party's* deck onto KU Leuven branding would be wrong;
-since `neutral` is a one-file swap (#11), scaffold defaults to `neutral` and offers `kuleuven` as the
-worked example. Slidev-only for v1.
+**Theme = `leuven-blue`.** The repo ships one theme ([ADR 0001](adr/0001-personal-leuven-template.md)),
+and the scaffold stamps a copy of it. It carries no institution's marks, so nothing stamped claims an
+endorsement: the cover's logo slots arrive as placeholders. Slidev only.
 
 Built in **#24** as the scaffold mode of [`skill/SKILL.md`](../skill/SKILL.md), which stamps
 [`skill/template/`](../skill/template) — files rather than instructions, so what a stamp produces is
@@ -156,9 +155,9 @@ of the theme.
 **The acceptance bar is §5's own review**, and it is enforced rather than asserted:
 `python/tests/test_scaffold.py` lints the template, so a template that would stamp an error fails
 this repo's CI, and the same suite holds it to the theme's layouts and to the palette it copies. CI
-also stamps the template and builds it, which is where the claim that the deck's own tokens outrank
-the theme checkout's is settled — a stamped deck wearing the wrong brand would be visible in the
-built CSS and nowhere else.
+also stamps the template, recolours it, and builds it, which is where the claim that the deck's own
+tokens outrank the theme checkout's is settled — a stamped deck wearing the wrong palette would be
+visible in the built CSS and nowhere else.
 
 ---
 
@@ -171,4 +170,4 @@ built CSS and nowhere else.
 | Review surface | Slidev only |
 | Review engine | Hybrid — mechanical linter in `legible` (palette via `cvd-validate`) + LLM for 4 semantic checks |
 | Review posture | Flag + suggest (human applies); two-tier gate/advisory; merged per-slide markdown report |
-| Scaffold | Minimal Slidev starter, `neutral` default, review-ready from slide one |
+| Scaffold | Minimal Slidev starter on `leuven-blue`, review-ready from slide one |

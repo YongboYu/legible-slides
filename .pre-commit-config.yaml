@@ -2,7 +2,7 @@
 #
 #     uv tool install pre-commit && pre-commit install
 #
-# The real gate is CI — .github/workflows/ci.yml runs the same check over every shipped theme on
+# The real gate is CI — .github/workflows/ci.yml runs the same check over the shipped theme on
 # push and pull request, and a non-zero exit blocks merge. A hook any author can skip with
 # `--no-verify` is convenience, never enforcement.
 repos:
@@ -26,7 +26,7 @@ repos:
         # rather than taking whichever palettes happen to be staged.
         entry: >
           uv run --project python
-          legible gen-css themes/kuleuven.json --output theme/styles/tokens.css
+          legible gen-css themes/leuven-blue.json --output theme/styles/tokens.css
         language: system
-        files: ^themes/kuleuven\.json$
+        files: ^themes/leuven-blue\.json$
         pass_filenames: false

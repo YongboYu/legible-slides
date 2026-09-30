@@ -27,13 +27,13 @@ The reference impl is **two things**, not one monolith:
   It is the **primary teaching artifact** (it teaches the method by being the method), not merely a
   demo — academic's `example.md` pattern, promoted to the real deliverable.
 
-The split draws the seam the project promises — *"brand is a swappable layer," "present in the tool
-you already use."* You cannot ship a reusable **template** if the machinery is welded into one
+The split draws the seam the project promises — *"the palette is one file," "present in the tool you
+already use."* You cannot ship a reusable **template** if the machinery is welded into one
 deck's content.
 
 **v1 scope:** built *as* a theme package (proper structure), but **in-repo**, consumed by the deck
 via a local `theme:` path. Publishing `slidev-theme-legible` to npm is a later flip, not a v1
-blocker (cf. the KU Leuven public-flip).
+blocker (cf. the public flip, #37).
 
 ## 2. Layouts (4)
 
@@ -90,7 +90,7 @@ It is deliberately **not a charting library**. Scope = the archetypes the method
 One repo, four sub-parts around the shared token source:
 
 ```
-themes/     kuleuven.json (default) + neutral.json  [+ logos/]   ← token source of truth
+themes/     leuven-blue.json                                    ← token source of truth
 theme/      slidev-theme-legible: layouts/ components/ styles/ (incl. generated tokens.css)
             assets/fonts/ (bundled woff2)  package.json
 deck/       the flagship deck: slides.md, public/ (its generated figures)
@@ -101,7 +101,8 @@ docs/       method.md, design-provenance.md, *-contract.md, research/
 - **Fonts** — Inter + JetBrains Mono bundled as woff2 in `theme/assets/fonts/` (borrow academic's
   self-hosted `@font-face`, drop the eot/svg legacy). The same TTFs the figure helper registers.
 - **Deck ↔ theme** — the deck consumes the theme via a local `theme:` path.
-- **Themes shipped** — `kuleuven` (default, validated, logo lockup) + `neutral` (brand-free).
+- **Theme shipped** — `leuven-blue`, validated, with no institution's marks: the decks serve logo
+  placeholders from their own `public/` ([ADR 0001](adr/0001-personal-leuven-template.md)).
 
 ### The palette → CSS wiring
 
@@ -109,7 +110,7 @@ The token contract fixes the *mapping* (`ink → --ink`, `series → --series-n`
 performs it*: **the Python `legible` package emits it.**
 
 ```
-legible gen-css themes/kuleuven.json  →  theme/styles/tokens.css   (committed, regenerated on change)
+legible gen-css themes/leuven-blue.json  →  theme/styles/tokens.css   (committed, regenerated on change)
 ```
 
 - **One palette authority.** Python already loads `palette.json` to validate and to draw figures;

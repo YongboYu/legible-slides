@@ -42,10 +42,9 @@ carrying an error is a bug in the template rather than in anybody's talk — whi
 starting point" has to mean if it is to mean anything.
 
 It is deliberately **lean**: a clean start, not a worked deck. The teaching artifact is
-[the flagship](../deck), and a second one here would be a second thing to keep true. It also
-defaults to the **brand-free** palette. This project's own default is the verified KU Leuven one,
-but stamping a university's name onto a stranger's talk claims an endorsement nobody gave, so that
-palette is offered as the worked example and never as the default.
+[the flagship](../deck), and a second one here would be a second thing to keep true. It stamps a
+copy of the project's one palette, `leuven-blue`, and placeholders where the cover's logos go: no
+institution's mark ships, so the author points the cover at their own.
 
 ## What review does
 

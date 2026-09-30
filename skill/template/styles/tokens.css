@@ -1,19 +1,19 @@
-/* Generated from the `neutral` theme by `legible gen-css` — do not edit.
+/* Generated from the `leuven-blue` theme by `legible gen-css` — do not edit.
  * Change the palette, regenerate, and commit the result; CI checks the two agree. */
 
 :root {
-  --ink: #1a1a1a;
-  --neutral: #595959;
-  --neutral-soft: #a3a3a3;
+  --ink: #102a43;
+  --neutral: #486581;
+  --neutral-soft: #93a4b8;
   --surface: #ffffff;
-  --surface-alt: #f5f7fa;
-  --hairline: #e2e6ea;
-  --brand: #1f4e79;
-  --brand-strong: #0072b2;
-  --accent: #e69f00;
+  --surface-alt: #f4f7fb;
+  --hairline: #dde5ee;
+  --brand: #00407a;
+  --brand-strong: #1d8db0;
+  --accent: #dd8a2e;
   --reference: #111111;
-  --muted: #686868;
-  --series-1: #004f8f;
-  --series-2: #d55e00;
-  --series-3: #56b4e9;
+  --muted: #778496;
+  --series-1: #1b6fb0;
+  --series-2: #57c0ae;
+  --series-3: #4c3a78;
 }

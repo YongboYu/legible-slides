@@ -28,9 +28,9 @@ DECK = Path(__file__).resolve().parents[2] / "deck" / "slides.md"
 BEATS = 13
 SLIDES = BEATS + 1
 
-#: The two themes beat 11 tabulates, and the group it measures them over. `separation-floor` forms
-#: the per-series ramp as G1, which is what "closest pair" on that slide means.
-TABULATED = ("kuleuven", "neutral")
+#: The theme beat 11 tabulates, and the group it measures it over. `separation-floor` forms the
+#: per-series ramp as G1, which is what "closest pair" on that slide means.
+TABULATED = ("leuven-blue",)
 PER_SERIES = "G1"
 
 
@@ -82,8 +82,8 @@ def test_beat_nine_names_the_canon_s_two_dense_exceptions(deck):
 
 @pytest.mark.parametrize("theme", TABULATED)
 def test_beat_eleven_tabulates_the_minima_the_validator_measures(deck, themes_dir, theme):
-    """The slide's whole argument is that a brand swap is checked rather than trusted, so its two
-    rows have to be what ``cvd-validate`` says today — not what it said when they were typed."""
+    """The slide's whole argument is that a palette is checked rather than trusted, so its row has
+    to be what ``cvd-validate`` says today — not what it said when it was typed."""
     row = re.search(rf"\| `{theme}` \| ([\d.]+) \| ([\d.]+) \|", deck)
     assert row, f"beat 11 no longer tabulates the `{theme}` theme"
     group = validate(load_palette(themes_dir / f"{theme}.json")).groups[PER_SERIES]
@@ -97,6 +97,6 @@ def test_beat_ten_s_caption_puts_the_binding_pair_on_the_floor(deck, themes_dir)
     capacity, and one more series would fail. It stops being true the moment either number moves."""
     caption = re.search(r"the closest pair lands on ([\d.]+), exactly the floor", deck)
     assert caption, "beat 10 no longer states where the binding pair lands"
-    measured = validate(load_palette(themes_dir / "kuleuven.json")).groups[PER_SERIES]
+    measured = validate(load_palette(themes_dir / "leuven-blue.json")).groups[PER_SERIES]
 
     assert float(caption.group(1)) == min(measured.min_delta_e.values()) == DELTA_E_FLOOR

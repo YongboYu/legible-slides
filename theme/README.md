@@ -62,9 +62,9 @@ On a content slide the headline is the markdown's `#`, and everything after it i
 which is where a cover normally lives — `author` belongs to the headmatter and never reaches a layout
 as a prop. The title and subtitle are the slide's `#` and `##`.
 
-The logo is the deck's to serve, from its own `public/`, because a brand's mark belongs to the deck
-and not to the machinery. `themes/*.json` names one per theme (`meta.logo`); wiring it up is one line
-of `themeConfig`.
+The logo is the deck's to serve, from its own `public/`, because a mark belongs to the deck and not
+to the machinery. This project ships none: the flagship and the scaffold serve placeholders, and
+pointing the cover at a real mark is one line of `themeConfig`.
 
 ## Chrome
 
@@ -169,7 +169,7 @@ the archetypes in the `legible` package — figures are regenerated, never redra
 uv run --project ../python python -c "
 from legible import load_palette
 from legible.figures import save, two_group
-palette = load_palette('../themes/kuleuven.json')
+palette = load_palette('../themes/leuven-blue.json')
 save(two_group(palette,
                {'protanomaly': 16.5, 'tritanomaly': 20.8},
                {'deuteranomaly': 15.0},
@@ -178,7 +178,7 @@ save(two_group(palette,
 "
 ```
 
-Its numbers are the achieved minima for `themes/kuleuven.json`, which the package's tests pin.
+Its numbers are the achieved minima for `themes/leuven-blue.json`, which the package's tests pin.
 
 ## Borrowed from
 

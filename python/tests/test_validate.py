@@ -32,7 +32,7 @@ def test_brand_and_series_are_never_compared(themes_dir):
     would be wrong on the merits and impossible in practice — so the theme passes regardless, and
     the pair appears in no group and in no result.
     """
-    report = validate(load_palette(themes_dir / "kuleuven.json"))
+    report = validate(load_palette(themes_dir / "leuven-blue.json"))
 
     for group in report.groups.values():
         series = [role for role in group.roles if role.startswith("series-")]
@@ -71,7 +71,7 @@ def test_a_longer_ramp_extends_the_per_series_group(write_theme, base_palette):
 
 
 def test_a_stricter_threshold_moves_the_boundary(themes_dir):
-    palette = load_palette(themes_dir / "kuleuven.json")
+    palette = load_palette(themes_dir / "leuven-blue.json")
 
     assert validate(palette).passed
     assert not validate(palette, threshold=20.0).passed
@@ -83,7 +83,7 @@ def test_a_pair_landing_exactly_on_the_floor_passes(themes_dir):
     Comparison is inclusive by design: the dependency is pinned, so a value on the floor is
     reproducible rather than a coin flip.
     """
-    palette = load_palette(themes_dir / "kuleuven.json")
+    palette = load_palette(themes_dir / "leuven-blue.json")
 
     report = validate(palette, threshold=15.0)
 

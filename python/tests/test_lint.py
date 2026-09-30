@@ -303,7 +303,7 @@ def test_a_theme_below_the_floor_is_a_finding_against_the_deck(
 
 
 def test_a_theme_that_clears_the_floor_is_not(write_deck, themes_dir):
-    report = lint(write_deck("# A claim\n"), themes=[themes_dir / "kuleuven.json"])
+    report = lint(write_deck("# A claim\n"), themes=[themes_dir / "leuven-blue.json"])
 
     assert report.findings == ()
     assert report.unchecked == ()

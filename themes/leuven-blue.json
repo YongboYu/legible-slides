@@ -1,8 +1,7 @@
 {
   "meta": {
-    "name": "kuleuven",
-    "description": "KU Leuven house-style-derived theme. Not an official KU Leuven product and carries no endorsement.",
-    "logo": "logos/kuleuven-liris.png"
+    "name": "leuven-blue",
+    "description": "A palette inspired by KU Leuven's house colours. It is not affiliated with or endorsed by the university, and it ships none of its marks."
   },
 
   "ink": "#102a43",

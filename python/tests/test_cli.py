@@ -13,7 +13,7 @@ from legible.cli import main
 
 def test_a_passing_theme_exits_zero_and_prints_the_achieved_minimum(capsys, themes_dir):
     """Headroom — or the lack of it — has to be visible on a pass, not only on a failure."""
-    theme = themes_dir / "kuleuven.json"
+    theme = themes_dir / "leuven-blue.json"
     report = validate(load_palette(theme))
 
     code = main([str(theme)])
@@ -56,7 +56,7 @@ def test_one_failing_theme_among_several_fails_the_whole_run(
     capsys, write_theme, colliding_palette, themes_dir
 ):
     """What the CI gate rides on: every theme is reported, and one failure is enough."""
-    code = main([str(themes_dir / "neutral.json"), str(write_theme(colliding_palette))])
+    code = main([str(themes_dir / "leuven-blue.json"), str(write_theme(colliding_palette))])
 
     out = capsys.readouterr().out
     assert code == 1
@@ -65,7 +65,7 @@ def test_one_failing_theme_among_several_fails_the_whole_run(
 
 
 def test_json_emits_the_report_verbatim(capsys, themes_dir):
-    theme = themes_dir / "kuleuven.json"
+    theme = themes_dir / "leuven-blue.json"
     expected = validate(load_palette(theme))
 
     code = main([str(theme), "--json"])
@@ -96,9 +96,13 @@ def test_json_failures_carry_the_condition_and_both_roles(capsys, write_theme, c
     assert all(failure["delta_e"] < report["threshold"] for failure in report["failures"])
 
 
-def test_json_emits_one_report_per_theme_in_argument_order(capsys, themes_dir):
-    """One object per line, so the shape of a report never depends on how many were asked for."""
-    themes = [themes_dir / "neutral.json", themes_dir / "kuleuven.json"]
+def test_json_emits_one_report_per_theme_in_argument_order(
+    capsys, themes_dir, write_theme, grayscale_clash_palette
+):
+    """One object per line, so the shape of a report never depends on how many were asked for.
+
+    Two palettes whose grayscale minima differ, so the order is something the assertion can see."""
+    themes = [write_theme(grayscale_clash_palette), themes_dir / "leuven-blue.json"]
 
     code = main([*(str(theme) for theme in themes), "--json"])
 
@@ -132,7 +136,7 @@ def test_an_unreadable_theme_does_not_silence_the_themes_named_after_it(
     capsys, tmp_path, themes_dir
 ):
     """The CI gate hands over every theme at once, so one bad file must not hide the rest."""
-    code = main([str(tmp_path / "absent.json"), str(themes_dir / "kuleuven.json")])
+    code = main([str(tmp_path / "absent.json"), str(themes_dir / "leuven-blue.json")])
 
     captured = capsys.readouterr()
     assert code == 2

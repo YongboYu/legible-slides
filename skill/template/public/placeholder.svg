@@ -5,7 +5,7 @@
      so it cannot read the palette's custom properties the way every stylesheet here does. The greys
      below are therefore deliberately *not* palette roles — a placeholder that quietly copied three
      of them would go stale on the first recolour, and a blank is the one thing in a deck that has
-     no business tracking the brand. A chart is the opposite case: it is drawn from
+     no business tracking the palette. A chart is the opposite case: it is drawn from
      themes/palette.json, whose colours the validator has measured. -->
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" width="640" height="360"
      role="img" aria-label="Placeholder for a figure">

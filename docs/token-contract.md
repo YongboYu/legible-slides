@@ -5,8 +5,8 @@ _Resolves [#2](https://github.com/YongboYu/legible-slides/issues/2). Generalized
 
 A **theme** is a palette file plus an optional logo. Everything else that makes a deck legible —
 the type scale, the font pairing, the Assertion-Evidence layout structure, the light colour scheme —
-is **fixed by the method** ([`method.md`](method.md)), not swappable per brand. That split is the
-whole point: a brand may recolour, but it cannot opt out of the accessibility floor.
+is **fixed by the method** ([`method.md`](method.md)), not set per palette. That split is the whole
+point: a palette may recolour, but it cannot opt out of the accessibility floor.
 
 This document fixes the palette's **shape**: which roles exist, what they are named, and how they
 reach CSS. The **rules** governing how those roles may be used are the canon's, and are linked by
@@ -18,8 +18,7 @@ rule ID rather than repeated here.
 
 ```
 themes/
-  kuleuven.json   ← palette + logo lockup   (default, validated)
-  neutral.json    ← palette                  (brand-free reference)
+  leuven-blue.json   ← the one palette   (validated)
 ```
 
 A theme file is the **single source of truth** for one palette, consumed by three things at once —
@@ -32,9 +31,9 @@ Keys are **kebab-case**, mirroring the CSS custom properties they become (`ink` 
 ```jsonc
 {
   "meta": {
-    "name": "kuleuven",
-    "description": "KU Leuven house-style-derived theme. Not an official KU Leuven product.",
-    "logo": "logos/kuleuven-liris.png"    // optional; omit for brand-free themes
+    "name": "leuven-blue",
+    "description": "A palette inspired by KU Leuven's house colours. …not affiliated with or endorsed by…",
+    // "logo": "logos/mark.png"   // optional, relative to themes/; leuven-blue ships no mark
   },
 
   // ── structural neutrals (universal; ported from pmf as-is) ──
@@ -101,7 +100,7 @@ validator ([#9](https://github.com/YongboYu/legible-slides/issues/9)) checks the
 
 Each scalar key becomes a `:root` custom property of the same name; `series` becomes
 `--series-1 … --series-n`. The deck's `style.css` reads only these variables — the same contract
-pmf proved, now brand-swappable.
+pmf proved, now one file's edit to recolour.
 
 ```css
 :root {

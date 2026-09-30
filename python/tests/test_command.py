@@ -115,7 +115,7 @@ def test_checking_without_an_output_path_is_an_argument_error(base_palette, writ
 
 
 def test_lint_exits_zero_on_a_deck_that_breaks_no_rule(capsys, themes_dir):
-    code = main(["lint", str(DECKS / "clean.md"), "--theme", str(themes_dir / "kuleuven.json")])
+    code = main(["lint", str(DECKS / "clean.md"), "--theme", str(themes_dir / "leuven-blue.json")])
 
     assert code == 0
     assert capsys.readouterr().out.startswith("PASS")

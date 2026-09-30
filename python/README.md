@@ -9,7 +9,7 @@ This package is the single reader of that schema, so nothing downstream re-imple
 ```python
 from legible import load_palette, validate
 
-report = validate(load_palette("themes/kuleuven.json"))
+report = validate(load_palette("themes/leuven-blue.json"))
 report.passed          # True
 report.min_delta_e     # {'normal': …, 'deuteranomaly': …, 'protanomaly': …, 'tritanomaly': …}
 report.failures        # pairs below the floor, named by role — never by hex
@@ -90,13 +90,13 @@ same name, `series` expanded to `--series-1 … --series-n`. The mapping is
 [`docs/token-contract.md`](../docs/token-contract.md) §5's:
 
 ```bash
-legible gen-css themes/kuleuven.json --output theme/styles/tokens.css
+legible gen-css themes/leuven-blue.json --output theme/styles/tokens.css
 ```
 
 ```python
 from legible import gen_css, load_palette
 
-gen_css(load_palette("themes/kuleuven.json"))    # '/* Generated … */\n\n:root {\n  --ink: …;\n}\n'
+gen_css(load_palette("themes/leuven-blue.json"))    # '/* Generated … */\n\n:root {\n  --ink: …;\n}\n'
 ```
 
 Python emits the CSS because Python already reads this schema to validate a palette and to draw a
@@ -108,7 +108,7 @@ which is what lets a deck build import it and never invoke Python.
 that keeps that lockfile honest, and what CI runs here:
 
 ```bash
-legible gen-css themes/kuleuven.json --output theme/styles/tokens.css --check
+legible gen-css themes/leuven-blue.json --output theme/styles/tokens.css --check
 ```
 
 Without `--output` the stylesheet goes to stdout. **Exit code** — `0` written or already current,
@@ -120,7 +120,7 @@ The rules the canon marks **decided by script**, as a command with an exit code 
 half of a review is something CI runs rather than something a reader has to remember:
 
 ```bash
-legible lint deck/slides.md --theme themes/kuleuven.json
+legible lint deck/slides.md --theme themes/leuven-blue.json
 ```
 
 ```
@@ -142,7 +142,7 @@ does not record which palette it wears, so naming none checks the slides alone.
 ```python
 from legible import lint
 
-report = lint("deck/slides.md", themes=["themes/kuleuven.json"])
+report = lint("deck/slides.md", themes=["themes/leuven-blue.json"])
 report.passed      # False if any finding is an error
 report.findings    # (Finding(rule=…, severity=…, slide=…, message=…), …)
 report.unchecked   # themes cvd-validate could not measure; neither a pass nor a violation
@@ -222,7 +222,7 @@ library, and a third shape belongs in a ticket rather than a keyword argument.
 from legible import load_palette
 from legible.figures import Series, multi_series, two_group, save
 
-palette = load_palette("themes/kuleuven.json")
+palette = load_palette("themes/leuven-blue.json")
 
 save(
     multi_series(

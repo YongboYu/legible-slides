@@ -173,7 +173,7 @@ noise), not a ratio to optimise: some redundant non-data ink genuinely helps.
 
 ### `type-scale`: type is sized for the back row, not the laptop
 
-Fixed by the method, not by the brand and not per slide. On the logical canvas, body type sits at the
+Fixed by the method, not by the palette and not per slide. On the logical canvas, body type sits at the
 floor: it projects to roughly 34px at 1920, which is what the back row of a lecture hall can read.
 The two dense sizes exist for tight figure panels and are marked exceptions, not knobs.
 
@@ -347,7 +347,7 @@ full.
 
 | # | Beat (assertion headline) | Evidence / self-demonstration | Teaches |
 |---|---|---|---|
-| 1 | **legible-slides** · _Readable from the back row, and for every pair of eyes._ | Cover; the type scale and the brand from slide one | `type-scale` |
+| 1 | **legible-slides** · _Readable from the back row, and for every pair of eyes._ | Cover; the type scale and the palette from slide one | `type-scale` |
 | 2 | _Most templates hand you files and leave the hard part to you: deciding what a slide is for._ | A busy stock-template slide | — |
 | 3 | _Every template quietly fails two audiences you can measure: the back row, and 1-in-12 eyes._ | Projector-distance sketch beside a CVD-muddy 5-line chart | `type-scale`, `separation-floor` |
 | 4 | _A method first, files second._ | The pivot; the thesis of the whole deck | — |
@@ -357,7 +357,7 @@ full.
 | 8 | _Cut everything that isn't the message._ | Signal-to-noise; a purposeful reveal doubles as the motion guardrail | `coherence`, `motion-purpose` |
 | 9 | _Body type is sized for the back row, not your laptop._ | Body sits at the floor; the projection arithmetic on screen | `type-scale` |
 | 10 | _If a colour dies under colour-blindness or grayscale, it's not in the palette._ | The 5-line chart under deuteranopia and grayscale, with dash and marker redundancy | `separation-floor`, `never-sole-channel` |
-| 11 | _Your brand is a swappable layer that must pass the validator._ | The worked KU Leuven example plus the non-endorsement note | `separation-floor` |
+| 11 | _The validator reads any palette file, yours included, and names the pair that fails._ | This deck's palette measured, at capacity, the command that measures yours, plus the not-affiliated note | `separation-floor` |
 | 12 | _One file is what you present, hand out and have reviewed._ | Slidev on screen, a PDF from the same file, plus the coding-agent skill | — |
 | 13 | _Everything you just watched was built to these rules._ | The close; a pointer to this file and a call to action | all of them |
 
@@ -385,6 +385,6 @@ time.
 - [`cvd-validator-contract.md`](cvd-validator-contract.md) — how `separation-floor` is measured, why
   the floor is where it is, and the retired `≥39` claim it replaces.
 - [`token-contract.md`](token-contract.md) — the palette schema the colour rules are addressed to,
-  and the split between what a brand may swap and what the method fixes.
+  and the split between what a palette may change and what the method fixes.
 - [`agent-skill-contract.md`](agent-skill-contract.md) — how an agent turns these rules into a
   review, and which of them gate a build.

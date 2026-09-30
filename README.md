@@ -35,21 +35,21 @@ Three things, in order of how much they matter:
 3. **A Slidev theme** that carries the method, and a skill so a coding agent can build to this
    standard on your behalf.
 
-### Brand as a layer, not a hard-coding
+### One palette, in one file
 
-The method is brand-neutral. A palette is a swappable theme file that must pass the validator.
-KU Leuven ships as the default, worked, already-verified reference theme — because a template that
-proves itself on one real brand is worth more than one that proves itself on lorem ipsum.
+The theme is `leuven-blue`, one palette file in [`themes/`](themes) that passes the validator. It is
+the author's own template for academic talks, and it ships no institution's marks: the decks serve
+placeholder logos, and a deck points its cover at its own files.
 
-> **Note:** the KU Leuven theme is derived from the university's house style for use by its own
-> researchers. This project is not an official KU Leuven product and carries no endorsement.
+> **Note:** the palette is inspired by KU Leuven's house colours. It is not affiliated with or
+> endorsed by the university.
 
 Editing that one file recolours the whole deck. The same Python that validates a palette also emits
 its CSS custom properties (`legible gen-css`), so the token schema is understood in one language
 and no second copy of it can drift. The generated stylesheet is committed and CI checks it against
 its palette — which is why building a deck needs no Python at all.
 
-Charts are regenerated from data rather than redrawn, so the swap reaches them too. There are two
+Charts are regenerated from data rather than redrawn, so a recolour reaches them too. There are two
 chart shapes, deliberately — the multi-series comparison, where every line gets a dash and a marker
 of its own because colour is never allowed to be the only channel, and the headline chart, where a
 de-emphasised comparison stands against one highlight. Either can render itself as a
@@ -70,9 +70,9 @@ It names each failing pair by role rather than by hex, prints the achieved minim
 pass — so you can see whether you have headroom — and exits non-zero if any pair falls below the
 floor. See [`python/README.md`](python/README.md).
 
-Inside this repo the same command gates CI over every theme in [`themes/`](themes) on push and pull
+Inside this repo the same command gates CI over the theme in [`themes/`](themes) on push and pull
 request: a palette that fails cannot merge. The hook in `.pre-commit-config.yaml` runs it locally and
-is opt-in, because enforcement belongs somewhere nobody can skip. Your own themes are yours — the
+is opt-in, because enforcement belongs somewhere nobody can skip. Your own palettes are yours — the
 command is offered, not imposed.
 
 ## Running the method
@@ -81,7 +81,7 @@ Bullet ceilings, word ceilings, em-dashes in a headline, inflated register and m
 openers are all decidable, so a script decides them rather than a reader:
 
 ```bash
-legible lint deck/slides.md --theme themes/kuleuven.json
+legible lint deck/slides.md --theme themes/leuven-blue.json
 ```
 
 Findings arrive grouped by slide and named by the rule they enforce, which is what makes one
@@ -107,9 +107,8 @@ edits — it can hold a deck to a structure, but deciding your message stays you
 **scaffold** stamps a new deck already wired to the theme, to a palette that clears the floor, and
 to both checks, with one skeleton slide per layout to fill in. It is lean on purpose — a correct
 starting point, not a second flagship — and it hands the deck over having run the review over it,
-so a deck is review-ready from slide one rather than retrofitted at the end. It defaults to the
-brand-free palette: the KU Leuven one is offered as the worked example, never stamped onto somebody
-else's talk.
+so a deck is review-ready from slide one rather than retrofitted at the end. It stamps a copy of
+the `leuven-blue` palette, which the deck is free to edit.
 
 Neither mode states a rule of its own, which is what stops a review drifting from the method it
 claims to enforce. See [`skill/README.md`](skill/README.md).

@@ -76,8 +76,8 @@ multi-spot edit, and a light/dark variant was effectively impossible. A non-bran
 - `template/style.css` → `:root` custom properties, auto-loaded globally by Slidev
 - `scripts/figure_manifest.py` → the Python figure pipeline
 
-This indirection is the reason a brand can be a *swappable layer* in this repo rather than a
-hard-coding — the mechanism already exists and is proven.
+This indirection is the reason a recolour is a one-file edit in this repo rather than a hunt through
+the deck — the mechanism already exists and is proven.
 
 ### The KU Leuven set
 

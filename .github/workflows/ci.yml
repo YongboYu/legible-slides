@@ -28,9 +28,9 @@ jobs:
       - uses: astral-sh/setup-uv@v5
         with:
           enable-cache: true
-      # Every theme this repo ships, in one invocation: a non-zero exit from any of them turns
-      # this check red. Grayscale collisions are advisory and leave the exit code alone.
-      - run: uv run --project python cvd-validate themes/*.json
+      # The one theme this repo ships: a non-zero exit turns this check red. Grayscale collisions
+      # are advisory and leave the exit code alone.
+      - run: uv run --project python cvd-validate themes/leuven-blue.json
 
   # The other half of the palette's authority. theme/styles/tokens.css is generated from the deck's
   # theme and committed like a lockfile, which is what lets the deck build import it and never
@@ -46,7 +46,7 @@ jobs:
           enable-cache: true
       - run: >
           uv run --project python
-          legible gen-css themes/kuleuven.json --output theme/styles/tokens.css --check
+          legible gen-css themes/leuven-blue.json --output theme/styles/tokens.css --check
 
   # The theme's own build, over the example deck that exercises every layout it ships. A theme is
   # declarative — layouts, chrome and one stylesheet — so a build that renders every layout is the
@@ -129,13 +129,13 @@ jobs:
                          exit
                        }' dist/assets/*.css)
           built=$(printf '%s' "$built" | sed -E 's/^#(.)(.)(.)$/#\1\1\2\2\3\3/')
-          want=$(jq -r .brand ../themes/kuleuven.json | tr 'A-Z' 'a-z')
+          want=$(jq -r .brand ../themes/leuven-blue.json | tr 'A-Z' 'a-z')
           echo "deck: $built  palette: $want"
           test "$built" = "$want"
       - uses: astral-sh/setup-uv@v5
         with:
           enable-cache: true
-      - run: uv run --project ../python legible lint slides.md --theme ../themes/kuleuven.json
+      - run: uv run --project ../python legible lint slides.md --theme ../themes/leuven-blue.json
 
   # What the skill's scaffold mode stamps, stamped and built. The Python suite lints the template
   # and holds it to the theme's layouts and to its own palette; what it cannot reach is whether the
@@ -143,7 +143,7 @@ jobs:
   #
   # That second half is the one worth a runner. The stamped deck carries its own generated tokens
   # and consumes the theme by path, so a checkout wearing another palette is exactly what it has to
-  # outrank — and a deck that silently wore the theme's brand instead would look fine everywhere
+  # outrank — and a deck that silently wore the checkout's palette instead would look fine everywhere
   # except in the built CSS.
   scaffold:
     name: the scaffold's template builds
@@ -165,6 +165,20 @@ jobs:
           # The one blank a runner has to fill for itself: the theme is consumed by path until the
           # package is on npm, and the author is the one who says where their checkout is.
           sed -i "s|^theme: .*|theme: $GITHUB_WORKSPACE/theme|" "$RUNNER_TEMP/stamped/slides.md"
+      # The template arrives holding the theme's own palette, so a deck that wore the checkout's
+      # colours instead would pass the check below by coincidence. Recolour it first, the way the
+      # skill's step 4 does, so the two differ and the check can tell them apart. Any hex other than
+      # the theme's own would do; the guard at the end of the step fails if the two ever coincide.
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+      - name: Recolour it
+        working-directory: ${{ runner.temp }}/stamped
+        run: |
+          jq '.brand = "#1f4e79"' themes/palette.json > palette.tmp && mv palette.tmp themes/palette.json
+          uv run --project "$GITHUB_WORKSPACE/python" \
+            legible gen-css themes/palette.json --output styles/tokens.css
+          test "$(jq -r .brand themes/palette.json)" != "$(jq -r .brand "$GITHUB_WORKSPACE/themes/leuven-blue.json")"
       # No lockfile is stamped: a deck resolves its own, and pinning one here would pin every deck
       # scaffolded from it to whatever this repo last resolved.
       - run: pnpm install
@@ -199,7 +213,7 @@ jobs:
       - run: uv sync --extra dev
       - run: uv run ruff check .
       - run: uv run ruff format --check .
-      # Asserts the shipped palettes' achieved minima, so a colorspacious bump that shifted the
+      # Asserts the shipped palette's achieved minima, so a colorspacious bump that shifted the
       # simulation or the distance surfaces here rather than in a theme someone already trusts.
       - run: uv run pytest
 
@@ -219,7 +233,7 @@ jobs:
       - name: Check a palette outside this repo
         run: |
           mkdir -p "$RUNNER_TEMP/outside"
-          cp themes/neutral.json "$RUNNER_TEMP/outside/my-palette.json"
+          cp themes/leuven-blue.json "$RUNNER_TEMP/outside/my-palette.json"
           uv venv "$RUNNER_TEMP/venv"
           uv pip install --python "$RUNNER_TEMP/venv/bin/python" "$RUNNER_TEMP"/dist/*.whl
           cd "$RUNNER_TEMP/outside"

@@ -22,7 +22,7 @@ here, because everything the method fixes arrives with the theme — see that RE
 
 **No Python is needed to build it.** The palette reaches these slides as
 [`theme/styles/tokens.css`](../theme/styles/tokens.css), which is generated from
-[`themes/kuleuven.json`](../themes/kuleuven.json) and committed like a lockfile — so recolouring the
+[`themes/leuven-blue.json`](../themes/leuven-blue.json) and committed like a lockfile — so recolouring the
 deck is an edit to that one file and a `legible gen-css` run, with nothing to change here. CI checks
 that the colour on the built slides is still the colour in the theme file.
 
@@ -43,7 +43,7 @@ everything else and never downloads the browser, because it never exports.
 uv run --project ../python python figures.py
 ```
 
-Three PNGs into `public/`, from [`themes/kuleuven.json`](../themes/kuleuven.json) under real Machado
+Three PNGs into `public/`, from [`themes/leuven-blue.json`](../themes/leuven-blue.json) under real Machado
 simulation — figures are regenerated, never redrawn. Beat 3 shows the deck's five-series chart with
 colour as the only channel and beat 10 shows it with the dash and the marker back on, under
 deuteranomaly and in grayscale; a hand-drawn approximation of either would gut the demonstration.
@@ -55,7 +55,7 @@ same way it never runs `gen-css`. Re-run the line above when the palette changes
 ## Held to the method
 
 ```bash
-uv run --project ../python legible lint slides.md --theme ../themes/kuleuven.json
+uv run --project ../python legible lint slides.md --theme ../themes/leuven-blue.json
 ```
 
 Every rule [`docs/method.md`](../docs/method.md) marks *decided by script* — `bullet-ceiling`,
@@ -73,6 +73,6 @@ the rest — are a reviewer's, human or agent. See
 | `slides.md` | the deck. The first frontmatter block is the deck's headmatter *and* the cover's own frontmatter, which is why the cover's props sit up there. |
 | `figures.py` | the three generated figures, and why each is drawn as it is. |
 | `style.css` | the two demonstrations the theme will not build, because the method refuses them: a stock-template slide, and body type below the floor. Slidev loads it for you. Every size in it derives from the theme's own custom properties, so nothing here invents one. |
-| `public/` | what the deck serves: the generated figures, and the brand mark as a copy of the one in [`themes/logos/`](../themes/logos/README.md) — a mark belongs to the deck rather than to the machinery, so changing it is an edit here and one line of `themeConfig`. |
+| `public/` | what the deck serves: the generated figures, and the two logo placeholders — this project ships no institution's mark, so presenting under one is dropping it in here and pointing one line of `themeConfig` at it. |
 
 The speaker and venue on the cover are the presenter's to set, and a `date` is theirs to add.

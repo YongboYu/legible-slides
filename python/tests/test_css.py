@@ -14,7 +14,7 @@ from legible import gen_css, load_palette
 #: (docs/slidev-reference-impl.md §5). CI gates the same comparison; the suite carries it too, so a
 #: palette edit that forgot the regeneration surfaces before the push.
 COMMITTED_STYLESHEET = Path(__file__).resolve().parents[2] / "theme" / "styles" / "tokens.css"
-ITS_PALETTE = Path(__file__).resolve().parents[2] / "themes" / "kuleuven.json"
+ITS_PALETTE = Path(__file__).resolve().parents[2] / "themes" / "leuven-blue.json"
 
 
 def test_every_scalar_role_becomes_a_custom_property_of_the_same_name(base_palette, write_theme):

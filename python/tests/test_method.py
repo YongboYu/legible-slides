@@ -189,7 +189,7 @@ def test_the_shipped_canon_carries_the_separation_floor():
 
 
 def test_the_default_threshold_is_the_canons_floor(themes_dir):
-    report = validate(load_palette(themes_dir / "kuleuven.json"))
+    report = validate(load_palette(themes_dir / "leuven-blue.json"))
 
     assert report.threshold == DELTA_E_FLOOR == 15.0
 

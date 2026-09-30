@@ -41,7 +41,7 @@ from legible.method import CVD_CONDITIONS, DELTA_E_FLOOR
 from legible.validate import PRECISION
 
 #: The theme the deck is presented in. The figures wear its colours because the slides do.
-THEME = Path("../themes/kuleuven.json")
+THEME = Path("../themes/leuven-blue.json")
 
 #: Where the deck serves them from.
 PUBLIC = Path("public")

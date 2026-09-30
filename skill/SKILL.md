@@ -24,7 +24,7 @@ Stamp a new Slidev deck wired to the theme, to its palette and to both checks. I
 start, not a worked deck**: the flagship deck in this project is the artifact that teaches the
 method, and a second one here would be a second thing to keep true.
 
-### 1. Settle the three things the template cannot
+### 1. Settle the four things the template cannot
 
 Ask only for what the author has not already said.
 
@@ -32,7 +32,8 @@ Ask only for what the author has not already said.
 |---|---|
 | Where the deck goes | a new directory, named by the author. |
 | Where the theme is | slidev-theme-legible is not on npm yet, so a deck consumes it by path — the theme directory inside a checkout of legible-slides. Ask which checkout. |
-| Which palette it wears | the brand-free one the template already carries. The worked example is `themes/kuleuven.json` in that same checkout — verified, and the project's own default; offer it, and stamp it only for an author who is at that university. A palette carries a name, and putting one on somebody else's talk claims an endorsement nobody gave. |
+| Which palette it wears | the one the template already carries, a copy of `themes/leuven-blue.json` in that same checkout. Change it only if the author names another. |
+| Which marks the cover shows | none: the template carries placeholders for the venue's and the affiliation's logos. Put the author's own files in `public/` if they name them; otherwise leave the placeholders for them to replace. |
 
 ### 2. Stamp the template
 
@@ -54,6 +55,7 @@ nothing if they are not.
 | the headmatter of `slides.md` | the theme's path, the title, the author, and the cover's own venue and date |
 | `package.json` | the deck's name and its description |
 | `themes/palette.json` | the chosen palette's contents, if it is not the one stamped. Keep the path — everything else in the deck points at it, which is what makes a recolour one edit. |
+| `public/` and `themeConfig.logo` | the author's own marks, if they named any, in place of the placeholders |
 
 A skeleton slide is a blank for the author to fill, and not a slide for you to write. The method is
 about deciding what each slide is *for*, and that decision is theirs.
@@ -179,7 +181,7 @@ against the deck rather than any one slide — the palette is the usual one — 
 
 **FAIL** — 2 errors, 3 warnings.
 Mechanical checks gate; judgments are advisory and never block. Palette: checked against
-themes/kuleuven.json. Read any rule below with `legible rules <rule-id>`.
+themes/leuven-blue.json. Read any rule below with `legible rules <rule-id>`.
 
 ## Slide 4 — "Cost falls with retrieval and accuracy holds"
 

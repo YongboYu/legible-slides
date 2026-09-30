@@ -8,8 +8,8 @@ before it ever reached an author.
 
 The rest is about drift. The template is files rather than instructions precisely so that a change
 to the theme, the canon or the palette can fail here — a layout the theme grows and the scaffold
-never stamps, a stylesheet that stopped following its palette, a brand that leaked into a stranger's
-deck. What no test here asserts is a judgment, for the reason ``test_skill.py`` gives.
+never stamps, a stylesheet that stopped following its palette, a stamped palette that drifted from
+the theme's. What no test here asserts is a judgment, for the reason ``test_skill.py`` gives.
 """
 
 import json
@@ -34,9 +34,8 @@ THEMES = REPO / "themes"
 #: names it — the checks, the stylesheet and the deck's own README all point at this path.
 PALETTE = Path("themes") / "palette.json"
 
-#: The palette it arrives holding. Brand-free, because scaffolding a third party's deck onto a
-#: university's branding would be wrong however well that palette is verified.
-DEFAULT_THEME = "neutral"
+#: The palette it arrives holding: the project's one theme.
+DEFAULT_THEME = "leuven-blue"
 
 #: `default` is the alias `assertion-evidence` answers to rather than a fifth layout, so a skeleton
 #: slide for it would be a second slide on the same layout.
@@ -66,9 +65,10 @@ _PALETTE_PATH = re.compile(r"themes/[\w.-]+\.json")
 _NAMED = re.compile(r"`(?P<rule>[a-z0-9-]+)`")
 
 #: Hyphenated the way a rule ID is, and not one: the commands the stamped checks run, the two hook
-#: IDs naming them, and the two projects a stamped deck names. The theme's name is read off its own
-#: manifest; this project's is written down, because the checkout's directory name is not it — a
-#: suite that read the name off the filesystem would pass or fail on where somebody cloned to.
+#: IDs naming them, the two projects a stamped deck names, and the palette its generated stylesheet
+#: names. The theme's and the palette's names are read off their own files; this project's is
+#: written down, because the checkout's directory name is not it — a suite that read the name off
+#: the filesystem would pass or fail on where somebody cloned to.
 #: Anything opening with a dash is a flag or a custom property and is skipped rather than listed,
 #: since the generated stylesheet declares one per palette role and a list would copy the token
 #: contract.
@@ -80,6 +80,7 @@ NOT_RULES = frozenset(
         "pre-commit",
         "legible-slides",
         json.loads((REPO / "theme" / "package.json").read_text(encoding="utf-8"))["name"],
+        load_palette(TEMPLATE / PALETTE).name,
     }
 )
 
@@ -92,19 +93,6 @@ def _shipped_layouts() -> set[str]:
     """The layouts the theme offers a deck, asked of the theme rather than listed here — which is
     what makes a layout it grows or drops a failure in this suite rather than a surprise later."""
     return {path.stem for path in (REPO / "theme" / "layouts").glob("*.vue")} - {LAYOUT_ALIAS}
-
-
-def _branded_themes() -> set[str]:
-    """Every palette this project ships that carries somebody's name, asked of `themes/` so a brand
-    added there is one the scaffold is held against without this file being edited."""
-    return {path.stem for path in THEMES.glob("*.json")} - {DEFAULT_THEME}
-
-
-def _mode(skill: str, mode: str) -> str:
-    """One mode's half of the procedure: its heading, and everything before the next one."""
-    section = skill[skill.index(f"## Mode: {mode}") + 1 :]
-    end = section.find("\n## ")
-    return section if end < 0 else section[:end]
 
 
 @pytest.fixture(scope="module")
@@ -209,22 +197,10 @@ def test_every_rule_the_template_names_is_one_the_canon_carries(stamped):
                 assert rule in stated, f"{path.relative_to(TEMPLATE)} names {rule}"
 
 
-def test_the_stamped_palette_is_the_brand_free_one(palette_path):
+def test_the_stamped_palette_is_the_theme_s_own(palette_path):
     """A copy rather than a reference, because the deck is the author's and the palette is theirs to
     edit — and held to the original here, so the copy cannot start life already stale."""
     assert json.loads(_read(palette_path)) == json.loads(_read(THEMES / f"{DEFAULT_THEME}.json"))
-
-
-def test_no_brand_reaches_a_stranger_s_deck(stamped):
-    """The repo's own default is a branded palette, verified and shipped. Stamping it into somebody
-    else's deck would put a university's name on a talk it has nothing to do with, so the offer of
-    it belongs in the procedure and never in the output."""
-    branded = _branded_themes()
-    assert branded, "the repo ships no branded theme, so this guard is measuring nothing"
-
-    for path in stamped:
-        for name in branded:
-            assert name not in _read(path).lower(), f"{path.relative_to(TEMPLATE)} names {name}"
 
 
 def test_everything_stamped_points_at_the_one_palette(stamped):
@@ -296,9 +272,3 @@ def test_the_scaffold_does_not_restate_the_review_procedure(skill):
     of a rule, one file further out."""
     for step in REVIEW_STEPS:
         assert skill.count(step) == 1, step
-
-
-def test_the_scaffold_offers_the_branded_theme_as_the_worked_example(skill):
-    """Defaulting to brand-free is not the same as pretending the verified brand palette is not
-    there. The procedure offers it; the output above may not carry it."""
-    assert any(name in _mode(skill, "scaffold") for name in _branded_themes())

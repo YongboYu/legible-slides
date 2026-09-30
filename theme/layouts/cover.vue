@@ -6,9 +6,9 @@
  * everything else. What is left is the metadata a talk carries — who is speaking, where, and when —
  * which is data rather than prose and arrives as frontmatter.
  *
- * The logo is the theme file's other half (`meta.logo` in `docs/token-contract.md` §2), and it
- * reaches the slide as a URL the deck serves: a brand's mark belongs to the deck, not to the
- * machinery. `themeConfig.logo` sets it once for a deck; a slide may override it.
+ * The logo reaches the slide as a URL the deck serves: a mark belongs to the deck, not to the
+ * machinery, and this project ships none. `themeConfig.logo` sets it once for a deck; a slide may
+ * override it.
  */
 import { computed } from 'vue'
 import { useSlideContext } from '@slidev/client'

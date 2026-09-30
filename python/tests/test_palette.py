@@ -4,13 +4,22 @@ from legible import PaletteError, load_palette
 
 
 def test_loads_a_shipped_theme_with_series_expanded_to_indexed_roles(themes_dir):
-    palette = load_palette(themes_dir / "kuleuven.json")
+    palette = load_palette(themes_dir / "leuven-blue.json")
 
-    assert palette.name == "kuleuven"
+    assert palette.name == "leuven-blue"
     assert palette["ink"] == "#102a43"
     assert palette["series-1"] == "#1b6fb0"
     assert palette["series-3"] == "#4c3a78"
     assert palette.series_roles == ("series-1", "series-2", "series-3")
+
+
+def test_the_shipped_theme_says_it_is_inspired_by_the_university_and_not_affiliated(themes_dir):
+    """The palette borrows KU Leuven's house colours and nothing else, and says so where the colours
+    are: in the one file that carries them, so no copy of the palette travels without the note."""
+    description = load_palette(themes_dir / "leuven-blue.json").description
+
+    assert "inspired by KU Leuven's house colours" in description
+    assert "not affiliated with or endorsed by" in description
 
 
 def test_a_file_that_is_not_json_fails_as_a_palette_error(tmp_path):

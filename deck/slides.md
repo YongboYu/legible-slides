@@ -8,11 +8,10 @@ info: |
   The flagship deck. It teaches the method by being the method: thirteen beats, each one obeying the
   rule it is about, and the outline they follow is in docs/method.md.
 themeConfig:
-  # A brand's mark is the deck's to serve, from its own public/, so the file below is a copy of
-  # themes/logos/kuleuven-liris.png rather than a reference to it. Nothing wires the two together:
-  # a deck that changes its mark changes this line and that file, and the theme file's meta.logo
-  # records which mark the palette considers its own.
-  logo: /kuleuven-liris.png
+  # A mark is the deck's to serve, from its own public/, and this project ships nobody's: the file
+  # below is a placeholder. Presenting under an affiliation is dropping its mark into public/ and
+  # pointing this line at it.
+  logo: /affiliation-logo.svg
 # The first frontmatter block is the cover's as well as the deck's, which is why the cover's own
 # props sit here. `author` is not among them: Slidev keeps that word for the headmatter, so the
 # layout reads `speaker`, and falls back to the author above when a deck omits it.
@@ -20,7 +19,7 @@ layout: cover
 speaker: Yongbo Yu
 venue: KU Leuven · Research Centre for Information Systems Engineering
 # The palette every colour on these slides comes from, and the floor it cleared to get here:
-#   uv run --project ../python cvd-validate ../themes/kuleuven.json
+#   uv run --project ../python cvd-validate ../themes/leuven-blue.json
 ---
 
 # legible-slides
@@ -294,7 +293,7 @@ narrow for body type. Neither is a knob for fitting more onto a slide. This para
 floor, which is how you can check the claim without taking my word for it.
 
 <!--
-Fixed by the method, not by the brand and not per slide. Once type becomes a knob, every slide that
+Fixed by the method, not by the palette and not per slide. Once type becomes a knob, every slide that
 runs one line long gets solved the same way, and the room pays for it at the back.
 -->
 
@@ -327,30 +326,29 @@ is already the fix.
 -->
 
 ---
-locator: Your brand
+locator: Your palette
 ---
 
-# Your brand is a swappable layer, and it has to pass the validator to ship.
+# The validator reads any palette file, yours included, and names the pair that fails.
 
 | Theme | closest pair, ΔE | in grayscale | verdict |
 |---|---|---|---|
-| `kuleuven` | 15.0 | 10.9 | passes, and is at capacity |
-| `neutral` | 25.4 | 11.8 | passes, with room to spare |
+| `leuven-blue` | 15.0 | 10.9 | passes, and is at capacity |
 
 Measured over the per-series ramp, under normal vision and all three dichromacies at full severity.
-Swapping is one theme file and one command, and no slide in this deck names a colour.
+Yours is `cvd-validate your-palette.json`, and no slide in this deck names a colour.
 
 <Callout title="Not an endorsement">
 
-These slides wear a palette derived from KU Leuven's house style. Nothing here is an official KU
-Leuven product, and the theme file carries that sentence in its own description.
+This palette is inspired by KU Leuven's house colours. It is not affiliated with or endorsed by the
+university, and the theme file carries that sentence in its own description.
 
 </Callout>
 
 <!--
-Read the last column. At capacity means a fourth series in the KU Leuven ramp fails, and the
-validator says so rather than quietly reusing a colour. That is the number to hand someone who asks
-whether they can add one more.
+Read the last column. At capacity means a fourth series in this ramp fails, and the validator says
+so by role rather than quietly reusing a colour. Run it on your own palette file before a talk: a
+pass is the floor cleared, and a fail tells you which colour to move.
 -->
 
 ---
@@ -387,8 +385,8 @@ rather than copied. Both commands below run on every push, and a finding either 
 error turns the build red.
 
 ```bash
-legible lint slides.md --theme ../themes/kuleuven.json
-cvd-validate ../themes/kuleuven.json
+legible lint slides.md --theme ../themes/leuven-blue.json
+cvd-validate ../themes/leuven-blue.json
 ```
 
 <Callout accent title="Take it">

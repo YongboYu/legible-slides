@@ -7,9 +7,9 @@ author: You
 info: |
   What this talk is, in a line. Slidev shows it in the presenter view and nowhere else.
 themeConfig:
-  # Your institution's mark, served from this deck's own public/. Empty is no mark, which is the
-  # honest default until you put a file there.
-  logo: ''
+  # Your affiliation's mark, served from this deck's own public/. The file below is a placeholder:
+  # drop your own mark into public/ and point this line at it, or set it to '' for no mark.
+  logo: /affiliation-logo.svg
 # The first frontmatter block is the deck's headmatter and the cover's own frontmatter at once,
 # which is why the cover's props sit here. The cover takes `speaker` when a talk is given by someone
 # other than the `author` above; `venue` and `date` are yours to fill in or to delete.

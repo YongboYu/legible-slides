@@ -6,7 +6,7 @@ info: |
   The theme package's own example deck: every layout it ships, exercised once, so a build proves the
   machinery rather than a screenshot. The teaching artifact is the flagship deck, not this file.
 # The palette every colour on these slides comes from, and the floor it passed to get here:
-#   uv run --project ../python cvd-validate ../themes/kuleuven.json
+#   uv run --project ../python cvd-validate ../themes/leuven-blue.json
 ---
 
 # slidev-theme-legible
@@ -62,7 +62,7 @@ The chart is regenerated from the same theme file this slide is coloured from, s
 reaches both.
 
 <Footnotes>
-  <Footnote :number="1">Achieved minima for <code>themes/kuleuven.json</code>, group G1.</Footnote>
+  <Footnote :number="1">Achieved minima for <code>themes/leuven-blue.json</code>, group G1.</Footnote>
 </Footnotes>
 
 ---

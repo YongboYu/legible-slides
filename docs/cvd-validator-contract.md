@@ -93,7 +93,7 @@ inclusive comparison and the grayscale carve-out. What this section records is t
   Grayscale is precisely the condition redundant encoding exists to cover, so it produces a warning
   and leaves the exit code alone.
 
-### Verified against the reference palette (`themes/kuleuven.json`)
+### Verified against the shipped palette (`themes/leuven-blue.json`)
 
 | | min ΔE (normal + CVD) | grayscale min | verdict |
 |---|---|---|---|
@@ -106,20 +106,7 @@ floor: the validator is correctly signalling the 3-series ramp is **at capacity 
 ("the validator tells you when you've added one too many"). The grayscale 10.9 is a lightness clash
 (`muted` J′ 57 vs `series-1` J′ 46) — warned, covered by redundant encoding.
 
-### Verified against the brand-free palette (`themes/neutral.json`)
-
-| | min ΔE (normal + CVD) | grayscale min | verdict |
-|---|---|---|---|
-| **G1** `{reference, muted, series[]}` | **25.4** | 11.8 | pass |
-| **G2** `{reference, muted, brand}` | **21.5** | 13.2 | pass |
-
-The brand-free theme carries real headroom where the reference palette sits at capacity, because it
-is not constrained to one institution's colours: its ramp is derived from the Okabe-Ito
-colour-vision-safe set, with Okabe-Ito's blue darkened one step so the three series separate by
-lightness as well as by hue. Lightness is what survives into grayscale, which is why the same
-adjustment lifts its grayscale minimum above the reference palette's.
-
-Both tables are asserted by the package tests. They are the **dependency-bump guard**: a
+The table is asserted by the package tests. It is the **dependency-bump guard**: a
 `colorspacious` release that shifted the simulation or the distance would move these numbers and
 turn the suite red, rather than quietly re-rating a palette someone already trusted.
 
@@ -146,7 +133,7 @@ Report:
   warnings:     [(role_a, role_b, delta_e)]              # grayscale pairs < threshold
 ```
 
-**CLI** — `cvd-validate themes/kuleuven.json`:
+**CLI** — `cvd-validate themes/leuven-blue.json`:
 
 - **Human-readable text by default:** a `PASS`/`FAIL` line, per-condition min ΔE, and each failing /
   warning pair named **by role** (`muted ↔ series-1`), never by hex — so an author knows which colour
@@ -173,10 +160,9 @@ share one palette-loader that reads the token-contract schema.
 
 ## 5. What it gates
 
-- **Scope** — every `themes/*.json` shipped in this repo (v1: `kuleuven.json`, `neutral.json`;
-  `*.dark.json` is a v2 concern). External authors get the CLI to self-check their own themes but are
-  not blocked.
-- **Hard gate — a GitHub Actions job** (`.github/workflows/ci.yml`) runs `cvd-validate` over every
+- **Scope** — the one theme shipped in this repo, `themes/leuven-blue.json` (`*.dark.json` is a v2
+  concern). External authors get the CLI to self-check their own palettes but are not blocked.
+- **Hard gate — a GitHub Actions job** (`.github/workflows/ci.yml`) runs `cvd-validate` over the
   shipped theme on push/PR; a non-zero exit turns the check red and blocks merge. Enforcement lives
   in CI, not a skippable hook. *Blocking* is the one half a workflow file cannot grant itself, and
   the branch ruleset on `main` now grants it
@@ -184,7 +170,7 @@ share one palette-loader that reads the token-contract schema.
   status check there, so a red check holds the merge instead of decorating it. Repo admins are a
   bypass actor — this repo is authored by direct push to `main` — so the gate binds what arrives by
   pull request and is discipline for the author.
-- **Package test** — the suite asserts the shipped reference palettes pass, so a future
+- **Package test** — the suite asserts the shipped palette passes, so a future
   `colorspacious` version bump that shifts the numbers is caught by tests, not silently in prod.
 - **No deck-build coupling** — the Slidev (JS) build does **not** invoke the validator; it trusts CI.
   The validator stays a Python authoring/CI tool, never a deck-runtime dependency.
