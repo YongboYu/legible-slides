@@ -83,4 +83,4 @@ both halves as one review with a proposed fix on every finding.
 | `slides.md` | the deck. The first frontmatter block is the headmatter *and* the cover's own frontmatter, which is why the cover's props sit up there. |
 | `themes/palette.json` | the palette. One file, and the only place a colour is written. |
 | `styles/tokens.css` | generated from it, committed, imported by `styles/index.ts`. Do not edit. |
-| `public/` | what the deck serves: figures, and the two logo placeholders your own marks replace. |
+| `public/` | what the deck serves: figures, and your own marks for the cover's two logo slots, which show the theme's placeholders until you name them. |

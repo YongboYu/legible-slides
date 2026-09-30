@@ -7,11 +7,9 @@ author: Yongbo Yu
 info: |
   The flagship deck. It teaches the method by being the method: thirteen beats, each one obeying the
   rule it is about, and the outline they follow is in docs/method.md.
-themeConfig:
-  # A mark is the deck's to serve, from its own public/, and this project ships nobody's: the file
-  # below is a placeholder. Presenting under an affiliation is dropping its mark into public/ and
-  # pointing this line at it.
-  logo: /affiliation-logo.svg
+# No themeConfig: the cover's two logo slots show the theme's placeholders, because this project
+# ships nobody's mark. Presenting under a venue or an affiliation is dropping its mark into public/
+# and naming it here, as `themeConfig.venueLogo` or `themeConfig.affiliationLogo`.
 # The first frontmatter block is the cover's as well as the deck's, which is why the cover's own
 # props sit here. `author` is not among them: Slidev keeps that word for the headmatter, so the
 # layout reads `speaker`, and falls back to the author above when a deck omits it.

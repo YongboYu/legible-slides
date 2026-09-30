@@ -40,9 +40,6 @@
           "JetBrains Mono"
         ],
         "provider": "none"
-      },
-      "themeConfig": {
-        "logo": ""
       }
     }
   },

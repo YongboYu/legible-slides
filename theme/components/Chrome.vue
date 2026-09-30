@@ -1,6 +1,6 @@
 <script setup lang="ts">
 /**
- * The persistent half of `ae-skeleton`: the locator pill, the accent rule and the page number.
+ * The persistent half of `ae-skeleton`: the locator pill and the page number.
  *
  * It is injected once by `slide-top.vue` rather than placed by each layout, so a content slide
  * cannot be built without it and a deck cannot drift into carrying it on some slides only. The
@@ -58,7 +58,6 @@ const locator = computed(() => {
 <template>
   <div v-if="shown" class="legible-chrome">
     <div v-if="locator" class="legible-locator">{{ locator }}</div>
-    <div class="legible-rule" />
     <div class="legible-page">{{ $page }} / {{ $slidev.nav.total }}</div>
   </div>
 </template>

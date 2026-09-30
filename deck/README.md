@@ -73,6 +73,6 @@ the rest — are a reviewer's, human or agent. See
 | `slides.md` | the deck. The first frontmatter block is the deck's headmatter *and* the cover's own frontmatter, which is why the cover's props sit up there. |
 | `figures.py` | the three generated figures, and why each is drawn as it is. |
 | `style.css` | the two demonstrations the theme will not build, because the method refuses them: a stock-template slide, and body type below the floor. Slidev loads it for you. Every size in it derives from the theme's own custom properties, so nothing here invents one. |
-| `public/` | what the deck serves: the generated figures, and the two logo placeholders — this project ships no institution's mark, so presenting under one is dropping it in here and pointing one line of `themeConfig` at it. |
+| `public/` | what the deck serves: the generated figures. The cover's two logo slots show the theme's placeholders — this project ships no institution's mark, so presenting under one is dropping it in here and pointing `themeConfig.venueLogo` or `themeConfig.affiliationLogo` at it. |
 
 The speaker and venue on the cover are the presenter's to set, and a `date` is theirs to add.

@@ -22,6 +22,7 @@ See [`python/README.md`](https://github.com/YongboYu/legible-slides/blob/main/py
 for the two archetypes and what they refuse to draw. A figure drawn any other way is one a recolour
 will leave behind, and one nothing has measured for separation.
 
-Your marks belong here too, beside the figures. `affiliation-logo.svg` and `venue-logo.svg` are
-placeholders: put your own files here and point the deck's headmatter at them — the affiliation's
-through `themeConfig.logo`. No institution's mark ships with this project.
+Your marks belong here too, beside the figures. Until you add them, the cover shows placeholders
+the theme bundles for the venue's and the affiliation's logos: put your own files here and point
+`themeConfig.venueLogo` and `themeConfig.affiliationLogo` in the headmatter at them. No
+institution's mark ships with this project.

@@ -43,7 +43,7 @@ starting point" has to mean if it is to mean anything.
 
 It is deliberately **lean**: a clean start, not a worked deck. The teaching artifact is
 [the flagship](../deck), and a second one here would be a second thing to keep true. It stamps a
-copy of the project's one palette, `leuven-blue`, and placeholders where the cover's logos go: no
+copy of the project's one palette, `leuven-blue`, and the cover's two logo slots show placeholders: no
 institution's mark ships, so the author points the cover at their own.
 
 ## What review does

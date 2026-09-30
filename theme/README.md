@@ -56,19 +56,21 @@ On a content slide the headline is the markdown's `#`, and everything after it i
 | `speaker` | who is speaking. Defaults to the deck's own `author`. |
 | `venue` | the conference, the seminar, the course |
 | `date` | written however the deck wants it read |
-| `logo` | a logo URL, overriding `themeConfig.logo` |
+| `venueLogo` | the venue's logo URL, above the title, overriding `themeConfig.venueLogo` |
+| `affiliationLogo` | the affiliation's logo URL, bottom left, overriding `themeConfig.affiliationLogo` |
 
 `speaker` rather than `author` because Slidev reserves that word: on the first slide of a deck —
 which is where a cover normally lives — `author` belongs to the headmatter and never reaches a layout
 as a prop. The title and subtitle are the slide's `#` and `##`.
 
-The logo is the deck's to serve, from its own `public/`, because a mark belongs to the deck and not
-to the machinery. This project ships none: the flagship and the scaffold serve placeholders, and
-pointing the cover at a real mark is one line of `themeConfig`.
+A mark is the deck's to serve, from its own `public/`, because it belongs to the deck and not to the
+machinery. This project ships none: until a deck names an image, each slot shows a placeholder the
+theme bundles (`assets/placeholders/`). Pointing a slot at a real mark is one line of `themeConfig`,
+and `''` leaves the slot empty.
 
 ## Chrome
 
-The locator pill, the accent rule and the page number are one component, injected on every slide by
+The locator pill and the page number are one component, injected on every slide by
 `slide-top.vue`. No layout opts in, so none can forget, and the deck never places them.
 
 ```yaml

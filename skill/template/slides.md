@@ -6,10 +6,12 @@ title: Your title
 author: You
 info: |
   What this talk is, in a line. Slidev shows it in the presenter view and nowhere else.
-themeConfig:
-  # Your affiliation's mark, served from this deck's own public/. The file below is a placeholder:
-  # drop your own mark into public/ and point this line at it, or set it to '' for no mark.
-  logo: /affiliation-logo.svg
+# The cover's two marks: the venue's above the title, the affiliation's bottom left. Left unset,
+# each shows a placeholder the theme bundles. Drop your own mark into this deck's public/ and name
+# it here, or set a slot to '' for no mark.
+# themeConfig:
+#   venueLogo: /venue-logo.png
+#   affiliationLogo: /affiliation-logo.png
 # The first frontmatter block is the deck's headmatter and the cover's own frontmatter at once,
 # which is why the cover's props sit here. The cover takes `speaker` when a talk is given by someone
 # other than the `author` above; `venue` and `date` are yours to fill in or to delete.

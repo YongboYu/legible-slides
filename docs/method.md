@@ -58,14 +58,16 @@ room reads it.
 **Decided by** judgment (that it reads as a claim, per `assertion-headline`, and that it fits) ·
 script where the build can measure rendered lines · **Threshold** `headline-lines-max = 2`
 
-### `ae-skeleton`: five zones on a content slide, and nothing else
+### `ae-skeleton`: four zones on a content slide, and nothing else
 
 ```
-locator  →  assertion headline  →  accent rule  →  evidence  →  page number
+locator  →  assertion headline  →  evidence  →  page number
 ```
 
-The locator and the page number are persistent chrome. Everything a slide adds beyond these five
-zones is a candidate for `coherence`.
+The locator and the page number are persistent chrome. Nothing is drawn between the headline and the
+evidence: weight and whitespace separate the claim from what proves it, and the evidence starts the
+same distance under the headline on every slide. Everything a slide adds beyond these four zones is a
+candidate for `coherence`.
 
 **Decided by** script (the layout supplies the zones)
 

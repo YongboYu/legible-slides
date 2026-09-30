@@ -17,7 +17,7 @@ from pathlib import Path
 
 import pytest
 
-from legible.method import rule_thresholds
+from legible.method import rule, rule_thresholds
 
 THEME = Path(__file__).resolve().parents[2] / "theme"
 
@@ -34,6 +34,16 @@ DECLARED_PX = {
 @pytest.fixture(scope="module")
 def stylesheet() -> str:
     return (THEME / "styles" / "layout.css").read_text(encoding="utf-8")
+
+
+@pytest.fixture(scope="module")
+def chrome() -> str:
+    return (THEME / "components" / "Chrome.vue").read_text(encoding="utf-8")
+
+
+@pytest.fixture(scope="module")
+def cover() -> str:
+    return (THEME / "layouts" / "cover.vue").read_text(encoding="utf-8")
 
 
 @pytest.fixture(scope="module")
@@ -98,3 +108,78 @@ def test_the_theme_asks_no_font_provider_for_those_families(package):
 
     assert declared_fonts["provider"] == "none"
     assert set(declared_fonts["local"]) == {fonts["font-text"], fonts["font-mono"]}
+
+
+def _skeleton_zones() -> list[str]:
+    """The zones `ae-skeleton` names, in order, read off the diagram it draws."""
+    diagram = re.search(r"```\n(.+?)\n```", rule("ae-skeleton").text, re.DOTALL)
+    assert diagram, "`ae-skeleton` draws no diagram of its zones"
+    return [zone.strip() for zone in diagram.group(1).split("→")]
+
+
+def test_the_canon_s_skeleton_draws_nothing_under_the_headline():
+    """The zones the theme builds are the canon's, and the canon no longer carries one for a rule
+    between the headline and the evidence."""
+    assert _skeleton_zones() == ["locator", "assertion headline", "evidence", "page number"]
+
+
+def test_the_theme_draws_no_rule_under_the_headline(stylesheet, chrome):
+    """The skeleton's zones, as the theme builds them. A rule zone left in the stylesheet, or a
+    rule element left in the chrome, would draw what the canon dropped."""
+    assert "--zone-rule" not in stylesheet
+    assert "legible-rule" not in stylesheet
+    assert "legible-rule" not in chrome
+    headline = re.search(r"^\.slidev-layout h1 \{(.+?)^\}", stylesheet, re.MULTILINE | re.DOTALL)
+    assert headline and "border" not in headline.group(1)
+
+
+def test_the_evidence_keeps_one_gap_below_the_headline(stylesheet):
+    """The whitespace that replaces the rule is one named zone, so every layout opens its evidence
+    the same distance under the claim rather than wherever a margin happened to land."""
+    headline = re.search(r"^\.slidev-layout h1 \{(.+?)^\}", stylesheet, re.MULTILINE | re.DOTALL)
+    assert headline, "the theme styles no headline"
+
+    assert declared(stylesheet, "--zone-headline-evidence-gap")
+    assert "margin: 0 0 var(--zone-headline-evidence-gap) 0;" in headline.group(1)
+
+
+def test_the_cover_is_undecorated(stylesheet, cover):
+    """No bar and no glow: the cover is the title, its logos and who is speaking."""
+    blocks = re.findall(r"^([^\s/*{}][^{]*)\{([^}]*)\}", stylesheet, re.MULTILINE)
+    cover_rules = "".join(body for selector, body in blocks if "cover" in selector)
+    assert cover_rules, "the theme styles no cover"
+
+    assert "gradient" not in cover_rules
+    assert "legible-cover-rule" not in stylesheet + cover
+    assert "var(--accent)" not in cover_rules
+
+
+#: The cover's two logo slots: the prop a slide sets, the `themeConfig` key a deck sets, and the
+#: placeholder the theme falls back to when neither names an image.
+LOGO_SLOTS = {
+    "venue": ("venueLogo", "venue-logo.svg"),
+    "affiliation": ("affiliationLogo", "affiliation-logo.svg"),
+}
+
+
+@pytest.mark.parametrize(("slot", "names"), LOGO_SLOTS.items())
+def test_the_cover_exposes_each_logo_slot(cover, stylesheet, slot, names):
+    key, _ = names
+
+    assert f"{key}?: string" in cover, f"the cover takes no `{key}` prop"
+    assert f"themeConfigs.{key}" in cover, f"a deck cannot set `{key}` once in themeConfig"
+    assert f"legible-cover-{slot}-logo" in cover
+    assert f".legible-cover-{slot}-logo" in stylesheet
+
+
+@pytest.mark.parametrize(("slot", "names"), LOGO_SLOTS.items())
+def test_each_logo_slot_falls_back_to_a_placeholder_the_theme_bundles(cover, slot, names):
+    """Imported rather than served, so the build carries it into whatever deck names the theme: a
+    theme's own `public/` is not served at a deck's root, and a fallback that pointed there would
+    be a broken image on every cover that names no mark."""
+    _, placeholder = names
+
+    assert (THEME / "assets" / "placeholders" / placeholder).is_file()
+    assert f"from '../assets/placeholders/{placeholder}?url'" in cover, (
+        f"the {slot} slot does not fall back to its placeholder"
+    )

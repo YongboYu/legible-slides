@@ -38,8 +38,8 @@ Three things, in order of how much they matter:
 ### One palette, in one file
 
 The theme is `leuven-blue`, one palette file in [`themes/`](themes) that passes the validator. It is
-the author's own template for academic talks, and it ships no institution's marks: the decks serve
-placeholder logos, and a deck points its cover at its own files.
+the author's own template for academic talks, and it ships no institution's marks: the cover's venue
+and affiliation slots show placeholder logos until a deck points them at its own files.
 
 > **Note:** the palette is inspired by KU Leuven's house colours. It is not affiliated with or
 > endorsed by the university.

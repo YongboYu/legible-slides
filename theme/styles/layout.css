@@ -29,8 +29,8 @@
   --headline-lines-max: 2;
   --headline-line-height: 1.28;
 
-  /* ── the five zones of `ae-skeleton`, as canvas px ──
-   * locator → assertion headline → accent rule → evidence → page number. The zone heights are
+  /* ── the four zones of `ae-skeleton`, as canvas px ──
+   * locator → assertion headline → evidence → page number. The zone heights are
    * fixed rather than content-driven, which is what makes the chrome land in the same place on
    * every slide of a deck instead of drifting with the length of a headline. */
   --edge-x: 72px;
@@ -39,22 +39,19 @@
   --zone-gap: 20px;
   --zone-locator-h: 28px;
   /* The headline's ceiling, in the height it actually takes: a third line has nowhere to go and
-   * collides with the accent rule. Derived rather than measured once and pasted, so the ceiling
+   * runs into the evidence. Derived rather than measured once and pasted, so the ceiling
    * cannot come loose from the two numbers it is made of. */
   --zone-headline-h: calc(
     var(--headline-px) * var(--headline-line-height) * var(--headline-lines-max)
   );
-  --zone-rule-h: 3px;
+  /* The distance `ae-skeleton` puts between the headline and the evidence, the same on every
+   * slide. Twice the gap between any other two zones, so the break under the headline reads as the
+   * slide's one structural break rather than as the space after a paragraph. */
+  --zone-headline-evidence-gap: calc(var(--zone-gap) * 2);
   /* Room under the evidence for the page number. */
   --zone-footer-h: 28px;
 
   --zone-headline-top: calc(var(--edge-top) + var(--zone-locator-h) + var(--zone-gap));
-  --zone-header-h: calc(
-    var(--zone-headline-top) + var(--zone-headline-h) + var(--zone-gap) + var(--zone-rule-h)
-  );
-
-  /* The accent segment that starts the rule. Attention, not decoration (`accent-is-attention`). */
-  --zone-rule-accent-w: 88px;
 
   /* `light-ground`: the scheme is locked, so form controls, scrollbars and any UA-drawn surface
    * are told the ground they are on rather than asking the viewer's OS. */
@@ -99,7 +96,7 @@ html.dark {
 }
 
 .slidev-layout h1 {
-  margin: 0 0 calc(var(--zone-gap) * 2 + var(--zone-rule-h)) 0;
+  margin: 0 0 var(--zone-headline-evidence-gap) 0;
   min-height: var(--zone-headline-h);
   color: var(--brand);
   font-size: var(--headline-px);
@@ -232,25 +229,6 @@ html.dark {
   letter-spacing: 0.04em;
 }
 
-.legible-rule {
-  position: absolute;
-  top: calc(var(--zone-header-h) - var(--zone-rule-h));
-  right: var(--edge-x);
-  left: var(--edge-x);
-  height: var(--zone-rule-h);
-  background: var(--hairline);
-}
-
-.legible-rule::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  width: var(--zone-rule-accent-w);
-  background: var(--accent);
-}
-
 .legible-page {
   position: absolute;
   right: var(--edge-x);
@@ -263,14 +241,28 @@ html.dark {
 /* ── layout: cover ────────────────────────────────────────────────────────────────────────────
  * The one slide outside the skeleton, and the only one with no chrome: it is where orientation
  * begins rather than something the locator has to carry. It introduces no new type size either —
- * the title is set at the headline size, because a cover is not a licence for a display face. */
+ * the title is set at the headline size, because a cover is not a licence for a display face.
+ *
+ * What it carries is the title, who is speaking, and two marks: the venue's above the title,
+ * because it says where the talk is being given, and the affiliation's in the bottom-left corner,
+ * because it says who the speaker speaks for and is read last. The gaps between them are the
+ * skeleton's own, so the cover is spaced like every slide after it.
+ *
+ * The marks are sized in locator heights, the one piece of chrome they sit beside in the deck, so
+ * neither can outweigh the title and neither is a number of its own. */
 
 .slidev-layout.cover {
+  --cover-venue-logo-h: calc(var(--zone-locator-h) * 2.5);
+  --cover-affiliation-logo-h: calc(var(--zone-locator-h) * 2);
+
   position: relative;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding: var(--edge-top) var(--edge-x) var(--edge-bottom) var(--edge-x);
+  /* The bottom edge is held clear of the affiliation's mark, so a long title pushes the column up
+   * rather than into the corner. */
+  padding: var(--edge-top) var(--edge-x)
+    calc(var(--edge-bottom) + var(--cover-affiliation-logo-h) + var(--zone-gap)) var(--edge-x);
 }
 
 .slidev-layout.cover h1 {
@@ -287,31 +279,41 @@ html.dark {
   line-height: 1.45;
 }
 
-.legible-cover-rule {
-  width: var(--zone-rule-accent-w);
-  height: var(--zone-rule-h);
-  margin: 32px 0;
-  background: var(--accent);
-}
-
 .legible-cover-meta {
   display: grid;
   gap: 4px;
+  margin-top: var(--zone-headline-evidence-gap);
   color: var(--neutral);
 }
 
-.legible-cover-logo {
+/* Both marks are sized by height and keep their own aspect ratio, so a wide lockup and a square
+ * crest land at the same visual weight; the width cap only stops a banner-shaped one from running
+ * across the slide. Set on the left edge the title is set on. */
+.legible-cover-venue-logo {
+  align-self: flex-start;
+  width: auto;
+  max-width: 50%;
+  height: var(--cover-venue-logo-h);
+  margin-bottom: var(--zone-headline-evidence-gap);
+  object-fit: contain;
+  object-position: left center;
+}
+
+.legible-cover-affiliation-logo {
   position: absolute;
-  top: var(--edge-top);
-  right: var(--edge-x);
-  max-width: 260px;
-  /* Matched to the locator zone opposite it, so the two top corners sit on one line. */
-  max-height: 44px;
+  bottom: var(--edge-bottom);
+  left: var(--edge-x);
+  width: auto;
+  max-width: 40%;
+  height: var(--cover-affiliation-logo-h);
+  object-fit: contain;
+  object-position: left bottom;
 }
 
 /* ── layouts: the content skeleton ────────────────────────────────────────────────────────────
- * Padded to the zones above: the headline starts under the locator, and the evidence starts under
- * the accent rule. A column, so a `Footnotes` block can sit on the bottom edge of the evidence. */
+ * Padded to the zones above: the headline starts under the locator, and the evidence starts one
+ * `--zone-headline-evidence-gap` under the headline's reserved zone. A column, so a `Footnotes`
+ * block can sit on the bottom edge of the evidence. */
 
 .slidev-layout.assertion-evidence,
 .slidev-layout.two-col-evidence,
@@ -322,7 +324,7 @@ html.dark {
     var(--edge-x);
 }
 
-/* The evidence pane, filling what is left under the rule. A column, and `min-height: 0` on both
+/* The evidence pane, filling what is left under the headline. A column, and `min-height: 0` on both
  * ends of it, so a figure inside shrinks to fit rather than pushing the slide past its bottom
  * edge — and so a `Footnotes` block can be pushed to that edge.
  *

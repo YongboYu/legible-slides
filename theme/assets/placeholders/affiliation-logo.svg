@@ -1,6 +1,7 @@
-<!-- A blank for your affiliation's logo, so the cover renders the slot as a form rather than as a
-     broken image. Replace it with your own mark: drop the file into this public/ and point the
-     deck's headmatter at it. No institution's mark ships with this project.
+<!-- A blank for your affiliation's logo, bundled by the theme so the cover's slot renders as a form rather
+     than as a broken image when a deck names no image of its own. Replace it from the deck, never
+     here: drop your own mark into the deck's public/ and point its themeConfig at it. No
+     institution's mark ships with this project.
 
      Greys rather than palette roles: an <img> cannot read the palette's custom properties, and a
      blank has no business tracking the palette. -->

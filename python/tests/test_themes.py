@@ -21,10 +21,6 @@ SHIPPED = sorted(path.name for path in (REPO / "themes").glob("*.json"))
 #: The one theme, by name. Everything downstream — the deck, the scaffold, CI — is built around it.
 THEME = "leuven-blue.json"
 
-#: The decks that serve a cover logo, and the placeholders they serve in place of anybody's mark.
-DECKS_WITH_A_COVER = (REPO / "deck", REPO / "skill" / "template")
-PLACEHOLDERS = ("venue-logo.svg", "affiliation-logo.svg")
-
 
 def test_exactly_one_theme_ships():
     assert SHIPPED == [THEME]
@@ -68,11 +64,3 @@ def test_no_university_mark_ships():
     ).stdout.splitlines()
 
     assert [path for path in tracked if "kuleuven" in path.lower()] == []
-
-
-@pytest.mark.parametrize("deck", DECKS_WITH_A_COVER, ids=lambda deck: deck.name)
-@pytest.mark.parametrize("placeholder", PLACEHOLDERS)
-def test_each_deck_serves_the_logo_placeholders(deck, placeholder):
-    """Blanks in the logo slots, served from the deck's own public/, where a real mark replaces
-    them by being dropped in under a name the headmatter points at."""
-    assert (deck / "public" / placeholder).is_file()

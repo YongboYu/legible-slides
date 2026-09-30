@@ -71,9 +71,9 @@ chrome: false
 
 # A slide can drop the chrome, and this one has.
 
-The locator pill, the accent rule and the page number are one component, injected on every other
-slide in this deck. No layout opts in, so none can forget. `chrome: false` in a slide's frontmatter
-takes all three off, and the `cover` layout is without them already.
+The locator pill and the page number are one component, injected on every other slide in this
+deck. No layout opts in, so none can forget. `chrome: false` in a slide's frontmatter takes both
+off, and the `cover` layout is without them already.
 
 This slide also names no layout. `default` is `assertion-evidence` under the name Slidev falls back
 to, so the skeleton is what a slide gets by default rather than something it has to ask for.

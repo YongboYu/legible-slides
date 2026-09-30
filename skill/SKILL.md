@@ -33,7 +33,7 @@ Ask only for what the author has not already said.
 | Where the deck goes | a new directory, named by the author. |
 | Where the theme is | slidev-theme-legible is not on npm yet, so a deck consumes it by path — the theme directory inside a checkout of legible-slides. Ask which checkout. |
 | Which palette it wears | the one the template already carries, a copy of `themes/leuven-blue.json` in that same checkout. Change it only if the author names another. |
-| Which marks the cover shows | none: the template carries placeholders for the venue's and the affiliation's logos. Put the author's own files in `public/` if they name them; otherwise leave the placeholders for them to replace. |
+| Which marks the cover shows | none: the cover's venue and affiliation slots show placeholders the theme bundles. Put the author's own files in `public/` if they name them; otherwise leave the placeholders for them to replace. |
 
 ### 2. Stamp the template
 
@@ -55,7 +55,7 @@ nothing if they are not.
 | the headmatter of `slides.md` | the theme's path, the title, the author, and the cover's own venue and date |
 | `package.json` | the deck's name and its description |
 | `themes/palette.json` | the chosen palette's contents, if it is not the one stamped. Keep the path — everything else in the deck points at it, which is what makes a recolour one edit. |
-| `public/` and `themeConfig.logo` | the author's own marks, if they named any, in place of the placeholders |
+| `public/`, `themeConfig.venueLogo` and `themeConfig.affiliationLogo` | the author's own marks, if they named any, in place of the placeholders |
 
 A skeleton slide is a blank for the author to fill, and not a slide for you to write. The method is
 about deciding what each slide is *for*, and that decision is theirs.

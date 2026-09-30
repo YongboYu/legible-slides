@@ -52,7 +52,7 @@ a layout that breaks it. The beat-13 close reuses `cover` or a plain `assertion-
 
 | Component | Role |
 |---|---|
-| locator + page-no **chrome** | the persistent AE identity — locator pill + accent rule + page number, injected globally with per-slide opt-out (academic's `Pagination` pattern). Generalizes pmf's `PageNo` + locator. **Built on the per-slide `slide-top.vue` layer, not `global-top.vue`** (#20): the chrome is per-slide, and Slidev provides a slide's frontmatter and number only inside that slide. A global layer is mounted outside every slide and can only ask where the deck currently *is* — the wrong question wherever more than one slide is on screen, as in the overview and a printed export. |
+| locator + page-no **chrome** | the persistent AE identity — locator pill + page number, injected globally with per-slide opt-out (academic's `Pagination` pattern). Generalizes pmf's `PageNo` + locator. **Built on the per-slide `slide-top.vue` layer, not `global-top.vue`** (#20): the chrome is per-slide, and Slidev provides a slide's frontmatter and number only inside that slide. A global layer is mounted outside every slide and can only ask where the deck currently *is* — the wrong question wherever more than one slide is on screen, as in the overview and a printed export. |
 | **`Callout`** | inline emphasis box (pmf universal). |
 | **`Footnote` / `Footnotes`** | manual citation markers (borrow academic, #6) — pairs with the `references` layout for the deck's Alley / Tversky / Machado cites. |
 | **`Figure`** | image + caption + optional cite-marker, kept as *data* (borrow academic's prop-driven captions) — evidence panes carry image + caption + source together. |
@@ -101,8 +101,9 @@ docs/       method.md, design-provenance.md, *-contract.md, research/
 - **Fonts** — Inter + JetBrains Mono bundled as woff2 in `theme/assets/fonts/` (borrow academic's
   self-hosted `@font-face`, drop the eot/svg legacy). The same TTFs the figure helper registers.
 - **Deck ↔ theme** — the deck consumes the theme via a local `theme:` path.
-- **Theme shipped** — `leuven-blue`, validated, with no institution's marks: the decks serve logo
-  placeholders from their own `public/` ([ADR 0001](adr/0001-personal-leuven-template.md)).
+- **Theme shipped** — `leuven-blue`, validated, with no institution's marks: the theme bundles the
+  cover's two logo placeholders, and a deck's `themeConfig` points a slot at its own file
+  ([ADR 0001](adr/0001-personal-leuven-template.md)).
 
 ### The palette → CSS wiring
 
