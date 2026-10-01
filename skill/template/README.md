@@ -27,6 +27,11 @@ The `theme` key in `slides.md`'s headmatter is a **path**, which is how a deck c
 nowhere else names it. Nothing else is configured here, because everything the method fixes — the
 canvas, the type scale, the bundled typefaces, the light ground — arrives with the theme.
 
+`package.json` holds markdown-it to its 14.x line under `pnpm.overrides`. Slidev's markdown plugin
+imports a file the next major version of markdown-it no longer exports, and with no lockfile a fresh
+install picks that version up and the build fails before it reads a slide. Drop the override once
+Slidev ships a plugin that works with it.
+
 A PDF to present from is Slidev's own export, and the renderer it needs is not stamped here because
 a browser download is something you should have asked for:
 
