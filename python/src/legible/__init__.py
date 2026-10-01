@@ -14,10 +14,11 @@ from legible.css import gen_css
 from legible.lint import Finding, LintReport, Unchecked, lint
 from legible.method import DELTA_E_FLOOR, MethodError, Rule, rule, rule_thresholds, rules
 from legible.palette import Palette, PaletteError, load_palette
-from legible.validate import Failure, GrayscaleWarning, GroupReport, Report, validate
+from legible.validate import ContrastPair, Failure, GrayscaleWarning, GroupReport, Report, validate
 
 __all__ = [
     "DELTA_E_FLOOR",
+    "ContrastPair",
     "Failure",
     "Finding",
     "GrayscaleWarning",

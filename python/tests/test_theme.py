@@ -266,3 +266,49 @@ def test_a_backup_section_shows_its_own_label_and_no_count(chrome):
     more part than it gave."""
     assert "backup" in chrome
     assert re.search(r"v-if=\"[^\"]*backup", chrome), "the chrome never branches on a backup"
+
+
+# ── attention ─────────────────────────────────────────────────────────────────
+
+
+def _theme_sources() -> dict[str, str]:
+    """Every file the theme styles anything in: its stylesheets, components and layouts."""
+    paths = [*THEME.glob("styles/*.css"), *THEME.glob("**/*.vue")]
+    return {
+        str(path.relative_to(THEME)): path.read_text(encoding="utf-8")
+        for path in paths
+        if "node_modules" not in path.parts and path.name != "tokens.css"
+    }
+
+
+def test_the_attention_callout_is_a_fill_with_ink_on_it(stylesheet):
+    """`accent-is-attention`: the fill role is a fill, and what sits on it is ink."""
+    callout = _block(stylesheet, ".legible-callout.legible-callout-accent")
+    title = _block(stylesheet, ".legible-callout-accent .legible-callout-title")
+
+    assert "background: var(--accent);" in callout
+    assert "color: var(--ink);" in callout
+    assert "color: var(--ink);" in title
+    assert "color: var(--ink);" in _block(stylesheet, ".slidev-layout .legible-callout-accent a")
+
+
+def test_the_attention_callout_s_edge_is_a_stroke_the_canon_allows(stylesheet):
+    """A stroke in the attention hue is drawn in the text-and-stroke role, at least as wide as the
+    canon's stroke floor."""
+    callout = _block(stylesheet, ".legible-callout.legible-callout-accent")
+    edge = re.search(r"border-left: (\d+)px solid var\(--accent-strong\);", callout)
+
+    floor = int(rule_thresholds("accent-is-attention")["attention-stroke-px-min"])
+
+    assert edge, "the attention callout's edge is not an accent-strong stroke"
+    assert int(edge.group(1)) >= floor
+
+
+def test_the_attention_fill_is_never_text_or_a_stroke():
+    """The fill colour is 2.7:1 on white: as text or a line, a projector loses it first."""
+    misuse = re.compile(
+        r"(?:^|[\s;{])(?:color|border(?:-[a-z]+)*|outline|stroke|fill):[^;]*var\(--accent\)"
+    )
+    offenders = [name for name, source in _theme_sources().items() if misuse.search(source)]
+
+    assert offenders == []

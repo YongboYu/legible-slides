@@ -14,6 +14,7 @@ report.passed          # True
 report.min_delta_e     # {'normal': …, 'deuteranomaly': …, 'protanomaly': …, 'tritanomaly': …}
 report.failures        # pairs below the floor, named by role — never by hex
 report.warnings        # grayscale collisions; advisory, never a failure
+report.contrast        # the attention pairings and the WCAG contrast each achieves
 ```
 
 ## What `validate()` checks
@@ -34,6 +35,10 @@ What the package adds on top of the rule is fixed by
 **two co-occurrence groups** — `G1 = {reference, muted, series…}` (the per-series ramp) and
 `G2 = {reference, muted, brand}` (the two-group highlight). They live on mutually exclusive slides,
 so `brand ↔ series` is never compared: those roles cannot share an axis.
+
+It also measures the pairings **`accent-is-attention`** names, in WCAG contrast. The canon owns the pairings and the
+ratio they clear; a pairing below it fails the palette like a pair below the floor, and is listed in
+`report.contrast_failures`.
 
 Pass your own floor to move the boundary:
 
@@ -60,13 +65,18 @@ FAIL  my-theme.json — min ΔE … (floor …)
     tritanomaly     …
     grayscale       …  advisory
 
+  attention contrast (min …)
+         …  ink on accent
+  fail   …  accent-strong on surface
+         …  accent-strong on surface-alt
+
   fail  deuteranomaly   …  series-1 ↔ series-2
   warn  grayscale       …  muted ↔ series-1
 ```
 
-Pairs are named by **role**, never by hex, so the output says which colour in your theme file to
-change. The achieved minimum prints on a pass too — headroom, or the lack of it, is the thing worth
-seeing when you are deciding whether the ramp has room for one more series.
+Pairs and pairings are named by **role**, never by hex, so the output says which colour in your
+theme file to change. The achieved minimum prints on a pass too — headroom, or the lack of it, is the
+thing worth seeing when you are deciding whether the ramp has room for one more series.
 
 `--json` emits the report verbatim, one object per theme in the order given.
 
@@ -260,7 +270,7 @@ two_group(palette, {"ARIMA": 0.51, "XGBoost": 0.44}, {"Ours": 0.29}, y_label="MA
   file the single authority the deck's CSS and the validator already read.
 - **Only roles the validator measured may encode data** — the anchors and the ramp for a
   multi-series chart, the de-emphasised role plus one highlight for a two-group one. That puts the
-  attention role out of reach (`accent-is-attention`) along with every structural neutral, because
+  attention roles out of reach (`accent-is-attention`) along with every structural neutral, because
   a pair nobody checked is a pair nobody can vouch for.
 - **The deck's typeface is registered before anything is drawn**, and a resolution landing outside
   the bundle is an error. See [`theme/assets/fonts/`](../theme/assets/fonts/).

@@ -68,7 +68,8 @@ cvd-validate my-theme.json
 
 It names each failing pair by role rather than by hex, prints the achieved minimum even when you
 pass — so you can see whether you have headroom — and exits non-zero if any pair falls below the
-floor. See [`python/README.md`](python/README.md).
+floor or an attention pairing falls short of its contrast (`accent-is-attention`). See
+[`python/README.md`](python/README.md).
 
 Inside this repo the same command gates CI over the theme in [`themes/`](themes) on push and pull
 request: a palette that fails cannot merge. The hook in `.pre-commit-config.yaml` runs it locally and

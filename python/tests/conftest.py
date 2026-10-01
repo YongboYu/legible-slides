@@ -52,6 +52,7 @@ def base_palette() -> dict:
         "brand": "#00407a",
         "brand-strong": "#1d8db0",
         "accent": "#dd8a2e",
+        "accent-strong": "#b3541e",
         "reference": "#111111",
         "muted": "#778496",
         "series": ["#1b6fb0", "#57c0ae", "#4c3a78"],
@@ -77,4 +78,12 @@ def grayscale_clash_palette(base_palette: dict) -> dict:
     """A palette whose series-2 is a rust: well clear of series-1 in colour, near-identical to it
     in lightness, so only the grayscale check — the advisory one — notices."""
     base_palette["series"][1] = "#a34a2a"
+    return base_palette
+
+
+@pytest.fixture
+def faint_attention_palette(base_palette: dict) -> dict:
+    """A palette whose text-and-stroke role is the fill colour itself: a warm tone that clears
+    contrast under ink, and fails it as text on the ground."""
+    base_palette["accent-strong"] = base_palette["accent"]
     return base_palette

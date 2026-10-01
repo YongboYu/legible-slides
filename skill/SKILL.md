@@ -179,7 +179,7 @@ against the deck rather than any one slide — the palette is the usual one — 
 ```markdown
 # Review — path/to/slides.md
 
-**FAIL** — 2 errors, 3 warnings.
+**FAIL** — 2 errors, 1 warning.
 Mechanical checks gate; judgments are advisory and never block. Palette: checked against
 themes/leuven-blue.json. Read any rule below with `legible rules <rule-id>`.
 

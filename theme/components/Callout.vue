@@ -10,8 +10,8 @@ defineProps<{
   /** A short label above the box's content. */
   title?: string
   /**
-   * Mark it as the thing to look at. Accent is the attention role and never a data colour, so it is
-   * spent on the box's edge with ink text on top of it (`accent-is-attention`).
+   * Mark it as the thing to look at. The box takes the attention fill and carries ink
+   * (`accent-is-attention`).
    */
   accent?: boolean
 }>()

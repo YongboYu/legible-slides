@@ -20,8 +20,8 @@ Three things are enforced rather than documented, because a rule a caller can fo
 deck will eventually break:
 
 - colour comes only from palette roles, so nothing downstream can hardcode a hex;
-- only roles the validator actually measured may encode data, which puts the attention role
-  (`accent-is-attention`) and the structural neutrals out of reach;
+- only roles the validator actually measured may encode data, which puts the attention
+  roles (`accent-is-attention`) and the structural neutrals out of reach;
 - the dash/marker supply is finite, and a chart with more series than it can distinguish is
   refused instead of quietly repeating one.
 
@@ -81,9 +81,9 @@ MARKERS = ("o", "s", "^", "D", "v", "P")
 #: an evidence pane without the labels running into each other.
 LEGEND_COLUMNS = 3
 
-#: The attention role. `accent-is-attention` reserves it for arrows and highlights, and this module
-#: is where "never a data series" stops being advice.
-ATTENTION_ROLE = "accent"
+#: The attention roles, the fill and the text-and-stroke one. `accent-is-attention` reserves both
+#: for arrows and highlights, and this module is where "never a data series" stops being advice.
+ATTENTION_ROLES = ("accent", "accent-strong")
 
 #: The de-emphasised comparison group in the two-group archetype — fixed, because a chart that let
 #: the caller choose it would be a chart that could highlight both sides.
@@ -212,7 +212,7 @@ def two_group(
 
     Two groups is the signature, not a convention — there is no third argument to put a second
     highlight in. The comparison is always the de-emphasised role; the highlight is the brand or a
-    colour off the ramp, and never the attention role. One highlight means one highlight *role*:
+    colour off the ramp, and never an attention role. One highlight means one highlight *role*:
     however many bars stand in that group, the chart still spends exactly two colours.
 
     Every bar is labelled with its own value where it stands, so the chart needs no legend and no
@@ -336,9 +336,9 @@ def _assign_roles(palette: Palette, series: Sequence[Series]) -> list[str]:
 
 def _checked_role(palette: Palette, role: str, *, allowed: Sequence[str], what: str) -> str:
     """One role, checked against what the method lets it encode."""
-    if role == ATTENTION_ROLE:
+    if role in ATTENTION_ROLES:
         raise FigureError(
-            f"`{ATTENTION_ROLE}` marks attention, never data (`accent-is-attention`), so it "
+            f"`{role}` marks attention, never data (`accent-is-attention`), so it "
             f"cannot colour {what}"
         )
     if role not in allowed:

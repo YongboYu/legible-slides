@@ -151,3 +151,23 @@ def test_a_palette_below_the_floor_outranks_a_theme_that_could_not_be_read(
     code = main([str(tmp_path / "absent.json"), str(write_theme(colliding_palette))])
 
     assert code == 1
+
+
+def test_a_failing_attention_pairing_exits_one_and_names_it_by_role(
+    capsys, write_theme, faint_attention_palette
+):
+    code = main([str(write_theme(faint_attention_palette))])
+
+    out = capsys.readouterr().out
+    assert code == 1
+    assert out.startswith("FAIL")
+    assert "accent-strong on surface" in out
+    assert faint_attention_palette["accent-strong"] not in out
+
+
+def test_a_passing_theme_prints_the_attention_contrast_it_achieved(capsys, themes_dir):
+    main([str(themes_dir / "leuven-blue.json")])
+
+    out = capsys.readouterr().out
+    assert "ink on accent" in out
+    assert "4.65" in out

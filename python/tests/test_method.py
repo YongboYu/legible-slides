@@ -4,6 +4,8 @@ import pytest
 
 from legible import DELTA_E_FLOOR, load_palette, validate
 from legible.method import (
+    ATTENTION_CONTRAST_MIN,
+    ATTENTION_CONTRAST_PAIRS,
     BULLETS_PER_SLIDE,
     EM_DASHES_PER_HEADLINE,
     INFLATED_REGISTER_SEVERITY,
@@ -224,3 +226,14 @@ def test_the_canon_decides_how_far_the_section_map_stretches_and_how_loudly():
     assert SECTIONS_MAX == 5
     assert SECTION_LABEL_CHARS_MAX == 10
     assert SECTION_LOCATOR_SEVERITY == "warning"
+
+
+def test_the_canon_names_the_attention_pairings_and_what_they_must_clear():
+    """`accent-is-attention` splits the hue by job, and says which pairing each job is read in."""
+    assert ATTENTION_CONTRAST_PAIRS == (
+        ("ink", "accent"),
+        ("accent-strong", "surface"),
+        ("accent-strong", "surface-alt"),
+    )
+    assert ATTENTION_CONTRAST_MIN == 4.5
+    assert rule_thresholds("accent-is-attention")["attention-stroke-px-min"] == "3"

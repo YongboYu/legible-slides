@@ -234,17 +234,19 @@ def test_nothing_in_a_two_group_chart_is_a_colour_the_palette_does_not_have(pale
     assert colours_in(figure) <= set(palette.roles.values())
 
 
-def test_the_attention_role_cannot_colour_a_data_series(palette):
-    """`accent-is-attention`, enforced rather than reviewed."""
+@pytest.mark.parametrize("role", ["accent", "accent-strong"])
+def test_the_attention_roles_cannot_colour_a_data_series(palette, role):
+    """`accent-is-attention`, enforced rather than reviewed, for both of its jobs."""
     with pytest.raises(FigureError) as error:
-        multi_series(palette, [Series("a", [1.0, 2.0], role="accent")])
+        multi_series(palette, [Series("a", [1.0, 2.0], role=role)])
 
     assert "accent-is-attention" in str(error.value)
 
 
-def test_the_attention_role_cannot_colour_a_highlighted_group(palette):
+@pytest.mark.parametrize("role", ["accent", "accent-strong"])
+def test_the_attention_roles_cannot_colour_a_highlighted_group(palette, role):
     with pytest.raises(FigureError) as error:
-        two_group(palette, {"ARIMA": 0.51}, {"Ours": 0.29}, highlight_role="accent")
+        two_group(palette, {"ARIMA": 0.51}, {"Ours": 0.29}, highlight_role=role)
 
     assert "accent-is-attention" in str(error.value)
 

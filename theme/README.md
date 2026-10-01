@@ -120,7 +120,7 @@ is on screen, as in the overview and a printed export.
 
 | Component | |
 |---|---|
-| `Callout` | an inline box for the one thing that has to read as set apart. `title`, and `accent` for the attention variant. |
+| `Callout` | an inline box for the one thing that has to read as set apart. `title`, and `accent` for the attention variant (`accent-is-attention`). |
 | `Figure` | `src`, `caption`, `cite`, `alt` — image, caption and citation as one thing, so a swapped figure cannot keep the old caption. |
 | `Footnotes` / `Footnote` | the foot of the evidence pane. `Footnote` takes the `number` you wrote as the in-text marker. |
 | `Chrome` | the chrome above. Injected for you; you should not need to place it. |

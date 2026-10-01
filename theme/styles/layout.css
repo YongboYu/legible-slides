@@ -438,10 +438,22 @@ html.dark {
   background: var(--surface-alt);
 }
 
-/* The attention variant. Accent marks the thing to look at, and carries ink on top of it rather
- * than light text (`accent-is-attention`). */
+/* The attention variant. The box takes the fill role and carries ink, title included; its edge is a
+ * stroke, so it takes the text-and-stroke role (`accent-is-attention`). */
 .legible-callout.legible-callout-accent {
-  border-left-color: var(--accent);
+  border-left: 4px solid var(--accent-strong);
+  background: var(--accent);
+  color: var(--ink);
+}
+
+.legible-callout-accent .legible-callout-title {
+  color: var(--ink);
+}
+
+/* Brand on the fill falls short of the contrast ink clears, so a link in the box is ink too, and
+ * its underline is what still marks it as a link (`never-sole-channel`). */
+.slidev-layout .legible-callout-accent a {
+  color: var(--ink);
 }
 
 .legible-callout-title {

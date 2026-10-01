@@ -32,12 +32,21 @@ the two lines that appear in every chart (`reference`, `muted`):
 - **`brand ↔ series` is *not* checked** — they never co-occur on one axis, and requiring it is both
   wrong on the merits and empirically impossible for the reference palette (brand `#00407a` vs
   series-3 `#4c3a78` collapse to ΔE ≈ 0.7 under protanopia, because both are dark blue-purples).
-- **Excluded roles:** `accent` (`accent-is-attention` keeps it off every data axis, and it carries
-  shape and position redundancy of its own) and all structural neutrals (`ink`, `neutral`, `neutral-soft`, `surface*`,
+- **Excluded roles:** `accent` and `accent-strong` (`accent-is-attention` keeps them off every data
+  axis, and they carry shape and position redundancy of their own) and all structural neutrals (`ink`, `neutral`, `neutral-soft`, `surface*`,
   `hairline`) — those are governed by WCAG *contrast*, not categorical ΔE.
 
 A theme with fewer series still works: the groups are formed pairwise over whatever roles are
 present.
+
+### The attention pairings — contrast, not ΔE
+
+`accent-is-attention` names a short list of pairings the attention roles are read in, and the WCAG
+contrast ratio they clear. Those are a
+legibility question, not a separation one, so they are measured with the WCAG 2.x luminance ratio
+rather than ΔE, at two decimal places, and compared inclusively against the canon's minimum. A
+pairing below it fails the palette and exits `1`, exactly like a pair below the floor; the canon
+owns the list and the number, so a pairing added there is checked with nothing edited here.
 
 ## 2. Metric
 
@@ -124,13 +133,17 @@ there rather than carrying its own copy, and the same name is used throughout th
 
 ```
 Report:
-  passed:       bool          # True iff every CVD pair ≥ threshold, both groups (grayscale excluded)
+  passed:       bool          # every CVD pair ≥ threshold in both groups (grayscale excluded),
+                              # and every attention pairing ≥ contrast_threshold
   threshold:    float         # the canon's floor unless the caller overrides it
   groups:       {G1: {...}, G2: {...}}
   min_delta_e:  {normal, deuteranomaly, protanomaly, tritanomaly}
   grayscale_min: float        # advisory
   failures:     [(condition, role_a, role_b, delta_e)]   # CVD pairs < threshold
   warnings:     [(role_a, role_b, delta_e)]              # grayscale pairs < threshold
+  contrast_threshold: float                              # the canon's `attention-contrast-min`
+  contrast:     [(foreground, background, ratio)]        # every pairing the canon names
+  contrast_failures: [(foreground, background, ratio)]   # pairings < contrast_threshold
 ```
 
 **CLI** — `cvd-validate themes/leuven-blue.json`:
@@ -139,7 +152,7 @@ Report:
   warning pair named **by role** (`muted ↔ series-1`), never by hex — so an author knows which colour
   to fix. The **achieved min prints even on pass**, so headroom (or the lack of it) is visible.
 - **`--json`** emits the `Report` verbatim for CI logs / tooling.
-- **Exit code** `0` on pass, `1` on any CVD failure. **Warnings never change the exit code.**
+- **Exit code** `0` on pass, `1` on any CVD or attention-contrast failure. **Warnings never change the exit code.**
 
 The command takes **one or more** theme paths, so the CI gate and the pre-commit hook are one
 invocation over whatever they were handed. Three consequences of that, settled in implementation:

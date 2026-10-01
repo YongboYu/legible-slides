@@ -9,6 +9,8 @@ def test_loads_a_shipped_theme_with_series_expanded_to_indexed_roles(themes_dir)
     assert palette.name == "leuven-blue"
     assert palette["ink"] == "#102a43"
     assert palette["series-1"] == "#1b6fb0"
+    assert palette["accent"] == "#dd8a2e"
+    assert palette["accent-strong"] == "#b3541e"
     assert palette["series-3"] == "#4c3a78"
     assert palette.series_roles == ("series-1", "series-2", "series-3")
 
@@ -79,3 +81,10 @@ def test_a_theme_without_metadata_is_named_after_its_file(write_theme, base_pale
     palette = load_palette(write_theme(base_palette, name="ochre.json"))
 
     assert palette.name == "ochre"
+
+
+def test_the_text_and_stroke_attention_role_is_required(write_theme, base_palette):
+    del base_palette["accent-strong"]
+
+    with pytest.raises(PaletteError, match="accent-strong"):
+        load_palette(write_theme(base_palette))

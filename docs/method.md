@@ -175,8 +175,8 @@ improves learning across every test of it. Signal-to-noise, data-ink, restraint 
 
 ### `signaling`: cue the one thing that matters
 
-Point the eye at the part of the evidence that carries the claim. The `accent` role is the signalling
-channel; see `accent-is-attention`.
+Point the eye at the part of the evidence that carries the claim. The attention roles are the
+signalling channel; see `accent-is-attention`.
 
 **Decided by** judgment
 
@@ -238,10 +238,24 @@ visuals and pasted images)
 
 ### `accent-is-attention`: the accent role marks attention, never data
 
-An arrow, a highlight, "ours". Never a data series, and always with ink text on top of it rather than
-light text.
+An arrow, a highlight, "ours". Never a data series.
 
-**Decided by** script (generated figures) · judgment (hand-made visuals)
+Attention is one hue doing two jobs, and no single tone of it clears contrast in both on a light
+ground, so it comes as two roles. `accent` is a **fill**: a callout, a pill, a badge, always with
+ink text on top of it and never light text. `accent-strong` is for **text and strokes**: an arrow, a
+ring, a highlighted numeral. The fill colour is never text and never a thin stroke. A stroke in
+either role is at least the stroke floor wide on the canvas, because a hairline in a warm hue is the
+first thing a washed-out projector loses.
+
+**One attention locus per slide:** one pill, or one arrow and the ring it points to, or one
+highlighted numeral. Isolation is what makes a highlight work, and a second one dilutes both. Pair it
+with a second cue (weight, shape or position), as `never-sole-channel` asks of all colour.
+
+**Decided by** script (the contrast pairings, generated figures) · judgment (hand-made visuals, the
+one locus) · **Threshold**
+`attention-contrast-pairs = [ink on accent, accent-strong on surface, accent-strong on surface-alt]`,
+`attention-contrast-min = 4.5`, `attention-stroke-px-min = 3` (violation when a pairing's WCAG
+contrast ratio is below `attention-contrast-min`)
 
 ### `spend-colour-on-discrimination`: two groups by default, the full ramp only when earned
 

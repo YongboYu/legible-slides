@@ -4,6 +4,10 @@
 and under which vision. The rule is `separation-floor`, and the canon owns its floor, conditions
 and grayscale carve-out; ``docs/cvd-validator-contract.md`` fixes what this module adds — the two
 co-occurrence groups and the shape of the report.
+
+It also reads the pairings `accent-is-attention` names in WCAG contrast, because attention that
+cannot be read is a palette that fails as surely as two series that cannot be told apart. The canon
+owns the pairings and the ratio they clear.
 """
 
 from __future__ import annotations
@@ -13,14 +17,19 @@ from collections.abc import Iterator, Sequence
 from dataclasses import dataclass
 from typing import NamedTuple
 
+from legible.contrast import contrast_ratio
 from legible.cvd import CVD_CONDITIONS, GRAYSCALE, delta_e, hex_to_rgb1, simulate
-from legible.method import DELTA_E_FLOOR
+from legible.method import ATTENTION_CONTRAST_MIN, ATTENTION_CONTRAST_PAIRS, DELTA_E_FLOOR
 from legible.palette import Palette
 
 #: Decimal places every ΔE is measured, reported and compared at. One precision throughout, so the
 #: verdict can never disagree with the figure printed beside it: a palette published as sitting on
 #: the floor passes the floor. See docs/cvd-validator-contract.md §3.
 PRECISION = 1
+
+#: Decimal places a contrast ratio is measured, reported and compared at — the same one-precision
+#: rule as ΔE, at the precision WCAG ratios are conventionally quoted in.
+CONTRAST_PRECISION = 2
 
 
 class Failure(NamedTuple):
@@ -38,6 +47,14 @@ class GrayscaleWarning(NamedTuple):
     role_a: str
     role_b: str
     delta_e: float
+
+
+class ContrastPair(NamedTuple):
+    """One pairing the canon names, and the WCAG contrast ratio it achieves."""
+
+    foreground: str
+    background: str
+    ratio: float
 
 
 @dataclass(frozen=True)
@@ -60,6 +77,9 @@ class Report:
     grayscale_min: float
     failures: tuple[Failure, ...] = ()
     warnings: tuple[GrayscaleWarning, ...] = ()
+    contrast_threshold: float = ATTENTION_CONTRAST_MIN
+    contrast: tuple[ContrastPair, ...] = ()
+    contrast_failures: tuple[ContrastPair, ...] = ()
 
 
 class _Pair(NamedTuple):
@@ -72,8 +92,9 @@ def validate(palette: Palette, threshold: float = DELTA_E_FLOOR) -> Report:
     """Check a palette's data-encoding roles for perceptual separation.
 
     Passes if every pair within each co-occurrence group stays at or above ``threshold`` under
-    every condition the canon names. Grayscale collisions come back as warnings instead: the
-    method already covers them by never letting colour be the sole channel.
+    every condition the canon names, and every attention pairing clears its contrast ratio.
+    Grayscale collisions come back as warnings instead: the method already covers them by never
+    letting colour be the sole channel.
     """
     failures: list[Failure] = []
     warnings: list[GrayscaleWarning] = []
@@ -97,8 +118,18 @@ def validate(palette: Palette, threshold: float = DELTA_E_FLOOR) -> Report:
             grayscale_min=min(pair.delta_e for pair in grayscale),
         )
 
+    contrast = tuple(
+        ContrastPair(
+            foreground,
+            background,
+            round(contrast_ratio(palette[foreground], palette[background]), CONTRAST_PRECISION),
+        )
+        for foreground, background in ATTENTION_CONTRAST_PAIRS
+    )
+    contrast_failures = tuple(pair for pair in contrast if pair.ratio < ATTENTION_CONTRAST_MIN)
+
     return Report(
-        passed=not failures,
+        passed=not failures and not contrast_failures,
         threshold=threshold,
         groups=group_reports,
         min_delta_e={
@@ -109,6 +140,9 @@ def validate(palette: Palette, threshold: float = DELTA_E_FLOOR) -> Report:
         # The anchors sit in both groups, so an anchor pair would otherwise be reported twice.
         failures=tuple(dict.fromkeys(failures)),
         warnings=tuple(dict.fromkeys(warnings)),
+        contrast_threshold=ATTENTION_CONTRAST_MIN,
+        contrast=contrast,
+        contrast_failures=contrast_failures,
     )
 
 

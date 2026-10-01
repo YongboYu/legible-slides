@@ -47,7 +47,8 @@ Keys are **kebab-case**, mirroring the CSS custom properties they become (`ink` 
   // ── brand & accent (universal) ──
   "brand":        "#00407a",   // headings, the "highlighted group" in 2-group charts
   "brand-strong": "#1d8db0",   // emphasis / links / chrome        (`decorative-neutral-never-text`)
-  "accent":       "#dd8a2e",   // the attention role: arrows, "our method"  (`accent-is-attention`)
+  "accent":        "#dd8a2e",  // the attention fill                 (`accent-is-attention`)
+  "accent-strong": "#b3541e",  // attention text and strokes         (`accent-is-attention`)
 
   // ── data-encoding roles (the generalization) ──
   "reference":    "#111111",   // ground-truth / anchor series      (was pmf `truth`)
@@ -87,7 +88,7 @@ them is restated here.
 
 | Role | Governing rule |
 |---|---|
-| `accent` | `accent-is-attention` |
+| `accent`, `accent-strong` | `accent-is-attention` (contrast pairings validator-gated) |
 | `muted` + one highlight vs. the full `series[]` ramp | `spend-colour-on-discrimination` |
 | `series[]` in a chart | `never-sole-channel` |
 | `neutral-soft` | `decorative-neutral-never-text` |
@@ -105,7 +106,7 @@ pmf proved, now one file's edit to recolour.
 ```css
 :root {
   --ink: #102a43;  --neutral: #486581;  /* … */
-  --brand: #00407a;  --accent: #dd8a2e;
+  --brand: #00407a;  --accent: #dd8a2e;  --accent-strong: #b3541e;
   --reference: #111111;  --muted: #778496;
   --series-1: #1b6fb0;  --series-2: #57c0ae;  --series-3: #4c3a78;
 }

@@ -89,3 +89,30 @@ def test_a_pair_landing_exactly_on_the_floor_passes(themes_dir):
 
     assert min(report.groups["G1"].min_delta_e.values()) == report.threshold
     assert report.passed
+
+
+def test_the_shipped_theme_clears_every_attention_pairing(themes_dir):
+    """The ratios the accent research published, measured rather than quoted."""
+    report = validate(load_palette(themes_dir / "leuven-blue.json"))
+
+    assert report.passed
+    assert report.contrast_failures == ()
+    measured = {(pair.foreground, pair.background): pair.ratio for pair in report.contrast}
+    assert measured == {
+        ("ink", "accent"): 5.40,
+        ("accent-strong", "surface"): 5.00,
+        ("accent-strong", "surface-alt"): 4.65,
+    }
+
+
+def test_attention_text_too_faint_on_the_ground_fails_naming_the_pairing(
+    write_theme, faint_attention_palette
+):
+    report = validate(load_palette(write_theme(faint_attention_palette)))
+
+    assert not report.passed
+    # A contrast failure is not a separation failure: the data colours are untouched.
+    assert report.failures == ()
+    failing = {(pair.foreground, pair.background) for pair in report.contrast_failures}
+    assert failing == {("accent-strong", "surface"), ("accent-strong", "surface-alt")}
+    assert all(pair.ratio < report.contrast_threshold for pair in report.contrast_failures)

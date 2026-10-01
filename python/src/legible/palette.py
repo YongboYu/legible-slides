@@ -26,6 +26,7 @@ SCALAR_ROLES = (
     "brand",
     "brand-strong",
     "accent",
+    "accent-strong",
     # data-encoding anchors
     "reference",
     "muted",

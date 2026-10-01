@@ -344,3 +344,15 @@ _SECTION_LOCATOR = rule_thresholds("section-locator")
 SECTIONS_MAX = int(_SECTION_LOCATOR["sections-max"])
 SECTION_LABEL_CHARS_MAX = int(_SECTION_LOCATOR["section-label-chars-max"])
 SECTION_LOCATOR_SEVERITY = _SECTION_LOCATOR["section-locator-severity"]
+
+
+_ACCENT_IS_ATTENTION = rule_thresholds("accent-is-attention")
+
+#: The pairings attention is read in, as (foreground, background) roles: ink on the fill, and the
+#: text-and-stroke role on each ground. The canon writes them `x on y`; this is that, split.
+ATTENTION_CONTRAST_PAIRS = tuple(
+    tuple(pair.split(" on ")) for pair in _listed(_ACCENT_IS_ATTENTION["attention-contrast-pairs"])
+)
+
+#: The WCAG contrast ratio each of those pairings has to clear.
+ATTENTION_CONTRAST_MIN = float(_ACCENT_IS_ATTENTION["attention-contrast-min"])

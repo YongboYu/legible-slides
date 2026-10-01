@@ -1,6 +1,7 @@
 """`cvd-validate` — the accessibility floor as a command with an exit code.
 
-A thin shell over ``validate()``. It decides nothing: `separation-floor` owns what passes, and
+A thin shell over ``validate()``. It decides nothing: `separation-floor` and the contrast pairings
+of `accent-is-attention` own what passes, and
 ``docs/cvd-validator-contract.md`` §4 fixes what this module adds — the shape of the human-readable
 report, and the exit code everything downstream keys on (CI, the opt-in pre-commit hook, and the
 review skill, which shells out here rather than reimplementing colour-vision simulation).
@@ -20,7 +21,7 @@ from pathlib import Path
 
 from legible.cvd import CVD_CONDITIONS, GRAYSCALE
 from legible.palette import PaletteError, load_palette
-from legible.validate import PRECISION, Report, validate
+from legible.validate import CONTRAST_PRECISION, PRECISION, ContrastPair, Report, validate
 
 #: The contract fixes 0 and 1. 2 says the check did not run — a theme that could not be read makes
 #: no claim about its colours, and must not borrow 1's. It is argparse's code for bad arguments
@@ -74,7 +75,8 @@ def _parser() -> argparse.ArgumentParser:
         prog="cvd-validate",
         description=(
             "Check a theme's data colours for perceptual separation under every condition the "
-            "`separation-floor` rule names. Exits 0 on pass, 1 if any pair falls below the floor, "
+            "`separation-floor` rule names, and its attention pairings for the contrast "
+            "`accent-is-attention` names. Exits 0 on pass, 1 if any pair falls below either, "
             "and 2 if a theme could not be read. Grayscale collisions are advisory and never "
             "change the exit code."
         ),
@@ -110,6 +112,10 @@ def _as_text(theme: Path, report: Report) -> str:
     )
     lines.append(f"    {_measured(GRAYSCALE, report.grayscale_min)}  advisory")
 
+    lines.append("")
+    lines.append(f"  attention contrast (min {report.contrast_threshold:.{CONTRAST_PRECISION}f})")
+    lines.extend(_contrast(pair, pair in report.contrast_failures) for pair in report.contrast)
+
     if report.failures or report.warnings:
         lines.append("")
     lines.extend(
@@ -128,6 +134,15 @@ def _measured(condition: str, delta_e: float) -> str:
     return f"{condition:<{_CONDITION_WIDTH}}{delta_e:>{_DELTA_E_WIDTH}.{PRECISION}f}"
 
 
+def _contrast(pair: ContrastPair, failed: bool) -> str:
+    """One attention pairing, named by role, with what it achieved — and `fail` where it fell."""
+    tag = "fail" if failed else ""
+    return (
+        f"  {tag:<{_TAG_WIDTH}}{pair.ratio:>{_DELTA_E_WIDTH}.{CONTRAST_PRECISION}f}"
+        f"  {pair.foreground} on {pair.background}"
+    )
+
+
 def _pair(tag: str, condition: str, delta_e: float, role_a: str, role_b: str) -> str:
     return f"  {tag:<{_TAG_WIDTH}}{_measured(condition, delta_e)}  {role_a} ↔ {role_b}"
 
@@ -141,4 +156,6 @@ def _as_json(report: Report) -> str:
     data = asdict(report)
     data["failures"] = [failure._asdict() for failure in report.failures]
     data["warnings"] = [warning._asdict() for warning in report.warnings]
+    data["contrast"] = [pair._asdict() for pair in report.contrast]
+    data["contrast_failures"] = [pair._asdict() for pair in report.contrast_failures]
     return json.dumps(data)

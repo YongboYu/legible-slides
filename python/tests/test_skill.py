@@ -99,11 +99,13 @@ def test_the_skill_carries_none_of_the_canons_numbers(skill):
     goes stale the moment the canon is retuned. Naming the key is the loud way to get this wrong;
     writing the bare number into an example report is the quiet way, and this is the check for it.
 
-    Numbers alone, and headings taken out: a rule's units and wordlists are words this procedure
-    uses for its own reasons, and a heading is numbered for navigation. `0`, `1` and `2` cannot be
+    Numbers alone, and headings and step references taken out: a rule's units and wordlists are
+    words this procedure uses for its own reasons, and a heading or a step is numbered for
+    navigation. `0`, `1` and `2` cannot be
     guarded here, because they are the exit codes step 2 documents.
     """
     body = "\n".join(line for line in skill.splitlines() if not line.startswith("#"))
+    body = re.sub(r"\bsteps? \d+", "", body)
     numbers = {
         value for rule in rules() for value in rule.thresholds.values() if _is_a_number(value)
     }
