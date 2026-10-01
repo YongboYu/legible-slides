@@ -33,24 +33,24 @@ venue: KU Leuven · Research Centre for Information Systems Engineering
 
 # legible-slides
 
-## Readable from the back row, and for every pair of eyes.
+## Slides that everyone in the room can read, back row included.
 
 ---
 layout: answer
 ---
 
-# A method decides what each slide is for, and two commands hold every slide to it.
+# A short method helps decide what each slide is for, and two commands check the deck.
 
 ::questions::
 
-1. What is a slide for?
-2. Can the back row, and every pair of eyes, read it?
-3. How does the method reach your own deck?
+1. What is each slide for?
+2. Can everyone in the room read it?
+3. How can you use this in your own deck?
 
 <!--
-That headline is the whole talk. Everything after it is the case for it, in the order of these three
-questions, and the last slide answers them by the same numbers. Point at the QR code on the cover if
-anyone missed it: the slides are already on their phones.
+Here's the short version of the whole talk. The rest of the slides go through these three questions
+in order, and the last slide comes back to them with the same numbers. If anyone missed the QR code
+on the cover, it's on the last slide too, and the slides are already online.
 -->
 
 ---
@@ -59,7 +59,7 @@ ratio: 3fr 2fr
 section: Problem
 ---
 
-# Most templates hand you files and leave the hard part to you: deciding what a slide is for.
+# Most templates give you a look, but little help deciding what each slide should say.
 
 ::left::
 
@@ -90,125 +90,125 @@ section: Problem
   </div>
 </div>
 
-<p class="demo-caption">A conference slide, built exactly as its template allows.</p>
+<p class="demo-caption">A typical conference slide, built the way its template suggests.</p>
 
 ::right::
 
-<Callout title="What the files cannot decide">
+<Callout title="What a template can't decide for you">
 
-Which one question this slide answers. No master, colour theme or font stack settles it, and a slide
-that has not settled it grows until it is three slides wearing one page number.
+Which question this slide answers. Masters, color themes and fonts don't help with that, and a slide
+without a clear question tends to keep growing.
 
 </Callout>
 
 <!--
-Signpost: first the problem, then the method, then what it does for legibility, then how it ships.
+Signpost: I'll start with the problem, then the method, then legibility, and finally how it all ships.
 
-Ask the room what their template handed them last time. Masters, a colour theme, a logo in the
-corner. Nobody has ever been given the decision about what a slide is for, and that is the decision
-that costs you the evening.
+You might ask the room what their last template gave them. Usually it's a master, a color theme and
+a logo in the corner. Deciding what each slide is for is still up to you, and that's often the part
+that takes the most time.
 -->
 
 ---
 layout: two-col-evidence
 ---
 
-# Every template quietly fails two audiences you can measure: the back row, and 1-in-12 eyes.
+# Most templates never check whether the back row, or color-blind viewers, can read the slides.
 
 ::left::
 
 <div class="demo-type">
   <div class="demo-type-row">
-    <span class="demo-type-label">12 px: shrunk until it fits</span>
-    <span class="demo-type-shrunk">Shrink the body type and everything fits.</span>
+    <span class="demo-type-label">12 px: shrunk to fit</span>
+    <span class="demo-type-shrunk">Shrinking the text makes everything fit.</span>
   </div>
   <div class="demo-type-row">
-    <span class="demo-type-label">23 px: the body size, held</span>
-    <span class="demo-type-body">Hold the body size and the back row reads it.</span>
+    <span class="demo-type-label">23 px: the body size</span>
+    <span class="demo-type-body">Keeping the body size lets the back row read it.</span>
   </div>
 </div>
 
-Red-green deficiency reaches about one man in twelve of European ancestry<sup>1</sup>, and no
-template checks for that either.
+Red-green color deficiency affects about one in twelve men of European ancestry<sup>1</sup>, and
+templates rarely account for it.
 
 <Footnotes>
   <Footnote :number="1">Birch (2012), on worldwide prevalence: about 8% of men and 0.4% of women of European ancestry.</Footnote>
-  <Footnote :number="2">Machado, Oliveira and Fernandes (2009), the simulation this deck and its validator both use.</Footnote>
+  <Footnote :number="2">Machado, Oliveira and Fernandes (2009), the simulation used for this deck and its validator.</Footnote>
 </Footnotes>
 
 ::right::
 
 <Figure
   src="/colour-alone.png"
-  caption="Ten pairs of data colours, measured under four conditions, as deuteranomaly receives them. Colour is the only thing telling the five lines apart."
+  caption="Ten pairs of data colors, measured under four conditions, shown as someone with deuteranomaly sees them. Color is the only thing that tells the five lines apart."
   :cite="2"
 />
 
 <!--
-Two numbers, both measurable, both left to the author by every template I have used. Whatever is
-projecting these slides is projecting both samples, so the room settles this one rather than the
-arithmetic: read the small sample aloud from the back if anyone thinks it is fine. On the right is this deck's own palette,
-simulated at full severity, with the dash and the marker taken off the chart it draws later.
+Both of these can be measured, and in my experience templates leave both to the author. The two text
+samples are on the screen in this room right now, so anyone at the back can check whether the small
+one is readable. On the right is this deck's own palette, simulated at full severity, without the
+dashes and markers that the later chart adds.
 -->
 
 ---
 section: Method
 ---
 
-# The method comes first, and the files are only what it ships as.
+# The method comes first, and the theme and tools are there to support it.
 
-| The method decides | What holds it to that |
+| What the method covers | What checks it |
 |---|---|
-| what a slide is for | a reviewer, human or agent |
-| how far apart data colours stay | `cvd-validate`, on any palette |
-| how much may go on one slide | `legible lint`, on every push |
-| what type the back row can read | the theme, which fixes the scale |
-| what a figure is made of | the palette, regenerated and never redrawn |
+| what each slide is for | a reviewer, human or agent |
+| how distinct the data colors stay | `cvd-validate`, on any palette |
+| how much fits on one slide | `legible lint`, on every push |
+| what text size the back row can read | the theme's fixed type scale |
+| what goes into a figure | the palette, regenerated rather than redrawn |
 
 <Callout accent title="Why that order">
 
-Files without a method are a look. A method without files is advice.
+A theme changes how the slides look. The method helps with what they say, and the tools make it
+easier to follow.
 
 </Callout>
 
 <!--
-Signpost: that was the problem, so now the method, one rule a slide.
+Signpost: That covers the problem, so now the method, one rule per slide.
 
-Here is the pivot. Everything before it is the problem, and everything after it is one rule and its
-demonstration. Swap the palette and every row above survives it, which is the test of which half was
-load-bearing.
+From here on, each slide shows one rule and tries to follow it. If you swapped in a different
+palette, every row in this table would still hold, which suggests the method is doing the work
+rather than the styling.
 -->
 
 ---
 
-# Every slide answers one question, and if you cannot state it the slide is wrong.
+# Each slide should answer one question, and you should be able to say what it is.
 
 <Callout title="The question this slide answers">
 
-What is a slide *for*?
+What is each slide for?
 
 </Callout>
 
-Assertion-evidence gives a slide one claim and the evidence that proves it<sup>3</sup>. Three
-messages on one slide save building two more, and cost longer than that in the explaining<sup>4</sup>.
+Assertion-evidence slides pair one claim with the evidence for it<sup>3</sup>. Fitting three
+messages onto one slide saves a little preparation, but usually takes longer to explain<sup>4</sup>.
 
 <Footnotes>
   <Footnote :number="3">Alley and Neeley (2005), on sentence headlines and visual evidence.</Footnote>
-  <Footnote :number="4">Mayer, on coherence: what does not serve the message costs the message.</Footnote>
+  <Footnote :number="4">Mayer, on coherence: material that doesn't support the message gets in its way.</Footnote>
 </Footnotes>
 
 <!--
-Say the question out loud before the slide is on screen, then let the slide answer it. Compress
-three messages onto one and the room is behind by the time you are done. The beat is
-the method's first rule and its own demonstration: one claim, two sentences of evidence, nothing
-else on the canvas.
+Try saying the question out loud before you show the slide, and then let the slide answer it. When
+three messages share one slide, the audience often falls behind while you explain them. This slide
+tries to follow its own advice: one claim and a couple of sentences of evidence.
 -->
 
 ---
 layout: two-col-evidence
 ---
 
-# The headline is the claim, not a label.
+# A headline works better as a short claim than as a topic label.
 
 ::left::
 
@@ -218,7 +218,7 @@ Results
 
 </Callout>
 
-Read alone, this gives the topic and nothing else.
+Read on its own, this only tells you the topic.
 
 ::right::
 
@@ -228,116 +228,116 @@ Three series pass, and a fourth would fail without retuning.
 
 </Callout>
 
-Read alone, this already gives the finding, and the slide has only to prove it<sup>5</sup>.
+Read on its own, this already tells you the finding, and the rest of the slide can support
+it<sup>5</sup>.
 
 <Footnotes>
-  <Footnote :number="5">Alley, Schreiber, Ramsdell and Muffo (2006): audiences retained more from sentence headlines than from topic phrases.</Footnote>
+  <Footnote :number="5">Alley, Schreiber, Ramsdell and Muffo (2006): audiences remembered more from sentence headlines than from topic phrases.</Footnote>
 </Footnotes>
 
 <!--
-Read the two boxes in order and stop. One of them told you something. Eight to fourteen words is the
-band, and two rendered lines is the ceiling this headline is sitting inside. A deck whose headlines read as
-a paragraph on their own has an argument; a deck whose headlines read as a table of contents has a
-filing system.
+Read the two boxes and pause for a moment. Only one of them tells you something. A full sentence
+that fits comfortably on screen is usually enough. If someone reads only the headlines of a good
+deck, they should still be able to follow the argument.
 -->
 
 ---
 layout: two-col-evidence
 ---
 
-# A slide's message is chosen before its chart, never the other way round.
+# Choosing the message before the chart keeps each slide focused.
 
 ::left::
 
-1. State the one question the slide answers
+1. Write down the one question the slide answers
 2. Find the evidence that answers it
-3. Write the claim it proves, as the headline
+3. Turn the answer into the headline
 
 ::right::
 
-<Callout accent title="The failure this order prevents">
+<Callout accent title="What this order helps avoid">
 
-A chart arrives first, a caption is invented for it, and the slide is about whatever the chart
-showed.
+A chart comes first, a caption gets written around it, and the point of the slide is unclear.
 
 </Callout>
 
 <!--
-Everyone has done the other order, and it is how a deck acquires slides nobody can state the point
-of: the hardest ones to cut later. You have a figure from the paper, it looks like a slide's worth
-of work, and a heading gets written to cover it. Three steps, and the first one is a sentence you
-say out loud before anything gets drawn.
+Most of us have worked the other way around at some point. You have a figure from the paper, it
+feels like a slide's worth of material, and you write a heading for it afterward. Slides made like
+that are often the hardest ones to cut later. Starting with a sentence you can say out loud makes
+the rest easier.
 -->
 
 ---
 
-# Whatever does not serve the one message is costing you the message.
+# Anything that doesn't support the main message makes it harder to follow.
 
-Removing extraneous material improves learning in every test of it<sup>4</sup>, and data ink over
-decoration is the same move<sup>6</sup>.
+Removing extra material consistently improves learning<sup>4</sup>, and the same idea applies to
+figures: spend the ink on the data<sup>6</sup>.
 
 <v-click>
 
-<Callout accent title="Why that box arrived on a click">
+<Callout accent title="Why that box appeared on a click">
 
-Motion earns a place two ways: segmenting what you would otherwise hold at once, or depicting
-change that is the content<sup>7</sup>.
+Animation helps in two cases: breaking content into steps, or showing a change over
+time<sup>7</sup>.
 
 </Callout>
 
 </v-click>
 
 <Footnotes>
-  <Footnote :number="4">Mayer, on coherence and on segmenting a reveal to the speaker's pace.</Footnote>
+  <Footnote :number="4">Mayer, on coherence, and on revealing content at the speaker's pace.</Footnote>
   <Footnote :number="6">Tufte, on data ink and chartjunk.</Footnote>
-  <Footnote :number="7">Tversky, Morrison and Bétrancourt (2002): animation helps when it is apprehensible and congruent, and not otherwise.</Footnote>
+  <Footnote :number="7">Tversky, Morrison and Bétrancourt (2002): animation helps when it is easy to follow and matches the idea it shows.</Footnote>
 </Footnotes>
 
 <!--
-Pause before the click. Ask what a second box could be for, then let it answer: it is here because
-the rule about cutting applies to time as well as to space, and it is the deck's only reveal.
-Coherence is the best-evidenced rule in the method. Segment what the room has to hold, and
-depict a process that genuinely changes. Nothing else.
+Pause before the click and ask what the box might add. It's there to show that the same idea applies
+to time as well as space, and it's the only reveal in the deck. Of all the rules in the method, this
+one has the strongest research behind it. Animation is worth it when it breaks content into steps or
+shows something that actually changes.
 -->
 
 ---
 section: Legibility
 ---
 
-# Body type is sized for the back row, not for your laptop.
+# Body text is sized for the back of the room, not for your laptop screen.
 
-<Callout title="The arithmetic, worked">
+<Callout title="Working it out">
 
-Body type is fixed at 23 px on this deck's 1280 × 720 canvas, and the canvas is scaled to fill the
-screen, so what matters is its share of the image height: 23 ÷ 720 = 3.2%, on any projector. By the
-AV industry's sizing rule that reads to about 4.5 image heights, so a screen 2 m tall carries it
-2 × 4.5 = 9 m: a seminar room or a conference session.
+Body text is fixed at 23 px on this deck's 1280 × 720 canvas. The canvas scales to fill the screen,
+so what matters is the text's share of the image height: 23 ÷ 720 = 3.2%, on any projector. By the
+AV industry's sizing guideline, that reads to about 4.5 image heights, so on a screen 2 m tall it
+reaches about 2 × 4.5 = 9 m: roughly a seminar room or a conference session room.
 
 </Callout>
 
-Nothing goes below 18 px: not a caption, a legend or the page number. A bigger room raises the
-body size rather than lowering anything, and cuts what the slide carries.
+Nothing goes below 18 px, including captions, legends and page numbers. For a larger room, the
+better fix is a bigger body size and less on each slide.
 
 <!--
-Signpost: those were the rules about what goes on a slide, and next is whether the room can see it.
+Signpost: So far we've looked at what goes on a slide. Next is whether people can actually see it.
 
-Fixed by the method, not by the palette and not per slide. Once type becomes a knob, every slide that
-runs one line long gets solved the same way, and the room pays for it at the back. A lecture hall
-sits past where this scale reaches: share the slides by QR code, ask for a second screen. Whatever
-the room, do the distance check in the method before the talk.
+The method sets the type size once, rather than leaving it to the palette or to each slide. When
+text size can change per slide, it's tempting to shrink whatever runs long, and the people at the
+back pay for that. A lecture hall is beyond what this scale is designed for, so sharing the slides
+by QR code or asking for a second screen helps there. Whatever the room, it's worth doing the
+distance check from the method before the talk.
 -->
 
 ---
 layout: two-col-evidence
 ---
 
-# If a colour dies under colour-blindness or in grayscale, it is not in the palette.
+# A color only goes in the palette if it stays distinct for color-blind viewers.
 
 ::left::
 
 <Figure
   src="/redundant-deuteranomaly.png"
-  caption="The same ten pairs under deuteranomaly, which is the binding condition here: the closest pair lands on 15.0, exactly the floor."
+  caption="The same ten pairs under deuteranomaly, the hardest condition for this palette: the closest pair lands on 15.0, exactly the floor."
   :cite="2"
 />
 
@@ -345,82 +345,84 @@ layout: two-col-evidence
 
 <Figure
   src="/redundant-grayscale.png"
-  caption="The same chart in black and white, where the closest pair falls to 10.9. Dash and marker are what keep it readable."
+  caption="The same chart in grayscale, where the closest pair drops to 10.9. The dashes and markers keep it readable."
 />
 
 <!--
-Same chart as the third slide, same palette, same simulation, and source 2 again for it. What changed
-is that every line got a dash and a marker of its own, and the archetype assigns both by position so
-an author cannot decline them. Grayscale stays advisory for exactly that reason: redundant encoding
-is already the fix.
+Here's the same chart from earlier, with the same palette and simulation (source 2). What's
+different is that each line now has its own dash pattern and marker. The figure template assigns
+them by position, so they're always there. Grayscale is only a warning for that reason: the dashes
+and markers already cover it.
 -->
 
 ---
 
-# The validator reads any palette file, yours included, and names the pair that fails.
+# The validator works on any palette file, including yours, and shows which pair fails.
 
-| Theme | closest pair, ΔE | in grayscale | verdict |
+| Theme | closest pair, ΔE | in grayscale | result |
 |---|---|---|---|
-| `leuven-blue` | 15.0 | 10.9 | passes, and is at capacity |
+| `leuven-blue` | 15.0 | 10.9 | passes, at capacity |
 
-Yours is `cvd-validate your-palette.json`.
+To check yours, run `cvd-validate your-palette.json`.
 
 <Callout title="Not an endorsement">
 
-This palette is inspired by KU Leuven's house colours, and is not affiliated with or endorsed by
-the university.
+This palette is inspired by KU Leuven's colors. It isn't affiliated with or endorsed by the
+university.
 
 </Callout>
 
 <!--
-Measured over the per-series ramp, under normal vision and all three dichromacies at full severity,
-and no slide in this deck names a colour. The theme file carries the not-affiliated sentence in its
-own description. Read the last column. At capacity means a fourth series in this ramp fails, and the validator says
-so by role rather than quietly reusing a colour. Run it on your own palette file before a talk: a
-pass is the floor cleared, and a fail tells you which colour to move.
+These numbers are measured over the per-series colors, under normal vision and three types of color
+blindness at full severity. No slide in this deck names a color directly. "At capacity" means a
+fourth series would fail, and the validator would say which one rather than quietly reusing a color.
+It's worth running on your own palette before a talk: a pass means it clears the floor, and a fail
+tells you which color to change. The theme file carries the same not-affiliated note in its
+description.
 -->
 
 ---
 section: Delivery
 ---
 
-# One file is the slides on screen, the PDF you hand out and the deck an agent reviews.
+# The same markdown file gives you the slides, a PDF and a deck an agent can review.
 
-| Delivery | Where it stands |
+| What you get | Status |
 |---|---|
-| this Slidev theme, and this deck | shipped, and on the screen |
-| a PDF to present from | `slidev export`, from the same file |
-| a skill for coding agents | shipped: it scaffolds a deck and reviews one |
+| the Slidev theme and this deck | available, and on screen now |
+| a PDF to present or share | `slidev export`, from the same file |
+| a skill for coding agents | available: it can start a deck and review one |
 
-<Callout accent title="Why only one">
+<Callout accent title="Why one file">
 
-Every output reads the same markdown, so none of them can fall out of step with the others.
+Everything is built from the same markdown, so the different versions can't drift apart.
 
 </Callout>
 
 <!--
-Signpost: last part, which is how all of this reaches your own deck.
+Signpost: The last part is how you can use this in your own deck.
 
-Say why there is no PowerPoint master. An export is one screenshot per slide, and a hand-kept twin
-drifts from the deck it copies the first time either one changes.
+You might wonder why there's no PowerPoint master. An export is one screenshot per slide, and a
+separately maintained copy tends to drift as soon as either one changes.
 -->
 
 ---
 layout: conclusion
 ---
 
-# Everything you just watched was built to the rules it was teaching you.
+# This deck was built with the same rules it has been describing.
 
 ::answers::
 
-1. One question per slide, and its answer is the headline
-2. Type sized for the room, colours measured under colour-vision deficiency
-3. One markdown file, with `legible lint` and `cvd-validate` on every push
+1. Each slide answers one question, and the headline gives the answer
+2. Text is sized for the room, and colors are checked for color-blindness
+3. One markdown file, checked by `legible lint` and `cvd-validate` on every push
 
 <!--
-Leave this slide up through the questions: it is the one the room reads while they ask. Each answer
-closes the question with the same number on the second slide. Say thank you aloud rather than on a
-slide, and point at the code for the slides and the rules, which all live in docs/method.md.
+Leave this slide up during questions, since it's what people will look at while they ask. Each
+answer matches the question with the same number on the second slide. Say thank you out loud rather
+than on a slide, and mention that the code and the rules are on GitHub, with the rules in
+docs/method.md.
 -->
 
 ---
@@ -437,8 +439,8 @@ backup: true
 # docs/research/presentation-methods.md and docs/research/cvd-validator.md; the prevalence figure is
 # Birch (2012), https://doi.org/10.1364/JOSAA.29.000313.
 indexEntries:
-  - title: 'Birch, J. (2012) — Worldwide prevalence of red-green colour deficiency, JOSA A 29(3)'
-  - title: 'Machado, Oliveira and Fernandes (2009) — Simulation of colour vision deficiency, IEEE TVCG'
+  - title: 'Birch, J. (2012) — Worldwide prevalence of red-green color deficiency, JOSA A 29(3)'
+  - title: 'Machado, Oliveira and Fernandes (2009) — Simulation of color vision deficiency, IEEE TVCG'
   - title: 'Alley, M. and Neeley, K. A. (2005) — Rethinking the design of presentation slides'
   - title: 'Mayer, R. E. — Multimedia Learning, Cambridge University Press'
   - title: 'Alley, Schreiber, Ramsdell and Muffo (2006) — How headline design affects retention'
@@ -446,4 +448,4 @@ indexEntries:
   - title: 'Tversky, Morrison and Bétrancourt (2002) — Animation: can it facilitate?'
 ---
 
-# Every claim these slides make came from somewhere, and here is where.
+# These are the sources behind the claims in this talk.
