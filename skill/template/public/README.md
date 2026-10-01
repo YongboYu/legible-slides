@@ -26,3 +26,6 @@ Your marks belong here too, beside the figures. Until you add them, the cover sh
 the theme bundles for the venue's and the affiliation's logos: put your own files here and point
 `themeConfig.venueLogo` and `themeConfig.affiliationLogo` in the headmatter at them. No
 institution's mark ships with this project.
+
+So does the QR code to your shared slides, which the cover and the conclusion show: generate one for
+the link you share them at, save it here, and point `themeConfig.shareQr` at it.

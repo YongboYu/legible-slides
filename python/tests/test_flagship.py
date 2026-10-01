@@ -14,6 +14,7 @@ copy of one, and these fail naming which.
 
 import importlib.util
 import re
+from itertools import takewhile
 from pathlib import Path
 
 import pytest
@@ -32,9 +33,9 @@ from legible.method import (
 
 DECK = Path(__file__).resolve().parents[2] / "deck" / "slides.md"
 
-#: The thirteen beats of the canon's outline, then the sources they cite. Counted so that deleting a
+#: The fourteen beats of the canon's outline, then the sources they cite. Counted so that deleting a
 #: beat is a failure rather than a quiet edit — the outline is the deck's contract.
-BEATS = 13
+BEATS = 14
 SLIDES = BEATS + 1
 
 #: The theme beat 11 tabulates, and the group it measures it over. `separation-floor` forms the
@@ -57,25 +58,25 @@ def test_the_deck_carries_every_beat_and_its_sources():
     assert [slide.number for slide in slides if not slide.headline] == []
 
 
-def test_beat_nine_is_set_in_the_canon_s_type_scale(deck):
+def test_beat_ten_is_set_in_the_canon_s_type_scale(deck):
     """The two sizes the slide names as fixed are the canon's body size and its logical canvas."""
     type_scale = rule_thresholds("type-scale")
     stated = re.search(r"fixed at (\d+) px on this deck's (\d+) × (\d+) canvas", deck)
-    assert stated, "beat 9 no longer states the body size and the canvas it is written against"
+    assert stated, "beat 10 no longer states the body size and the canvas it is written against"
 
     assert stated.group(1) == type_scale["body-px"]
     assert stated.group(2) == type_scale["canvas-width-px"]
     assert int(stated.group(3)) == CANVAS_HEIGHT_PX
 
 
-def test_beat_nine_s_worked_example_is_arithmetic_that_holds(deck):
+def test_beat_ten_s_worked_example_is_arithmetic_that_holds(deck):
     """`equation-worked-example` asks for real numbers pushed through the formula, so the numbers
     have to come out: the body's share of the image height, and how far that share reads in a room
     with a screen of a given height. The reach is the canon's, not the slide's."""
     share = re.search(r"(\d+) ÷ (\d+) = ([\d.]+)%", deck)
     reach = re.search(r"(\d+) × ([\d.]+) = (\d+) m", deck)
-    assert share, "beat 9 no longer works the body's share of the image height on screen"
-    assert reach, "beat 9 no longer works through how far the body size reads"
+    assert share, "beat 10 no longer works the body's share of the image height on screen"
+    assert reach, "beat 10 no longer works through how far the body size reads"
 
     body, height, percent = int(share.group(1)), int(share.group(2)), float(share.group(3))
     assert (body, height) == (BODY_PX, CANVAS_HEIGHT_PX)
@@ -86,31 +87,31 @@ def test_beat_nine_s_worked_example_is_arithmetic_that_holds(deck):
     assert metres == screen * heights
 
 
-def test_beat_nine_names_the_canon_s_floor(deck):
+def test_beat_ten_names_the_canon_s_floor(deck):
     """One size under the body, and it is a floor rather than an exception."""
     named = re.search(r"Nothing goes below (\d+) px", deck)
-    assert named, "beat 9 no longer names the floor"
+    assert named, "beat 10 no longer names the floor"
 
     assert int(named.group(1)) == FLOOR_PX
 
 
 @pytest.mark.parametrize("theme", TABULATED)
-def test_beat_eleven_tabulates_the_minima_the_validator_measures(deck, themes_dir, theme):
+def test_beat_twelve_tabulates_the_minima_the_validator_measures(deck, themes_dir, theme):
     """The slide's whole argument is that a palette is checked rather than trusted, so its row has
     to be what ``cvd-validate`` says today — not what it said when it was typed."""
     row = re.search(rf"\| `{theme}` \| ([\d.]+) \| ([\d.]+) \|", deck)
-    assert row, f"beat 11 no longer tabulates the `{theme}` theme"
+    assert row, f"beat 12 no longer tabulates the `{theme}` theme"
     group = validate(load_palette(themes_dir / f"{theme}.json")).groups[PER_SERIES]
 
     assert float(row.group(1)) == min(group.min_delta_e.values())
     assert float(row.group(2)) == group.grayscale_min
 
 
-def test_beat_ten_s_caption_puts_the_binding_pair_on_the_floor(deck, themes_dir):
+def test_beat_eleven_s_caption_puts_the_binding_pair_on_the_floor(deck, themes_dir):
     """The caption's "exactly the floor" is the claim the demonstration turns on: the ramp is at
     capacity, and one more series would fail. It stops being true the moment either number moves."""
     caption = re.search(r"the closest pair lands on ([\d.]+), exactly the floor", deck)
-    assert caption, "beat 10 no longer states where the binding pair lands"
+    assert caption, "beat 11 no longer states where the binding pair lands"
     measured = validate(load_palette(themes_dir / "leuven-blue.json")).groups[PER_SERIES]
 
     assert float(caption.group(1)) == min(measured.min_delta_e.values()) == DELTA_E_FLOOR
@@ -163,3 +164,45 @@ def test_the_deck_s_figures_hold_the_floor_in_the_pane_they_land_in(
     width, _ = deck_figures.PANE_PX
 
     assert smallest_type_px(figure, lands_at_px=width) >= FLOOR_PX
+
+
+# ── the opening and the close ─────────────────────────────────────────────────
+
+#: Where the deck serves its own files from, which is where a `themeConfig` image path points.
+PUBLIC = DECK.parent / "public"
+
+
+def _main(slides):
+    """The talk's slides: everything before the first backup, which the flagship puts last."""
+    return list(takewhile(lambda slide: not slide.backup, slides))
+
+
+def test_the_answer_comes_straight_after_the_cover():
+    """`answer-first`: the second slide is the result, with the questions it answers."""
+    slides = read_deck(DECK)
+
+    assert slides[1].layout == "answer"
+    assert len(slides[1].bullets) >= 2, "the answer slide numbers no questions"
+
+
+def test_the_close_answers_each_question_by_its_number():
+    """`conclusion-stays-up`: the last main slide is the conclusion, and it answers as many
+    questions as the opening asked, one to one."""
+    slides = read_deck(DECK)
+    close = _main(slides)[-1]
+
+    assert close.layout == "conclusion"
+    assert len(close.bullets) == len(slides[1].bullets)
+
+
+def test_the_slides_are_handed_over_on_the_first_and_the_last_slide():
+    """One QR code, set once for the deck: the cover and the conclusion both read it. It is a file
+    the deck serves, and the link and the contact are written beside it."""
+    headmatter = re.match(r"---\n(.*?)\n---\n", DECK.read_text(encoding="utf-8"), re.DOTALL)[1]
+    qr = re.search(r"^  shareQr: (\S+)$", headmatter, re.MULTILINE)
+    url = re.search(r"^  shareUrl: (\S+)$", headmatter, re.MULTILINE)
+
+    assert qr and url, "the deck sets no QR code to its slides"
+    assert re.search(r"^  contact: \S", headmatter, re.MULTILINE), "the close carries no contact"
+    assert (PUBLIC / qr.group(1).lstrip("/")).is_file()
+    assert url.group(1) in (PUBLIC / qr.group(1).lstrip("/")).read_text(encoding="utf-8")

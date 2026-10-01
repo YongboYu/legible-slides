@@ -25,7 +25,7 @@ Each rule carries a stable **ID** in backticks, its statement, and a footer:
 
 Rules are grouped: [structure](#1-structure), [authoring order](#2-authoring-order),
 [density and noise](#3-density-and-noise), [legibility](#4-legibility), [colour](#5-colour),
-[motion](#6-motion), [voice](#7-voice). The [13-beat flagship outline](#the-flagship-deck-13-beats)
+[motion](#6-motion), [voice](#7-voice). The [14-beat flagship outline](#the-flagship-deck-14-beats)
 follows the rules it teaches.
 
 ---
@@ -78,9 +78,38 @@ Everything a slide adds beyond these four zones is a candidate for `coherence`.
 
 The footer locator carries orientation, so the method ships no section-divider slide, no
 single-word-emphasis slide, and no closing "thank you" slide. A slide whose only content is the name
-of the next section is a slide that proves nothing.
+of the next section is a slide that proves nothing. The close is `conclusion-stays-up`'s.
 
 **Decided by** script (the deck offers no such layout; a slide whose body is a bare section name)
+
+### `answer-first`: the talk opens on its answer
+
+By about the second minute, the room has the result and the questions the talk answers: one slide
+straight after the cover, its headline the result and its evidence the research questions, numbered
+so the close can answer them by number. Everything after it is the case for that answer, and a
+listener who drifts off at minute five already has what they came for. Background, related work and
+the outline come after the answer, if at all; the footer's section map is the outline.
+
+The opening also hands the slides over: the cover carries a QR code to the shared slides, so anyone
+in the room can follow on their own screen from the first minute.
+
+**Decided by** judgment (that the second slide states the result and the questions, and that the
+room has them in time) · **Threshold** `answer-by-minute = 2`
+
+### `conclusion-stays-up`: the last main slide answers the questions, and stays up through Q&A
+
+The final slide of the talk, before any backup, is a conclusion: its headline is the talk's claim,
+and its evidence answers each research question from `answer-first` one to one, by the same number.
+It carries a QR code to the shared slides and the presenter's contact, and it stays on screen
+through the questions, because that is when the room is reading it. A "thank you" or "questions?"
+slide put there hides the answers for the whole of Q&A; say thank you aloud.
+
+**Decided by** judgment (that each question gets its answer) · script (the last main slide has a
+headline, the headline is not a closing label, and it does not read as a thank-you) · **Threshold**
+`closing-labels = [Thank you, Thanks, Questions, Any questions, Q&A, The end, Conclusion, Conclusions, Summary]`,
+`thank-you-words = [thank you, thanks]`, `conclusion-severity = warning` (a finding when the last
+slide outside the backups has no headline, a headline that is one of `closing-labels`, or a headline
+carrying one of `thank-you-words`)
 
 ### `section-locator`: the footer names the talk's sections, and the current one by weight too
 
@@ -222,8 +251,8 @@ planned to about 6 image heights, and for one of those:
    theme, and it costs about 15–30% of each slide's text, so check the densest slides after.
 2. **Cut what the slide carries** rather than shrinking it: detail moves to the spoken track, a
    backup slide or the shared PDF.
-3. **Share the slides** with a QR code on the first and last slide, so people can follow on their
-   own screen.
+3. **Share the slides** with a QR code on the first and last slide (`answer-first`,
+   `conclusion-stays-up`), so people can follow on their own screen.
 4. **Ask the organisers** for a second screen or a confidence monitor for the rear.
 
 Before any talk, whatever the room: view the deck from about six screen heights away (about 1.1 m
@@ -407,7 +436,7 @@ characteristics".
 
 ---
 
-## The flagship deck: 13 beats
+## The flagship deck: 14 beats
 
 The flagship deck is the **primary teaching artifact**: it teaches the method by being the method.
 Each beat's headline is an assertion, and the slide self-demonstrates the rule it teaches. The
@@ -416,21 +445,22 @@ full.
 
 | # | Beat (assertion headline) | Evidence / self-demonstration | Teaches |
 |---|---|---|---|
-| 1 | **legible-slides** · _Readable from the back row, and for every pair of eyes._ | Cover; the type scale and the palette from slide one | `type-scale` |
-| 2 | _Most templates hand you files and leave the hard part to you: deciding what a slide is for._ | A busy stock-template slide | — |
-| 3 | _Every template quietly fails two audiences you can measure: the back row, and 1-in-12 eyes._ | Projector-distance sketch beside a CVD-muddy 5-line chart | `type-scale`, `separation-floor` |
-| 4 | _A method first, files second._ | The pivot; the thesis of the whole deck | — |
-| 5 | _Every slide answers one question. If you can't state it, the slide is wrong._ | This slide answers exactly one | `one-message` |
-| 6 | _The headline is the claim, not a label._ | The headline is a claim; label versus claim side by side | `assertion-headline`, `headline-shape` |
-| 7 | _Decide the message before you reach for the chart._ | Message-before-visual, shown as an ordering | `message-before-visual` |
-| 8 | _Cut everything that isn't the message._ | Signal-to-noise; a purposeful reveal doubles as the motion guardrail | `coherence`, `motion-purpose` |
-| 9 | _Body type is sized for the back row, not your laptop._ | The body size as a share of the image height, worked through to the room it reads in | `type-scale` |
-| 10 | _If a colour dies under colour-blindness or grayscale, it's not in the palette._ | The 5-line chart under deuteranopia and grayscale, with dash and marker redundancy | `separation-floor`, `never-sole-channel` |
-| 11 | _The validator reads any palette file, yours included, and names the pair that fails._ | This deck's palette measured, at capacity, the command that measures yours, plus the not-affiliated note | `separation-floor` |
-| 12 | _One file is what you present, hand out and have reviewed._ | Slidev on screen, a PDF from the same file, plus the coding-agent skill | — |
-| 13 | _Everything you just watched was built to these rules._ | The close; a pointer to this file and a call to action | all of them |
+| 1 | **legible-slides** · _Readable from the back row, and for every pair of eyes._ | Cover; the type scale and the palette from slide one, and a QR code to the slides | `type-scale`, `answer-first` |
+| 2 | _A method decides what each slide is for, and two commands hold every slide to it._ | The result first, and the three questions the talk answers, numbered | `answer-first` |
+| 3 | _Most templates hand you files and leave the hard part to you: deciding what a slide is for._ | A busy stock-template slide | — |
+| 4 | _Every template quietly fails two audiences you can measure: the back row, and 1-in-12 eyes._ | Projector-distance sketch beside a CVD-muddy 5-line chart | `type-scale`, `separation-floor` |
+| 5 | _A method first, files second._ | The pivot; the thesis of the whole deck | — |
+| 6 | _Every slide answers one question. If you can't state it, the slide is wrong._ | This slide answers exactly one | `one-message` |
+| 7 | _The headline is the claim, not a label._ | The headline is a claim; label versus claim side by side | `assertion-headline`, `headline-shape` |
+| 8 | _Decide the message before you reach for the chart._ | Message-before-visual, shown as an ordering | `message-before-visual` |
+| 9 | _Cut everything that isn't the message._ | Signal-to-noise; a purposeful reveal doubles as the motion guardrail | `coherence`, `motion-purpose` |
+| 10 | _Body type is sized for the back row, not your laptop._ | The body size as a share of the image height, worked through to the room it reads in | `type-scale` |
+| 11 | _If a colour dies under colour-blindness or grayscale, it's not in the palette._ | The 5-line chart under deuteranopia and grayscale, with dash and marker redundancy | `separation-floor`, `never-sole-channel` |
+| 12 | _The validator reads any palette file, yours included, and names the pair that fails._ | This deck's palette measured, at capacity, the command that measures yours, plus the not-affiliated note | `separation-floor` |
+| 13 | _One file is what you present, hand out and have reviewed._ | Slidev on screen, a PDF from the same file, plus the coding-agent skill | — |
+| 14 | _Everything you just watched was built to the rules it was teaching you._ | Each question answered by its number, a QR code to the slides and the presenter's contact, left up through Q&A | `conclusion-stays-up` |
 
-Beats 2, 4 and 12 teach no rule: they carry the argument for why the rules exist. The anti-slop
+Beats 3, 5 and 13 teach no rule: they carry the argument for why the rules exist. The anti-slop
 rules in [§7](#7-voice) get **no beat** — the deck obeys them silently, because a slide dated to
 "don't sound like AI" would age badly and pull focus from the timeless part of the method.
 

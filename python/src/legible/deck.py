@@ -14,8 +14,9 @@ not started yet.
 
 What comes back per slide is what the canon's script-decided rules ask about — the headline, the
 bullets, the prose and the speaker notes, every font size the slide's own markup sets, and from
-the frontmatter only the section the slide declares — and nothing else. Layouts, components and
-code blocks are evidence: the method has rules about them, but none a script decides.
+the frontmatter only the section the slide declares — plus the name of its layout, which no rule
+reads but which is how a test finds a deck's opening and its close. Nothing else: what a layout
+renders, components and code blocks are evidence, and no rule about them is a script's to decide.
 """
 
 from __future__ import annotations
@@ -59,9 +60,9 @@ _TEXT_SIZE_CLASS = re.compile(r"^text-(?:xs|sm|base|lg|\d?xl|\[[^\]]+\])$")
 
 #: A top-level frontmatter key the rules read, and its value up to a trailing comment. Read by line
 #: rather than as YAML, for the reason the module gives for the split: Slidev does not require the
-#: block to parse, so neither does this, and the two keys asked for are scalars at column 0.
+#: block to parse, so neither does this, and the keys asked for are scalars at column 0.
 _KEY = re.compile(
-    r"""^(?P<key>section|backup):[ \t]*"""
+    r"""^(?P<key>section|backup|layout):[ \t]*"""
     r"""(?:(?P<quote>["'])(?P<quoted>.*?)(?P=quote)|(?P<plain>.*?))"""
     r"""[ \t]*(?:[ \t]\#.*)?$"""
 )
@@ -89,6 +90,8 @@ class Slide:
     section: str | None = None
     #: Whether the section this slide declares is a backup, held for questions after the talk.
     backup: bool = False
+    #: The layout the slide names, or ``None`` where it names none and the theme picks the default.
+    layout: str | None = None
     #: Every font size the slide's markup sets, as written: ``font-size: 14px`` for a style,
     #: ``text-sm`` for a class. Which of them break the floor is the linter's call.
     font_sizes: tuple[str, ...] = ()
@@ -208,6 +211,7 @@ def _slide(number: int, frontmatter: Sequence[str], lines: Sequence[str]) -> Sli
         notes=notes,
         section=keys.get("section"),
         backup=keys.get("backup") in _TRUE,
+        layout=keys.get("layout") or None,
         font_sizes=_font_sizes("\n".join(body)),
     )
 
@@ -235,8 +239,8 @@ def _font_sizes(body: str) -> tuple[str, ...]:
 def _keys(frontmatter: Sequence[str]) -> dict[str, str]:
     """The frontmatter keys the rules read. Absent keys are absent, not empty.
 
-    A quoted section comes back unquoted. A quoted backup is a string to YAML, so it comes back
-    empty: only a plain value can be one of the spellings in ``_TRUE``.
+    A quoted section or layout comes back unquoted. A quoted backup is a string to YAML, so it comes
+    back empty: only a plain value can be one of the spellings in ``_TRUE``.
     """
     keys: dict[str, str] = {}
     for line in frontmatter:
@@ -245,7 +249,7 @@ def _keys(frontmatter: Sequence[str]) -> dict[str, str]:
             continue
         key = found.group("key")
         if found.group("quote"):
-            keys[key] = found.group("quoted") if key == "section" else ""
+            keys[key] = found.group("quoted") if key != "backup" else ""
         else:
             keys[key] = found.group("plain")
     return keys

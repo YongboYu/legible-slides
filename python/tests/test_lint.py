@@ -488,3 +488,74 @@ def test_the_flagship_deck_holds_the_floor():
 
     assert [finding for finding in report.findings if finding.rule == "type-scale"] == []
     assert report.passed
+
+
+#: A deck's last main slide, once the rule has something to read: a claim before it, so the deck has
+#: a talk to close.
+_OPENING = "# Retrieval beats fine-tuning at a tenth of the cost\n\nEvidence beside it.\n\n---\n\n"
+
+
+@pytest.mark.parametrize(
+    "headline",
+    ["Thank you!", "Thanks", "Questions?", "Any questions?", "Q&A", "Conclusion", "Summary"],
+)
+def test_closing_on_a_label_is_a_warning(write_deck, headline):
+    """`conclusion-stays-up`: the slide left up through Q&A is the answers, so a closing label put
+    there hides them. It warns, because whether the slide answers the questions is judgment."""
+    report = lint(write_deck(f"{_OPENING}# {headline}\n"))
+
+    assert rules(report) == ["conclusion-stays-up"]
+    assert [finding.severity for finding in report.findings] == ["warning"]
+    assert [finding.slide for finding in report.findings] == [2]
+    assert report.passed
+
+
+def test_a_thank_you_inside_a_longer_headline_still_reads_as_one(write_deck):
+    report = lint(write_deck(f"{_OPENING}# Thank you for listening to all of this\n"))
+
+    assert rules(report) == ["conclusion-stays-up"]
+
+
+def test_closing_with_no_headline_is_a_warning(write_deck):
+    report = lint(write_deck(f"{_OPENING}A slide with words on it and nothing above them.\n"))
+
+    assert rules(report) == ["conclusion-stays-up"]
+    assert "no headline" in report.findings[0].message
+
+
+def test_closing_on_a_claim_is_not(write_deck):
+    """Naming the questions is what a conclusion does, so the word alone is not the tell."""
+    report = lint(write_deck(f"{_OPENING}# All three research questions have an answer here\n"))
+
+    assert report.findings == ()
+
+
+def test_the_backups_after_the_close_are_not_the_close(write_deck):
+    """The last *main* slide is the one left up. Backups sit after it, and a backup carries forward
+    onto the slides after it like any section, so none of them is read as the close."""
+    deck = (
+        f"{_OPENING}# The method holds on every deck we tried\n\n---\n"
+        "section: Backup\nbackup: true\n---\n\n# Sources\n\n---\n\n# More detail\n"
+    )
+
+    assert lint(write_deck(deck)).findings == ()
+
+
+def test_a_thank_you_before_the_backups_is_still_the_close(write_deck):
+    deck = f"{_OPENING}# Thank you\n\n---\nsection: Backup\nbackup: true\n---\n\n# Sources\n"
+    report = lint(write_deck(deck))
+
+    assert rules(report) == ["conclusion-stays-up"]
+    assert [finding.slide for finding in report.findings] == [2]
+
+
+def test_a_main_section_after_a_backup_ends_the_backups(write_deck):
+    deck = (
+        f"{_OPENING}# The method holds on every deck we tried\n\n"
+        "---\nsection: Backup\nbackup: true\n---\n\n# Sources\n\n"
+        "---\nsection: Close\n---\n\n# Questions?\n"
+    )
+    report = lint(write_deck(deck))
+
+    assert rules(report) == ["conclusion-stays-up"]
+    assert [finding.slide for finding in report.findings] == [4]

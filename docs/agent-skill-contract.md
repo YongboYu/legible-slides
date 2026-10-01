@@ -84,6 +84,7 @@ grouped by slide and names each finding's rule; see
 | Sentence-opener distribution | `opener-variety` | opener share per passage, against the rule's ceiling |
 | Section map fits | `section-locator` | the sections a deck declares, their count and each label's length, at the severity the rule assigns |
 | Type floor holds | `type-scale` | every font size a slide's markup sets (style attributes, style blocks, UnoCSS text classes): an inline px size, and any size that resolves below the rule's floor |
+| Closes on a conclusion | `conclusion-stays-up` | the last slide outside the backups: no headline, a closing label for one, or a thank-you, at the severity the rule assigns |
 | **Palette passes CVD** | `separation-floor` | **shell out to `cvd-validate`** over `themes/*.json` — never reimplement CVD |
 
 Each row's numbers, wordlist and severity are read from that rule in `method.md`. The linter carries

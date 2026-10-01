@@ -3,8 +3,8 @@
 A rule the canon marks **decided by script** is a rule nobody should have to remember, so this
 module decides them: the bullet and word ceilings, em-dashes in a headline, the inflated-register
 wordlist, the sentence-opener share, whether the footer's section map still fits, a font size a
-slide sets inline or below the type floor, and whether the deck's palette clears the separation
-floor.
+slide sets inline or below the type floor, whether the talk closes on a conclusion rather than a
+thank-you, and whether the deck's palette clears the separation floor.
 ``docs/agent-skill-contract.md`` §4a fixes the set; the canon fixes every number in it, and this
 module quotes those numbers through ``legible.method`` rather than keeping a second copy.
 
@@ -34,6 +34,8 @@ from typing import NamedTuple
 from legible.deck import Slide, read_deck
 from legible.method import (
     BULLETS_PER_SLIDE,
+    CLOSING_LABELS,
+    CONCLUSION_SEVERITY,
     EM_DASHES_PER_HEADLINE,
     FLOOR_PX,
     INFLATED_REGISTER_SEVERITY,
@@ -43,6 +45,7 @@ from legible.method import (
     SECTION_LABEL_CHARS_MAX,
     SECTION_LOCATOR_SEVERITY,
     SECTIONS_MAX,
+    THANK_YOU_WORDS,
     WORDS_PER_BULLET,
 )
 
@@ -131,6 +134,7 @@ def lint(deck: str | Path, themes: Iterable[str | Path] = ()) -> LintReport:
     slides = read_deck(deck)
     findings = [finding for slide in slides for finding in _slide_findings(slide)]
     findings.extend(_section_findings(slides))
+    findings.extend(_conclusion_findings(slides))
     palette, unchecked = _palette_findings(themes)
 
     return LintReport(
@@ -244,6 +248,50 @@ def _section_findings(slides: Sequence[Slide]) -> Iterator[Finding]:
                 f"section {slide.section!r} is one more than the map holds, ceiling {SECTIONS_MAX}",
                 severity=SECTION_LOCATOR_SEVERITY,
             )
+
+
+def _conclusion_findings(slides: Sequence[Slide]) -> Iterator[Finding]:
+    """Whether the slide left up through Q&A is a conclusion rather than a thank-you.
+
+    That slide is the last one outside the backups. A backup is declared where its section starts
+    and carries forward with it, so it runs until a slide declares a section of the talk again.
+    """
+    last: Slide | None = None
+    in_backup = False
+    for slide in slides:
+        if slide.section is not None:
+            in_backup = slide.backup
+        if not in_backup:
+            last = slide
+    if last is None:
+        return
+
+    problem = _not_a_conclusion(last.headline)
+    if problem:
+        yield _finding(
+            "conclusion-stays-up",
+            last,
+            f"the last main slide {problem}; it stays up through Q&A, so make it the answers",
+            severity=CONCLUSION_SEVERITY,
+        )
+
+
+def _not_a_conclusion(headline: str | None) -> str | None:
+    """What keeps a headline from being a conclusion's, or ``None`` if nothing a script can see.
+
+    A label is matched whole, so a claim that names the questions it answers is not one; a thank-you
+    is matched anywhere in the headline, which can catch a claim that opens "thanks to", and is one
+    reason the canon has this rule warn rather than gate.
+    """
+    if not headline:
+        return "has no headline"
+    spoken = " ".join(headline.split()).strip(" .!?:;,").casefold()
+    if spoken in {label.casefold() for label in CLOSING_LABELS}:
+        return f"is headed {headline!r}, a label rather than a claim"
+    for words in THANK_YOU_WORDS:
+        if re.search(rf"\b{re.escape(words.casefold())}\b", spoken):
+            return f"reads as a thank-you: {headline!r}"
+    return None
 
 
 def _finding(rule: str, slide: Slide, message: str, severity: str = ERROR) -> Finding:

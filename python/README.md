@@ -148,7 +148,8 @@ look up in [`docs/method.md`](../docs/method.md) and disagree with. Six rules ar
 slide — `bullet-ceiling`, `word-ceiling`, `no-em-dash-headline`, `no-inflated-register`,
 `opener-variety` and `type-scale`, which flags a font size the slide's markup sets inline in px or
 below the floor — `section-locator` over the sections the deck declares, reported on the slide
-that declares the one at fault, and `separation-floor` per theme, for each `--theme` named. A deck
+that declares the one at fault, `conclusion-stays-up` on the last slide outside the backups, and
+`separation-floor` per theme, for each `--theme` named. A deck
 does not record which palette it wears, so naming none checks the slides alone.
 
 ```python

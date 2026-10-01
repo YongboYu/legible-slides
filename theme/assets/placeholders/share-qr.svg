@@ -1,0 +1,16 @@
+<!-- A blank for the QR code to your shared slides, bundled by the theme so the cover's and the
+     conclusion's slot render as a form rather than as a broken image when a deck names no code of
+     its own. Replace it from the deck, never here: generate a code for the link your slides are
+     shared at, drop it into the deck's public/ and point themeConfig.shareQr at it.
+
+     Greys rather than palette roles, for the reason the logo placeholders give: an <img> cannot
+     read the palette's custom properties. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="240" height="240"
+     role="img" aria-label="Placeholder for a QR code to your slides">
+  <rect x="1" y="1" width="238" height="238" rx="4" fill="#eeeeee" stroke="#b4b4b4"
+        stroke-width="2" stroke-dasharray="10 8" />
+  <text x="120" y="112" text-anchor="middle" font-family="Inter, system-ui, sans-serif"
+        font-size="26" fill="#6e6e6e">QR code</text>
+  <text x="120" y="146" text-anchor="middle" font-family="Inter, system-ui, sans-serif"
+        font-size="26" fill="#6e6e6e">to your slides</text>
+</svg>

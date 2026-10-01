@@ -37,6 +37,8 @@ pnpm build    # what CI builds
 | `cover` | the title slide, and nothing else |
 | `assertion-evidence` | the default: a claim, and the one pane of evidence that proves it |
 | `two-col-evidence` | evidence in two panes — `::left::` and `::right::`, on an optional `ratio` |
+| `answer` | straight after the cover: the result as the headline, the research questions after `::questions::` (`answer-first`) |
+| `conclusion` | the last main slide: the claim, each question answered after `::answers::`, and the slides handed over beside them (`conclusion-stays-up`) |
 | `references` | the sources, rendered from `indexEntries: [{ title, uri }]` |
 
 `default` is an alias for `assertion-evidence` rather than a fifth layout, so a slide that names no
@@ -44,7 +46,25 @@ layout still gets the skeleton and has to opt *out* of it.
 
 There is no `section`, `intro`, `end`, `statement`, `fact`, `focus` or `quote`. `no-section-dividers`
 forbids the slides they build, and the theme enforces that by offering no way to build one. The close
-of a talk is a `cover` or an ordinary `assertion-evidence`.
+of a talk is a `conclusion` (`conclusion-stays-up`), which `legible lint` checks.
+
+The questions on `answer` and the answers on `conclusion` are ordered lists, numbered Q1, Q2, … on
+both, so the room reads each answer against its question:
+
+```md
+---
+layout: answer
+---
+
+# The result, as a sentence.
+
+::questions::
+
+1. The first question?
+2. The second?
+```
+
+`conclusion` takes the same shape with `::answers::`, one answer per question in the same order.
 
 On a content slide the headline is the markdown's `#`, and everything after it is the evidence. On
 `two-col-evidence` the headline is what comes before the first `::left::`.
@@ -58,6 +78,7 @@ On a content slide the headline is the markdown's `#`, and everything after it i
 | `date` | written however the deck wants it read |
 | `venueLogo` | the venue's logo URL, above the title, overriding `themeConfig.venueLogo` |
 | `affiliationLogo` | the affiliation's logo URL, bottom left, overriding `themeConfig.affiliationLogo` |
+| `shareQr`, `shareUrl` | the QR code to the shared slides and its link, bottom right, overriding `themeConfig` |
 
 `speaker` rather than `author` because Slidev reserves that word: on the first slide of a deck —
 which is where a cover normally lives — `author` belongs to the headmatter and never reaches a layout
@@ -67,6 +88,23 @@ A mark is the deck's to serve, from its own `public/`, because it belongs to the
 machinery. This project ships none: until a deck names an image, each slot shows a placeholder the
 theme bundles (`assets/placeholders/`). Pointing a slot at a real mark is one line of `themeConfig`,
 and `''` leaves the slot empty.
+
+### Handing the slides over
+
+The cover and the conclusion carry the same `Share` slot: a QR code to where the slides are shared,
+the link written out under it, and on the conclusion the presenter's contact. Set it once:
+
+```yaml
+themeConfig:
+  shareQr: /share-qr.svg # in the deck's public/
+  shareUrl: https://example.org/your-slides
+  contact: you@example.org
+```
+
+Each key is also a prop on `cover` and `conclusion`, for one slide. The code is an image the deck
+generates for its own link and commits, like a figure — any QR tool will do, for instance
+`uvx segno <link> --no-size --output public/share-qr.svg` (`--no-size` keeps the SVG's viewBox, so the
+theme can size it). Until a deck names one the slot shows a placeholder, and `shareQr: ''` hides it.
 
 ## Chrome
 
@@ -122,6 +160,7 @@ is on screen, as in the overview and a printed export.
 |---|---|
 | `Callout` | an inline box for the one thing that has to read as set apart. `title`, and `accent` for the attention variant (`accent-is-attention`). |
 | `Figure` | `src`, `caption`, `cite`, `alt` — image, caption and citation as one thing, so a swapped figure cannot keep the old caption. |
+| `Share` | the QR code to the slides, its link and the contact, from `themeConfig`. Placed by `cover` and `conclusion`. |
 | `Footnotes` / `Footnote` | the foot of the evidence pane. `Footnote` takes the `number` you wrote as the in-text marker. |
 | `Chrome` | the chrome above. Injected for you; you should not need to place it. |
 

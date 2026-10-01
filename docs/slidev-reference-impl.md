@@ -2,7 +2,7 @@
 
 _Resolves [#10](https://github.com/YongboYu/legible-slides/issues/10). Consumes the token contract
 ([#2](https://github.com/YongboYu/legible-slides/issues/2),
-[`token-contract.md`](token-contract.md)), the method canon + 13-beat flagship outline
+[`token-contract.md`](token-contract.md)), the method canon + flagship outline
 ([#3](https://github.com/YongboYu/legible-slides/issues/3), [`method.md`](method.md)), the prior-art
 survey
 ([#6](https://github.com/YongboYu/legible-slides/issues/6),
@@ -35,26 +35,29 @@ deck's content.
 via a local `theme:` path. Publishing `slidev-theme-legible` to npm is a later flip, not a v1
 blocker (cf. the public flip, #37).
 
-## 2. Layouts (4)
+## 2. Layouts (6)
 
 | Layout | Covers | Origin |
 |---|---|---|
-| `cover` | beat 1 title; reused for the beat-13 close | pmf, generalized |
+| `cover` | beat 1 title, with the QR code to the slides (`answer-first`) | pmf, generalized |
+| `answer` | the result and the numbered research questions, straight after the cover (`answer-first`, #33) | new |
 | `assertion-evidence` | the default — headline claim + one evidence pane | pmf, generalized |
 | `two-col-evidence` | side-by-side evidence (beats 3, 6, 10) | pmf, generalized |
+| `conclusion` | the close: each question answered by number, the QR code and the contact, left up through Q&A (`conclusion-stays-up`, #33) | new |
 | `references` | a divider-free sources slide (`indexEntries: [{title, uri}]`) | borrow academic's `index` (#6) |
 
 **Not shipped:** `intro`, `section`, `end`, and the `statement`/`fact`/`focus`/`quote` emphasis
 layouts. `no-section-dividers` forbids them, and the theme enforces that rule by simply not offering
-a layout that breaks it. The beat-13 close reuses `cover` or a plain `assertion-evidence`.
+a layout that breaks it. The close is the `conclusion` layout, never a thank-you slide.
 
-## 3. Components (4)
+## 3. Components (5)
 
 | Component | Role |
 |---|---|
 | locator + page-no **chrome** | the persistent AE identity — the footer's section locator (`section-locator`) + page number, injected globally with per-slide opt-out (academic's `Pagination` pattern). Generalizes pmf's `PageNo` + locator. **Built on the per-slide `slide-top.vue` layer, not `global-top.vue`** (#20): the chrome is per-slide, and Slidev provides a slide's frontmatter and number only inside that slide. A global layer is mounted outside every slide and can only ask where the deck currently *is* — the wrong question wherever more than one slide is on screen, as in the overview and a printed export. |
 | **`Callout`** | inline emphasis box (pmf universal). |
 | **`Footnote` / `Footnotes`** | manual citation markers (borrow academic, #6) — pairs with the `references` layout for the deck's Alley / Tversky / Machado cites. |
+| **`Share`** | the QR code to the shared slides, its link and the presenter's contact, from `themeConfig`; placed by `cover` and `conclusion` (`answer-first`, `conclusion-stays-up`, #33). |
 | **`Figure`** | image + caption + optional cite-marker, kept as *data* (borrow academic's prop-driven captions) — evidence panes carry image + caption + source together. |
 
 **Left behind from pmf** (domain-specific): `DfgEvolution` and any other pmf data-figure Vue

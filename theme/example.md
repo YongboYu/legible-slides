@@ -11,27 +11,37 @@ info: |
 
 # slidev-theme-legible
 
-## Four layouts, four components, and a palette that had to pass the floor to get here.
+## Six layouts, five components, and a palette that had to pass the floor to get here.
+
+---
+layout: answer
+---
+
+# The theme opens a talk on its answer and closes on one that stays up.
+
+::questions::
+
+1. Which layouts does it ship, and which does it refuse?
+2. What does the palette have to clear?
 
 ---
 section: Skeleton
 ---
 
-# The theme ships four layouts, and refuses the ones the method forbids.
+# The theme ships six layouts, and refuses the ones the method forbids.
 
-- `cover` for the title, and for nothing else
-- `assertion-evidence` for a claim and its one pane of evidence
-- `two-col-evidence` when the evidence needs two panes
-- `references` for the sources, from data
+| Layout | For |
+|---|---|
+| `cover` | the title, and the QR code to the slides |
+| `answer` | the result, and the questions the talk answers |
+| `assertion-evidence` | a claim and its one pane of evidence |
+| `two-col-evidence` | evidence that needs two panes |
+| `conclusion` | each question answered, left up through Q&A |
+| `references` | the sources, from data |
 
-<!-- The blank lines are load-bearing: without them markdown-it takes the block for raw HTML and
-     leaves the backticks as backticks. -->
-<Callout title="Refused">
-
-No `section`, no `intro`, no `end`, no one-word emphasis. A slide spent on navigation proves nothing,
-so there is no layout that builds one.
-
-</Callout>
+<!-- Six rows at body size is as much as this slide holds, so what the theme refuses is said here
+     instead: no `section`, `intro`, `end` or one-word emphasis layout. A slide spent on navigation
+     proves nothing, so there is no layout that builds one. -->
 
 ---
 layout: two-col-evidence
@@ -77,6 +87,17 @@ off, and the `cover` layout is without them already.
 
 This slide also names no layout. `default` is `assertion-evidence` under the name Slidev falls back
 to, so the skeleton is what a slide gets by default rather than something it has to ask for.
+
+---
+layout: conclusion
+---
+
+# Every layout here is one the method asks for, and none is a divider.
+
+::answers::
+
+1. Six layouts, and no section, intro, end or thank-you slide
+2. The separation floor, under all three dichromacies
 
 ---
 layout: references

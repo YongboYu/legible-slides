@@ -5,13 +5,22 @@ theme: ../theme
 title: legible-slides
 author: Yongbo Yu
 info: |
-  The flagship deck. It teaches the method by being the method: thirteen beats, each one obeying the
+  The flagship deck. It teaches the method by being the method: fourteen beats, each one obeying the
   rule it is about, and the outline they follow is in docs/method.md.
-# No themeConfig: the cover's two logo slots show the theme's placeholders, because this project
-# ships nobody's mark. Presenting under a venue or an affiliation is dropping its mark into public/
-# and naming it here, as `themeConfig.venueLogo` or `themeConfig.affiliationLogo`. The footer shows
-# the map of this talk's four sections, which is the theme's default; `themeConfig.locator: label`
-# would show the current one with its position instead.
+# The slides, handed over on the cover and again on the close: a QR code to where they are shared,
+# the link written out under it, and on the close how to reach the speaker. The code is generated for
+# that link and committed, like the figures:
+#   uvx segno https://github.com/YongboYu/legible-slides --error M --border 4 --light "#ffffff" \
+#     --title "QR code to https://github.com/YongboYu/legible-slides" --no-xmldecl --no-size \
+#     --output public/share-qr.svg
+# No logos: the cover's two slots show the theme's placeholders, because this project ships nobody's
+# mark. Presenting under a venue or an affiliation is dropping its mark into public/ and naming it
+# here, as `venueLogo` or `affiliationLogo`. The footer shows the map of this talk's four sections,
+# which is the theme's default; `locator: label` would show the current one with its position.
+themeConfig:
+  shareQr: /share-qr.svg
+  shareUrl: https://github.com/YongboYu/legible-slides
+  contact: Yongbo Yu · github.com/YongboYu
 # The first frontmatter block is the cover's as well as the deck's, which is why the cover's own
 # props sit here. `author` is not among them: Slidev keeps that word for the headmatter, so the
 # layout reads `speaker`, and falls back to the author above when a deck omits it.
@@ -25,6 +34,24 @@ venue: KU Leuven · Research Centre for Information Systems Engineering
 # legible-slides
 
 ## Readable from the back row, and for every pair of eyes.
+
+---
+layout: answer
+---
+
+# A method decides what each slide is for, and two commands hold every slide to it.
+
+::questions::
+
+1. What is a slide for?
+2. Can the back row, and every pair of eyes, read it?
+3. How does the method reach your own deck?
+
+<!--
+That headline is the whole talk. Everything after it is the case for it, in the order of these three
+questions, and the last slide answers them by the same numbers. Point at the QR code on the cover if
+anyone missed it: the slides are already on their phones.
+-->
 
 ---
 layout: two-col-evidence
@@ -382,28 +409,21 @@ drifts from the deck it copies the first time either one changes.
 -->
 
 ---
+layout: conclusion
+---
 
 # Everything you just watched was built to the rules it was teaching you.
 
-Every rule sits in one file, `docs/method.md`, and every number it turns on is quoted from there
-rather than copied. Both commands below run on every push, and a finding either of them calls an
-error turns the build red.
+::answers::
 
-```bash
-legible lint slides.md --theme ../themes/leuven-blue.json
-cvd-validate ../themes/leuven-blue.json
-```
-
-<Callout accent title="Take it">
-
-Point a deck at the theme, run those two lines against your own palette, and when you disagree with a
-rule, change the one file the rule lives in: [github.com/YongboYu/legible-slides](https://github.com/YongboYu/legible-slides)
-
-</Callout>
+1. One question per slide, and its answer is the headline
+2. Type sized for the room, colours measured under colour-vision deficiency
+3. One markdown file, with `legible lint` and `cvd-validate` on every push
 
 <!--
-Close on the commands rather than on thanks. What you have just watched is lint-green, and its
-palette is measured in the same pipeline: nothing on any of these slides was exempt.
+Leave this slide up through the questions: it is the one the room reads while they ask. Each answer
+closes the question with the same number on the second slide. Say thank you aloud rather than on a
+slide, and point at the code for the slides and the rules, which all live in docs/method.md.
 -->
 
 ---

@@ -116,9 +116,9 @@ claims to enforce. See [`skill/README.md`](skill/README.md).
 
 ## Presenting with Slidev
 
-[`theme/`](theme) is `slidev-theme-legible`, the method as machinery: four layouts, the persistent
-chrome that carries orientation so no slide has to be spent on navigation, and styles that read
-nothing but the generated palette. Both typefaces are bundled, so a deck renders in the family it was
+[`theme/`](theme) is `slidev-theme-legible`, the method as machinery: six layouts, among them an
+opening answer and a closing conclusion, the persistent chrome that carries orientation so no slide
+has to be spent on navigation, and styles that read nothing but the generated palette. Both typefaces are bundled, so a deck renders in the family it was
 designed in on a lecture-room laptop with no network — and in the same one the figures were drawn in.
 
 What it refuses is as much the point. There is no section-divider, no opener, no closer and no

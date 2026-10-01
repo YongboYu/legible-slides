@@ -56,6 +56,7 @@ nothing if they are not.
 | `package.json` | the deck's name and its description |
 | `themes/palette.json` | the chosen palette's contents, if it is not the one stamped. Keep the path — everything else in the deck points at it, which is what makes a recolour one edit. |
 | `public/`, `themeConfig.venueLogo` and `themeConfig.affiliationLogo` | the author's own marks, if they named any, in place of the placeholders |
+| `themeConfig.shareUrl`, `themeConfig.shareQr` and `themeConfig.contact` | where the slides will be shared and how to reach the author, if they said; a QR code for that link goes in `public/`. Otherwise leave the placeholder. |
 
 A skeleton slide is a blank for the author to fill, and not a slide for you to write. The method is
 about deciding what each slide is *for*, and that decision is theirs.

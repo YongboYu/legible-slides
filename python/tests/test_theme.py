@@ -357,6 +357,7 @@ SMALL_TEXT = (
     ".legible-footnote",
     ".slidev-layout .legible-reference-uri",
     ".slidev-layout th",
+    ".legible-share-caption",
 )
 
 
@@ -377,3 +378,62 @@ def test_a_citation_marker_in_the_small_text_is_set_at_the_floor(stylesheet, sel
     """Both are `sup` elements, which a browser shrinks to about 80% of their parent unless told
     otherwise, and their parents already sit on the floor."""
     assert "font-size: var(--floor-px);" in _block(stylesheet, selector)
+
+
+# ── the opening and the close ─────────────────────────────────────────────────
+
+
+def _layout(name: str) -> str:
+    return (THEME / "layouts" / f"{name}.vue").read_text(encoding="utf-8")
+
+
+@pytest.mark.parametrize(("layout", "slot"), [("answer", "questions"), ("conclusion", "answers")])
+def test_the_opening_and_the_close_each_have_a_layout(layout, slot):
+    """`answer-first` and `conclusion-stays-up`: the result and its questions, then the questions
+    answered. Each takes its numbered list in a slot of its own, so the layout can number both the
+    same way and the close reads against the opening by number."""
+    source = _layout(layout)
+
+    assert f'<slot name="{slot}" />' in source
+    assert "legible-numbered" in source
+
+
+def test_the_questions_and_the_answers_are_numbered_alike(stylesheet):
+    """The pairing is by number, so the number is text in a role that clears contrast, and a
+    question and its answer wear the same one."""
+    marker = _block(stylesheet, ".legible-numbered > ol > li::marker")
+
+    assert re.search(r"content: 'Q' counter\(list-item\)", marker)
+    assert "var(--neutral-soft)" not in marker
+
+
+@pytest.mark.parametrize("layout", ["cover", "conclusion"])
+def test_the_first_and_the_last_slide_carry_the_share_slot(layout):
+    """`answer-first` puts a QR code to the slides on the cover; `conclusion-stays-up` puts it on
+    the close, with the presenter's contact. One component, so the two cannot drift apart."""
+    assert "<Share" in _layout(layout)
+
+
+@pytest.fixture(scope="module")
+def share() -> str:
+    return (THEME / "components" / "Share.vue").read_text(encoding="utf-8")
+
+
+@pytest.mark.parametrize("key", ["shareQr", "shareUrl", "contact"])
+def test_the_share_slot_is_set_once_for_a_deck_or_per_slide(share, key):
+    assert f"{key}?: string" in share, f"the share slot takes no `{key}` prop"
+    assert f"themeConfigs.{key}" in share, f"a deck cannot set `{key}` once in themeConfig"
+
+
+def test_the_qr_slot_falls_back_to_a_placeholder_the_theme_bundles(share):
+    """Like the logo slots, and imported for the same reason: an unset slot renders as a blank to
+    fill in rather than a broken image."""
+    assert (THEME / "assets" / "placeholders" / "share-qr.svg").is_file()
+    assert "from '../assets/placeholders/share-qr.svg?url'" in share
+
+
+def test_the_qr_code_says_where_it_goes(share):
+    """A QR code is an image nobody can read without a phone, so its link is also written out, and
+    its alt text names it."""
+    assert "legible-share-caption" in share
+    assert re.search(r":alt=\"[^\"]*url", share)

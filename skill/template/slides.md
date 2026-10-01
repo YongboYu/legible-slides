@@ -10,10 +10,17 @@ info: |
 # each shows a placeholder the theme bundles. Drop your own mark into this deck's public/ and name
 # it here, or set a slot to '' for no mark. The footer maps the talk's sections; `locator: label`
 # shows only the current one, with its position, instead.
+# The slides, handed over on the cover and on the conclusion (`answer-first`,
+# `conclusion-stays-up`): a QR code to the link you share them at, generated into public/ by any QR
+# tool (`uvx segno <link> --no-size --output public/share-qr.svg`), the link itself, and on the
+# conclusion how to reach you. The QR slot shows a placeholder until you name a code.
 # themeConfig:
 #   venueLogo: /venue-logo.png
 #   affiliationLogo: /affiliation-logo.png
 #   locator: label
+#   shareQr: /share-qr.svg
+#   shareUrl: https://example.org/your-slides
+#   contact: you@example.org
 # The first frontmatter block is the deck's headmatter and the cover's own frontmatter at once,
 # which is why the cover's props sit here. The cover takes `speaker` when a talk is given by someone
 # other than the `author` above; `venue` and `date` are yours to fill in or to delete.
@@ -25,6 +32,22 @@ date: When
 # Your title
 
 ## The one sentence you want the room to leave with.
+
+---
+layout: answer
+# Straight after the cover. What goes on it, and why here: `legible rules answer-first`.
+---
+
+# The result of the whole talk, written as a sentence.
+
+::questions::
+
+1. The first question the talk answers?
+2. The second?
+
+<!--
+What you say out loud while the room reads the result.
+-->
 
 ---
 layout: assertion-evidence
@@ -85,6 +108,23 @@ the number the evidence turns on.
 <!--
 Both panes serve the headline above them. Read `legible rules one-message` when a slide starts to
 feel like it is doing two jobs, because splitting it here is cheaper than splitting it in the room.
+-->
+
+---
+layout: conclusion
+# The last slide of the talk; the QR code and your contact come from themeConfig above. What goes
+# on it, and why: `legible rules conclusion-stays-up`.
+---
+
+# The claim the whole talk proved, written as a sentence.
+
+::answers::
+
+1. The answer to the first question
+2. The answer to the second
+
+<!--
+What you say out loud while this slide is up.
 -->
 
 ---

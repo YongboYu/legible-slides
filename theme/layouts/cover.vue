@@ -11,6 +11,10 @@
  * each slot shows a placeholder until the deck names an image. `themeConfig` names one once for a
  * deck, and a slide's prop overrides it. An empty string leaves the slot empty.
  *
+ * Bottom right, the slides themselves: a QR code to where they are shared (`answer-first`), so the
+ * room can follow on their own screens from the first minute. It is the same `Share` component the
+ * conclusion places, read from the same `themeConfig`, without the contact.
+ *
  * The placeholders are imported rather than served. Slidev does not serve a theme's `public/` at a
  * deck's root, so a fallback URL pointing there would be a broken image on every cover that named
  * no mark; an import is carried into whichever deck the theme is built into.
@@ -19,6 +23,7 @@ import { computed } from 'vue'
 import { useSlideContext } from '@slidev/client'
 import affiliationPlaceholder from '../assets/placeholders/affiliation-logo.svg?url'
 import venuePlaceholder from '../assets/placeholders/venue-logo.svg?url'
+import Share from '../components/Share.vue'
 
 const props = defineProps<{
   /**
@@ -36,6 +41,10 @@ const props = defineProps<{
   venueLogo?: string
   /** The affiliation's logo URL, overriding `themeConfig.affiliationLogo` for this slide. */
   affiliationLogo?: string
+  /** The QR code to the shared slides, overriding `themeConfig.shareQr` for this slide. */
+  shareQr?: string
+  /** Where that code leads, overriding `themeConfig.shareUrl` for this slide. */
+  shareUrl?: string
 }>()
 
 const { $slidev } = useSlideContext()
@@ -71,6 +80,12 @@ const meta = computed(() =>
       class="legible-cover-affiliation-logo"
       :src="affiliationLogo"
       alt=""
+    />
+    <Share
+      class="legible-cover-share"
+      :share-qr="shareQr"
+      :share-url="shareUrl"
+      contact=""
     />
   </div>
 </template>

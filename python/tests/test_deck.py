@@ -325,6 +325,33 @@ def test_a_slide_reports_the_section_its_frontmatter_declares():
     assert [slide.section for slide in slides] == ["Problem", None, "Method"]
 
 
+def test_a_slide_reports_the_layout_its_frontmatter_names():
+    """Which slide is the deck's opening answer and which its close is a matter of layout, so the
+    reading keeps the name a slide gives and leaves resolving a default to the theme."""
+    slides = deck(
+        """\
+        ---
+        theme: ../theme
+        layout: cover
+        ---
+
+        # First
+
+        ---
+        layout: 'answer' # quoted, and commented
+        ---
+
+        # Second
+
+        ---
+
+        # Third
+        """
+    )
+
+    assert [slide.layout for slide in slides] == ["cover", "answer", None]
+
+
 def test_an_empty_section_is_declared_rather_than_absent():
     """`section: ''` clears the locator, which is a declaration of its own."""
     slides = deck(

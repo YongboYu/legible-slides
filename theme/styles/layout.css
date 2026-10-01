@@ -49,6 +49,10 @@
   /* Room under the evidence for the footer: the locator and the page number. */
   --zone-footer-h: 28px;
 
+  /* The QR code to the shared slides, on the cover and the close. Sized in footer heights like the
+   * cover's marks, and large enough that a phone reads it from the middle of the room. */
+  --share-qr-size: calc(var(--zone-footer-h) * 6);
+
   /* The slide opens on the claim. Nothing is reserved above it, so the headline starts one gap
    * inside the top edge. */
   --zone-headline-top: calc(var(--edge-top) + var(--zone-gap));
@@ -280,10 +284,17 @@ html.dark {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  /* The bottom edge is held clear of the affiliation's mark, so a long title pushes the column up
-   * rather than into the corner. */
+  /* The QR code and the one line of link under it, in the opposite corner. */
+  --cover-share-h: calc(var(--share-qr-size) + var(--zone-gap) + var(--floor-px) * 1.35);
+
+  /* The bottom edge is held clear of the corners — the affiliation's mark and the QR code — so a
+   * long title pushes the column up rather than into either. */
   padding: var(--edge-top) var(--edge-x)
-    calc(var(--edge-bottom) + var(--cover-affiliation-logo-h) + var(--zone-gap)) var(--edge-x);
+    calc(
+      var(--edge-bottom) + max(var(--cover-affiliation-logo-h), var(--cover-share-h)) +
+        var(--zone-gap)
+    )
+    var(--edge-x);
 }
 
 .slidev-layout.cover h1 {
@@ -331,6 +342,17 @@ html.dark {
   object-position: left bottom;
 }
 
+/* The slides, handed over from the first minute (`answer-first`): the cover's bottom-right corner,
+ * opposite the affiliation's mark and on the same bottom edge, the code and its link flush right.
+ * Qualified by the component's own class so it outranks that class' left alignment below. */
+.legible-share.legible-cover-share {
+  position: absolute;
+  right: var(--edge-x);
+  bottom: var(--edge-bottom);
+  align-items: flex-end;
+  text-align: right;
+}
+
 /* ── layouts: the content skeleton ────────────────────────────────────────────────────────────
  * Padded to the zones above: the headline opens the slide, and the evidence starts one
  * `--zone-headline-evidence-gap` under the headline's reserved zone. A column, so a `Footnotes`
@@ -338,7 +360,9 @@ html.dark {
 
 .slidev-layout.assertion-evidence,
 .slidev-layout.two-col-evidence,
-.slidev-layout.references {
+.slidev-layout.references,
+.slidev-layout.answer,
+.slidev-layout.conclusion {
   display: flex;
   flex-direction: column;
   padding: var(--zone-headline-top) var(--edge-x) calc(var(--edge-bottom) + var(--zone-footer-h))
@@ -384,6 +408,66 @@ html.dark {
 .legible-evidence > .legible-figure,
 .legible-column > .legible-figure {
   flex: 1;
+}
+
+/* ── layouts: answer and conclusion ───────────────────────────────────────────────────────────
+ * The opening and the close (`answer-first`, `conclusion-stays-up`). The questions on the one and
+ * the answers on the other are numbered alike, Q1, Q2, …, because the close is read against the
+ * opening by number. The number is text, so it takes the brand role and a heavier weight rather
+ * than the softest neutral (`decorative-neutral-never-text`, `never-sole-channel`). */
+
+.legible-numbered > ol {
+  padding-left: 2.2em;
+}
+
+.legible-numbered > ol > li::marker {
+  content: 'Q' counter(list-item) '  ';
+  color: var(--brand);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+/* The answers beside the slides, handed over: the answers take the room, the share slot its own
+ * width. */
+.slidev-layout.conclusion .legible-evidence {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: start;
+  gap: 48px;
+}
+
+/* ── component: Share ─────────────────────────────────────────────────────────────────────────
+ * A QR code to the shared slides, the link written out under it, and on the close the presenter's
+ * contact. The code is square and sized by the theme, so a generated SVG of any module count lands
+ * at the same size. */
+
+.legible-share {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.legible-share-qr {
+  width: var(--share-qr-size);
+  height: var(--share-qr-size);
+  margin-bottom: 6px;
+  object-fit: contain;
+}
+
+/* At the floor: the link and the contact are the code's caption, not evidence. In `neutral`,
+ * because it is text at the floor. */
+.legible-share-caption {
+  color: var(--neutral);
+  font-size: var(--floor-px);
+  line-height: 1.35;
+}
+
+/* The link, qualified by the layout so it outranks the link colour, and set like the contact
+ * rather than as a link nobody in the room can click. */
+.slidev-layout a.legible-share-caption {
+  color: var(--neutral);
+  text-decoration: none;
 }
 
 /* ── layout: references ───────────────────────────────────────────────────────────────────────

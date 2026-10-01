@@ -362,3 +362,13 @@ ATTENTION_CONTRAST_PAIRS = tuple(
 
 #: The WCAG contrast ratio each of those pairings has to clear.
 ATTENTION_CONTRAST_MIN = float(_ACCENT_IS_ATTENTION["attention-contrast-min"])
+
+
+_CONCLUSION_STAYS_UP = rule_thresholds("conclusion-stays-up")
+
+#: What the slide left up through Q&A may not be: a headline that is only one of these labels, or
+#: one that thanks the room. How loudly a hit is reported is the canon's call too: whether the slide
+#: answers the talk's questions is a judgment the script only approaches from the outside.
+CLOSING_LABELS = _listed(_CONCLUSION_STAYS_UP["closing-labels"])
+THANK_YOU_WORDS = _listed(_CONCLUSION_STAYS_UP["thank-you-words"])
+CONCLUSION_SEVERITY = _CONCLUSION_STAYS_UP["conclusion-severity"]
