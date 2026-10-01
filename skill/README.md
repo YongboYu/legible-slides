@@ -2,10 +2,15 @@
 
 [`SKILL.md`](SKILL.md) is a [Claude Code](https://claude.com/claude-code) skill that holds a Slidev
 deck to the method. It turns the rules from prose an author has to remember into checks something
-runs, and reports what breaks, per slide, with a fix for each.
+runs, and reports what breaks, per slide, with a fix for each. It can also take a talk from a paper
+to a deck, by way of a plan the author edits.
 
-Two modes, and the second is the first one's acceptance bar:
+Four modes, and review is the acceptance bar for the other three:
 
+- **draft** — read a paper and its codebase, and write a [talk plan](../docs/talk-plan.md): one
+  entry per slide, with its section, its headline claim, and its evidence and where that comes from.
+- **build** — turn a talk plan into a deck: scaffold it, fill each slide from its entry, draw the
+  figures, and review the result.
 - **scaffold** — stamp a new deck, wired to the theme, its palette and both checks, from
   [`template/`](template). Review-ready from slide one rather than retrofitted at the end.
 - **review** — check a deck that exists, and say what breaks and how to fix it.
@@ -45,6 +50,23 @@ It is deliberately **lean**: a clean start, not a worked deck. The teaching arti
 [the flagship](../deck), and a second one here would be a second thing to keep true. It stamps a
 copy of the project's one palette, `leuven-blue`, and the cover's two logo slots show placeholders: no
 institution's mark ships, so the author points the cover at their own.
+
+## What draft and build do
+
+Draft reads the paper for the argument and the codebase for the numbers, and writes a plan: the
+questions the talk answers, then one entry per slide, each headline written before its evidence is
+picked (`message-before-visual`). Every number is checked against its source as it goes in, and
+whatever didn't fit the slot, or didn't hold up, is listed under the plan's cuts with the reason.
+Then it stops. The author edits the plan, and that's where the argument gets settled, because
+changing a line is cheaper than redrawing a slide.
+
+Build stamps the template and fills each slide from its entry: the headline word for word, the
+layout, the section, the evidence, footnotes for the sources, and the notes. It draws every chart
+from data with the figure helper, builds the deck, and runs review mode over it. The report goes to
+the author with the deck. An error is fixed as part of the build; a warning is left for the author.
+
+[`examples/pmf-tsfm/`](examples/pmf-tsfm) is both modes run end to end on a real paper, with the
+review attached, and `python/tests/test_plan.py` holds the deck to its plan.
 
 ## What review does
 

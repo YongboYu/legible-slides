@@ -97,7 +97,13 @@ and judgment stays with a reader, or with the coding-agent skill that reviews on
 
 ## Starting and reviewing with a coding agent
 
-[`skill/`](skill) is that skill, and it has two modes.
+[`skill/`](skill) is that skill, and it has four modes.
+
+**draft** reads a paper and its codebase and writes a [talk plan](docs/talk-plan.md): the
+questions the talk answers, then one entry per slide with its headline claim, its evidence and
+where that comes from. You edit the plan, which is the cheap place to change an argument. **build**
+turns the plan into a deck on the template, draws its figures from data, and hands it over with a
+review. [`skill/examples/pmf-tsfm/`](skill/examples/pmf-tsfm) is both, run on a real paper.
 
 **review** runs the linter for everything a script settles, loads the rules that need reading
 straight from the canon (`legible rules`), and reports both halves as one review, grouped per slide,
@@ -111,7 +117,7 @@ starting point, not a second flagship — and it hands the deck over having run 
 so a deck is review-ready from slide one rather than retrofitted at the end. It stamps a copy of
 the `leuven-blue` palette, which the deck is free to edit.
 
-Neither mode states a rule of its own, which is what stops a review drifting from the method it
+No mode states a rule of its own, which is what stops a review drifting from the method it
 claims to enforce. See [`skill/README.md`](skill/README.md).
 
 ## Presenting with Slidev

@@ -1,6 +1,6 @@
 ---
 name: legible-slides
-description: Start a Slidev deck to the legible-slides method, or review an existing one against it — the mechanical gate a script settles, plus the judgments it cannot. Use when asked to scaffold or start a deck to the method, review a deck, check slides against the method, or vet a deck before it is presented or merged.
+description: Plan a talk from a paper and its codebase, build a Slidev deck from that plan, start a blank deck to the legible-slides method, or review an existing one against it — the mechanical gate a script settles, plus the judgments it cannot. Use when asked to turn a paper into a talk or a talk plan, build slides from a plan, scaffold or start a deck to the method, review a deck, check slides against the method, or vet a deck before it is presented or merged.
 ---
 
 # legible-slides
@@ -13,10 +13,116 @@ need reading, and what the report looks like.
 Rules are **loaded from the canon at review time** (review, step 3). A rule edited there changes
 this review with nothing edited here.
 
-Two modes, and the second is the first one's acceptance bar:
+Four modes. Review is the acceptance bar for the other three, and a talk plan is what joins the
+first two:
 
+- **draft** — read a paper and its codebase, and write a talk plan for the author to edit.
+- **build** — turn a talk plan into a deck: scaffold it, fill every slide from the plan, review it.
 - **scaffold** — start a new deck, method-compliant before a word of it is written.
 - **review** — check a deck that exists, and say what breaks and how to fix it.
+
+The talk plan's format is `docs/talk-plan.md` in the checkout of legible-slides. Read it before
+drafting a plan or building from one; this file names its parts and does not restate them. The
+worked example is `skill/examples/pmf-tsfm/`: a plan drafted from a paper and its code, the deck
+built from it, and the review of that deck.
+
+## Mode: draft
+
+Write a talk plan from a paper and its codebase. The plan is where the argument gets settled, one
+line of text per slide, so it is the cheapest place for the author to change it.
+
+### 1. Find the sources, and the four things they do not say
+
+| What | Where |
+|---|---|
+| The paper | The LaTeX source or the PDF the author named. The source is better: its tables are text. |
+| The codebase | The checkout the author named. Its outputs are where a number can be checked, and where data the paper only summarizes lives. |
+| The slot, the venue, the speaker | Ask. A plan without a slot cannot be budgeted. |
+
+### 2. Load the rules a plan is shaped by
+
+```bash
+legible rules message-before-visual answer-first conclusion-stays-up one-message assertion-headline
+legible rules section-locator pace-budget acronym-budget
+```
+
+As in review mode: work from what these print, not from memory of them, and stop if one exits 2.
+
+### 3. Write the questions, then the answer
+
+The questions are the ones the paper sets out to answer, phrased the way the room would ask them.
+Then the answer slide's entry, held to `answer-first` as step 2 printed it.
+
+### 4. Write one entry per slide, the claim first
+
+For each claim the talk has to make, in the order the argument needs, write the entry in the order
+`message-before-visual` asks for, and then say exactly where its evidence is: a table or section of
+the paper, a file in the codebase.
+
+Check every number in a claim against its source as you write it. Where the codebase holds the data
+behind a figure, extract it into the plan's data directory with a script that says where it read
+from, so the figure can be drawn again without the codebase.
+
+### 5. Fit the slot, and write down the cuts
+
+Give every entry a time budget and add them up against the slot, the way `pace-budget` does. What
+does not fit, and every claim from the paper whose evidence you could not find or that did not hold
+up when you checked it, goes under the plan's cuts, with the reason.
+
+### 6. Hand the plan over, and stop
+
+The author edits it. Do not build a deck from a plan the author has not read: the plan is their
+argument, and the deck only presents it.
+
+## Mode: build
+
+Turn a talk plan into a deck. Every headline, section, layout, piece of evidence and time budget
+comes from the plan; nothing on a slide is decided here that the plan did not decide first.
+
+### 1. Read the plan against its format
+
+Every entry carries the fields `docs/talk-plan.md` asks for. If one is missing, or a claim has no
+source, say which entry and ask, rather than filling it in.
+
+### 2. Scaffold the deck
+
+Run scaffold mode, steps 1 to 4, taking its answers from the plan's headmatter: the title, the
+speaker, the venue, and the slot as the deck's `duration`.
+
+### 3. Fill each slide from its entry, in order
+
+Replace the template's skeleton slides with one slide per entry:
+
+| From the entry | Onto the slide |
+|---|---|
+| its heading | the headline, word for word |
+| **Layout** | the slide's `layout` |
+| **Section** | the slide's `section`, set where it changes and left to carry forward otherwise |
+| **Evidence** | a figure through the figure script, a markdown table, an equation (`equation-worked-example`), or a `Callout`; the plan's questions and answers on the slides `answer-first` and `conclusion-stays-up` name |
+| **Source** | a footnote on the slide, and an entry on the references slide |
+| **Time** | a `Time:` line in the speaker notes |
+| the paragraph under it | the speaker notes, with a `Signpost:` line where the section changes |
+
+Delete the placeholder image and anything else the template stamped that no entry asked for.
+
+### 4. Draw the figures from data
+
+A figure script beside the deck draws every chart an entry calls for, with the archetypes in
+`legible.figures` and the deck's own palette. Numbers typed in from the paper say which table they
+came from; data read from the codebase is committed beside the script. Commit the images it writes.
+
+### 5. Build, review, and attach the report
+
+```bash
+pnpm install && pnpm build
+```
+
+Then run review mode over the deck and save its report beside the plan. That report is what the
+author gets with the deck.
+
+An error is a fault in the build, and fixing it is part of building. If the fix changes the words
+of a slide, change its entry in the plan too, so the plan stays the deck's source. A warning is the
+author's to weigh: report it with its fix, and leave the slide as the plan wrote it.
 
 ## Mode: scaffold
 
@@ -230,9 +336,13 @@ written into this procedure is a copy of it that can go stale.
 
 ## Posture
 
-**Flag and suggest. The author applies.** This skill proposes fixes and never edits a deck on its
-own. If the author accepts one, apply that one, and leave the rest of the deck alone. It can
-enforce structure; it cannot decide anybody's message for them.
+**Flag and suggest. The author applies.** Review proposes fixes and never edits a deck on its own.
+If the author accepts one, apply that one, and leave the rest of the deck alone. It can enforce
+structure; it cannot decide anybody's message for them.
+
+Draft and build do write, and the same line holds for them. Draft proposes an argument, and the
+author settles it in the plan. Build writes slides, but only what the plan says: it invents no
+claim, and it does not reword one to clear an advisory.
 
 ## What this skill will not do
 

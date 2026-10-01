@@ -15,11 +15,13 @@ must remember into checks an agent runs. It never restates those rules — it po
 
 ---
 
-## 1. Shape — one `SKILL.md` skill, two modes
+## 1. Shape — one `SKILL.md` skill, four modes
 
 A single **Claude Code skill** defined by a `SKILL.md`, living in **`skill/`** at the repo root (a
-shippable delivery, not a project-private `.claude/skills/` helper). One skill covering two modes:
+shippable delivery, not a project-private `.claude/skills/` helper). One skill covering four modes:
 
+- **draft** — write a talk plan from a paper and its codebase (§7).
+- **build** — build a deck from a talk plan, and review it (§7).
 - **scaffold** — start a new method-compliant Slidev deck of your own.
 - **review** — check an existing deck against the method.
 
@@ -172,15 +174,40 @@ also stamps the template, recolours it, and builds it, which is where the claim 
 tokens outrank the theme checkout's is settled — a stamped deck wearing the wrong palette would be
 visible in the built CSS and nowhere else.
 
+## 7. Draft and build — a talk plan between the paper and the deck
+
+Added in **[#36](https://github.com/YongboYu/legible-slides/issues/36)**. A **talk plan** is a
+markdown file with one entry per slide (its section, its headline claim, its evidence and where that
+comes from, its time budget), plus the talk's slot and its research questions. The format is
+[`talk-plan.md`](talk-plan.md). The plan is where `message-before-visual` is done: every claim is
+written before anything is drawn.
+
+- **draft** reads a paper and its codebase and writes a plan. It checks each number against its
+  source, records what it cut and why, and then stops: the author edits the plan, and the argument
+  is settled there.
+- **build** runs scaffold, fills each slide from its entry, draws the figures with the figure
+  helper, builds, and runs review mode. The report is handed over with the deck. An error is fixed
+  as part of the build, and the plan is updated to match; a warning is left for the author.
+
+Neither mode states a rule. Draft loads the rules a plan is shaped by with `legible rules`, the way
+review does, and build's acceptance bar is §5's review.
+
+The worked example is [`skill/examples/pmf-tsfm/`](../skill/examples/pmf-tsfm): a plan drafted from
+the pmf-tsfm paper and its code, the deck built from it, and its review. It is enforced, not
+asserted: `python/tests/test_plan.py` holds the plan to its format, the deck to the plan slide for
+slide, the deck to the linter's gate, and the attached review to the linter's verdict and findings.
+CI stamps the template, lays the example over it, builds it and lints it.
+
 ---
 
 ## Summary
 
 | Facet | Decision |
 |---|---|
-| Packaging | One Claude Code `SKILL.md` in `skill/`; two modes; plugin + cross-agent deferred |
+| Packaging | One Claude Code `SKILL.md` in `skill/`; four modes; plugin + cross-agent deferred |
 | Rule sourcing | Thin pointer — procedure in `SKILL.md`, rules + thresholds loaded from `method.md` |
 | Review surface | Slidev only |
 | Review engine | Hybrid — mechanical linter in `legible` (palette via `cvd-validate`) + LLM for 5 semantic checks |
 | Review posture | Flag + suggest (human applies); two-tier gate/advisory; merged per-slide markdown report |
 | Scaffold | Minimal Slidev starter on `leuven-blue`, review-ready from slide one |
+| Draft & build | Paper and codebase → talk plan (author edits) → deck, reviewed; worked on pmf-tsfm |
