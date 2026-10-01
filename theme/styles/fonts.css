@@ -42,14 +42,25 @@
   src: url('../assets/fonts/Inter-Bold.woff2') format('woff2');
 }
 
-/* One weight, because the locator is the only thing set in it — and the regular, because that is the
- * face that carries the bare family name `JetBrains Mono`. A weight-suffixed face reports itself as
- * a family of its own ("JetBrains Mono Medium"), which is fine for a browser reading this rule and
- * wrong for matplotlib, which resolves the family by name and would go looking outside the bundle. */
+/* The locator is the only thing set in it, at two weights: the regular for the sections the talk is
+ * not in, the semibold for the one it is in (`section-locator`), so the mark is a weight the bundle
+ * carries rather than one a browser smears out of the regular. The regular is the face that carries
+ * the bare family name `JetBrains Mono`: a weight-suffixed face reports itself as a family of its
+ * own ("JetBrains Mono SemiBold"), which is fine for a browser reading these rules and wrong for
+ * matplotlib, which resolves the family by name. So the semibold ships as woff2 only, for the
+ * browser, and matplotlib only ever sees the regular. */
 @font-face {
   font-family: 'JetBrains Mono';
   font-style: normal;
   font-weight: 400;
   font-display: block;
   src: url('../assets/fonts/JetBrainsMono-Regular.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-style: normal;
+  font-weight: 600;
+  font-display: block;
+  src: url('../assets/fonts/JetBrainsMono-SemiBold.woff2') format('woff2');
 }

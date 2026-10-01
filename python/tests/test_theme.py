@@ -110,17 +110,21 @@ def test_the_theme_asks_no_font_provider_for_those_families(package):
     assert set(declared_fonts["local"]) == {fonts["font-text"], fonts["font-mono"]}
 
 
-def _skeleton_zones() -> list[str]:
-    """The zones `ae-skeleton` names, in order, read off the diagram it draws."""
+def _skeleton_bands() -> list[list[str]]:
+    """The zones `ae-skeleton` names, top to bottom, a band per line of the diagram it draws."""
     diagram = re.search(r"```\n(.+?)\n```", rule("ae-skeleton").text, re.DOTALL)
     assert diagram, "`ae-skeleton` draws no diagram of its zones"
-    return [zone.strip() for zone in diagram.group(1).split("→")]
+    return [[zone.strip() for zone in band.split("·")] for band in diagram.group(1).split("\n")]
 
 
-def test_the_canon_s_skeleton_draws_nothing_under_the_headline():
-    """The zones the theme builds are the canon's, and the canon no longer carries one for a rule
-    between the headline and the evidence."""
-    assert _skeleton_zones() == ["locator", "assertion headline", "evidence", "page number"]
+def test_the_canon_s_skeleton_opens_on_the_headline_and_draws_nothing_under_it():
+    """The zones the theme builds are the canon's: nothing above the claim, no rule between it and
+    the evidence, and the locator sharing the footer with the page number."""
+    assert _skeleton_bands() == [
+        ["assertion headline"],
+        ["evidence"],
+        ["locator", "page number"],
+    ]
 
 
 def test_the_theme_draws_no_rule_under_the_headline(stylesheet, chrome):
@@ -183,3 +187,82 @@ def test_each_logo_slot_falls_back_to_a_placeholder_the_theme_bundles(cover, slo
     assert f"from '../assets/placeholders/{placeholder}?url'" in cover, (
         f"the {slot} slot does not fall back to its placeholder"
     )
+
+
+@pytest.fixture(scope="module")
+def fonts() -> str:
+    return (THEME / "styles" / "fonts.css").read_text(encoding="utf-8")
+
+
+def _block(stylesheet: str, selector: str) -> str:
+    """The declarations of the one rule whose selector is exactly ``selector``."""
+    match = re.search(rf"^{re.escape(selector)} \{{(.+?)^\}}", stylesheet, re.MULTILINE | re.DOTALL)
+    assert match, f"the theme styles no {selector}"
+    return match.group(1)
+
+
+def test_a_content_slide_opens_on_its_headline(stylesheet):
+    """Nothing is reserved above the claim any more: the headline's zone starts at the top edge's
+    own gap, and no locator zone is added to it."""
+    assert "--zone-locator-h" not in stylesheet
+    assert "zone-locator" not in declared(stylesheet, "--zone-headline-top")
+
+
+def test_the_locator_names_sections_and_carries_them_forward(chrome):
+    """`section:` is the key, read off this slide and then off the slides before it. The old
+    per-slide `locator:` key is read nowhere, so a deck still setting it is not silently obeyed."""
+    assert "sectionAt($page.value, $frontmatter)" in chrome
+    assert "for (let at = no; at >= 1; at--)" in chrome
+    assert "declaring.section" in chrome
+    assert "frontmatter.locator" not in chrome
+    assert ").locator" not in chrome
+
+
+def test_the_footer_shows_the_map_unless_the_deck_asks_for_the_label(chrome, stylesheet):
+    assert "themeConfigs.locator === 'label' ? 'label' : 'map'" in chrome
+    assert "legible-section-map" in chrome
+    assert "legible-section-label" in chrome
+    assert ".legible-section-count" in stylesheet
+
+
+def test_the_locator_sits_in_the_footer(stylesheet):
+    locator = _block(stylesheet, ".legible-locator")
+
+    assert "bottom: var(--edge-bottom);" in locator
+    assert "left: var(--edge-x);" in locator
+    assert "top:" not in locator
+
+
+def test_the_current_section_is_marked_by_weight_as_well_as_colour(stylesheet, fonts):
+    """`never-sole-channel`: a reader who cannot tell the brand from the neutral still sees which
+    section is bold. The weight is a face the theme bundles, never one a browser synthesises."""
+    current = _block(stylesheet, ".legible-section-current")
+    weight = re.search(r"font-weight: (\d+);", current)
+
+    assert "color: var(--brand);" in current
+    assert weight and weight.group(1) != "400"
+    assert re.search(
+        rf"font-family: 'JetBrains Mono';\s+font-style: normal;\s+font-weight: {weight.group(1)};",
+        fonts,
+    ), "the current section's weight is not a bundled face of the locator's family"
+
+
+def test_no_locator_text_is_set_in_the_softest_neutral(stylesheet):
+    """`decorative-neutral-never-text`, over every rule styling the locator and page number."""
+    blocks = re.findall(r"^([^\s/*{}][^{]*)\{([^}]*)\}", stylesheet, re.MULTILINE)
+    chrome_rules = [
+        body
+        for selector, body in blocks
+        if any(name in selector for name in ("legible-locator", "legible-section", "legible-page"))
+    ]
+    assert chrome_rules
+
+    assert all("--neutral-soft" not in body for body in chrome_rules)
+    assert "color: var(--neutral);" in _block(stylesheet, ".legible-locator")
+
+
+def test_a_backup_section_shows_its_own_label_and_no_count(chrome):
+    """A backup sits outside the talk's sections: counting it would tell the room the talk had one
+    more part than it gave."""
+    assert "backup" in chrome
+    assert re.search(r"v-if=\"[^\"]*backup", chrome), "the chrome never branches on a backup"

@@ -59,8 +59,8 @@ uv run --project ../python legible lint slides.md --theme ../themes/leuven-blue.
 ```
 
 Every rule [`docs/method.md`](../docs/method.md) marks *decided by script* — `bullet-ceiling`,
-`word-ceiling`, `no-em-dash-headline`, `no-inflated-register`, `opener-variety` and
-`separation-floor`. CI runs exactly this line, and a finding it calls an error turns the run red.
+`word-ceiling`, `no-em-dash-headline`, `no-inflated-register`, `opener-variety`,
+`section-locator` and `separation-floor`. CI runs exactly this line, and a finding it calls an error turns the run red.
 
 The rules the canon marks *judgment* — `one-message`, `assertion-headline`, `evidence-is-visual` and
 the rest — are a reviewer's, human or agent. See

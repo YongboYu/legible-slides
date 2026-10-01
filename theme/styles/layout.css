@@ -30,14 +30,13 @@
   --headline-line-height: 1.28;
 
   /* ── the four zones of `ae-skeleton`, as canvas px ──
-   * locator → assertion headline → evidence → page number. The zone heights are
-   * fixed rather than content-driven, which is what makes the chrome land in the same place on
-   * every slide of a deck instead of drifting with the length of a headline. */
+   * assertion headline, then evidence, then a footer holding the locator and the page number. The
+   * zone heights are fixed rather than content-driven, which is what makes the chrome land in the
+   * same place on every slide of a deck instead of drifting with the length of a headline. */
   --edge-x: 72px;
   --edge-top: 36px;
   --edge-bottom: 36px;
   --zone-gap: 20px;
-  --zone-locator-h: 28px;
   /* The headline's ceiling, in the height it actually takes: a third line has nowhere to go and
    * runs into the evidence. Derived rather than measured once and pasted, so the ceiling
    * cannot come loose from the two numbers it is made of. */
@@ -48,10 +47,12 @@
    * slide. Twice the gap between any other two zones, so the break under the headline reads as the
    * slide's one structural break rather than as the space after a paragraph. */
   --zone-headline-evidence-gap: calc(var(--zone-gap) * 2);
-  /* Room under the evidence for the page number. */
+  /* Room under the evidence for the footer: the locator and the page number. */
   --zone-footer-h: 28px;
 
-  --zone-headline-top: calc(var(--edge-top) + var(--zone-locator-h) + var(--zone-gap));
+  /* The slide opens on the claim. Nothing is reserved above it, so the headline starts one gap
+   * inside the top edge. */
+  --zone-headline-top: calc(var(--edge-top) + var(--zone-gap));
 
   /* `light-ground`: the scheme is locked, so form controls, scrollbars and any UA-drawn surface
    * are told the ground they are on rather than asking the viewer's OS. */
@@ -105,7 +106,7 @@ html.dark {
   letter-spacing: -0.01em;
 }
 
-/* No h2–h6 scale. Assertion-Evidence has one headline size, one body size and the locator; a
+/* No h2–h6 scale. Assertion-Evidence has one headline size, one body size and the chrome; a
  * per-context heading scale is how a deck drifts below the floor one slide at a time. A subhead on
  * a content slide is a second message (`one-message`), so the only h2 the theme styles is the
  * cover's. */
@@ -201,9 +202,11 @@ html.dark {
  * slide's own box rather than over the viewport, which is what makes these px the canvas px the
  * type scale is written in — the chrome scales with the slide, and lands on an exported page.
  *
- * The locator and the page number are set at the smallest size the canon carries. They are
- * orientation, not evidence: the back-row floor is about the material the audience has to read,
- * and chrome that competes with the claim is noise (`coherence`). */
+ * Both halves share the footer, on one baseline: the locator bottom left, the page number bottom
+ * right. They are set at the smallest size the canon carries, in `--neutral` and never the softest
+ * neutral (`decorative-neutral-never-text`). They are orientation, not evidence: the back-row floor
+ * is about the material the audience has to read, and chrome that competes with the claim is noise
+ * (`coherence`). */
 
 .legible-chrome {
   position: absolute;
@@ -214,19 +217,38 @@ html.dark {
 
 .legible-locator {
   position: absolute;
-  top: var(--edge-top);
+  bottom: var(--edge-bottom);
   left: var(--edge-x);
-  display: inline-flex;
-  align-items: center;
-  height: var(--zone-locator-h);
-  padding: 0 14px;
-  border-radius: 999px;
-  background: var(--brand);
-  color: var(--surface);
+  color: var(--neutral);
   font-family: 'JetBrains Mono', ui-monospace, monospace;
   font-size: var(--dense-xs-px);
   font-weight: 400;
-  letter-spacing: 0.04em;
+  line-height: 1;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.legible-section-separator {
+  margin: 0 0.6em;
+}
+
+/* `section-locator`: the current section by weight **and** colour, so it survives a projector that
+ * washes the brand out and a reader who cannot tell it from the neutral (`never-sole-channel`). The
+ * weight is a face the theme bundles, not one the browser synthesises from the regular. */
+.legible-section-current {
+  color: var(--brand);
+  font-weight: 600;
+}
+
+/* The label is the current section alone, so it is not marked against anything: it is set in the
+ * current section's weight, and the count after it in the others'. */
+.legible-section-label {
+  font-weight: 600;
+}
+
+.legible-section-count {
+  font-weight: 400;
 }
 
 .legible-page {
@@ -235,6 +257,7 @@ html.dark {
   bottom: var(--edge-bottom);
   color: var(--neutral);
   font-size: var(--dense-xs-px);
+  line-height: 1;
   font-variant-numeric: tabular-nums;
 }
 
@@ -248,12 +271,12 @@ html.dark {
  * because it says who the speaker speaks for and is read last. The gaps between them are the
  * skeleton's own, so the cover is spaced like every slide after it.
  *
- * The marks are sized in locator heights, the one piece of chrome they sit beside in the deck, so
- * neither can outweigh the title and neither is a number of its own. */
+ * The marks are sized in footer heights, the band of chrome every later slide carries, so neither
+ * can outweigh the title and neither is a number of its own. */
 
 .slidev-layout.cover {
-  --cover-venue-logo-h: calc(var(--zone-locator-h) * 2.5);
-  --cover-affiliation-logo-h: calc(var(--zone-locator-h) * 2);
+  --cover-venue-logo-h: calc(var(--zone-footer-h) * 2.5);
+  --cover-affiliation-logo-h: calc(var(--zone-footer-h) * 2);
 
   position: relative;
   display: flex;
@@ -311,7 +334,7 @@ html.dark {
 }
 
 /* ── layouts: the content skeleton ────────────────────────────────────────────────────────────
- * Padded to the zones above: the headline starts under the locator, and the evidence starts one
+ * Padded to the zones above: the headline opens the slide, and the evidence starts one
  * `--zone-headline-evidence-gap` under the headline's reserved zone. A column, so a `Footnotes`
  * block can sit on the bottom edge of the evidence. */
 

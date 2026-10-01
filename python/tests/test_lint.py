@@ -337,3 +337,64 @@ def test_each_violation_fixture_deck_produces_exactly_its_own_finding(deck):
 
     assert rules(report) == [deck.stem]
     assert [finding.slide for finding in report.findings] == [2]
+
+
+def _sectioned(names, backup=()):
+    """A deck with one slide per section name, the ones in ``backup`` declared as backup."""
+    slides = []
+    for name in names:
+        flag = "\nbackup: true" if name in backup else ""
+        slides.append(f"---\nsection: {name}{flag}\n---\n\n# A claim about {name.lower()}\n")
+    return "\n".join(slides)
+
+
+def test_more_sections_than_the_map_holds_is_a_warning(write_deck):
+    """The label with a count still fits a deck that outgrew the map, so it warns and never gates.
+    It names the slide the first section too many starts on, which is where a merge would go."""
+    report = lint(write_deck(_sectioned(["One", "Two", "Three", "Four", "Five", "Six"])))
+
+    assert rules(report) == ["section-locator"]
+    assert [finding.severity for finding in report.findings] == ["warning"]
+    assert [finding.slide for finding in report.findings] == [6]
+    assert report.passed
+
+
+def test_sitting_on_the_section_ceiling_is_not(write_deck):
+    report = lint(write_deck(_sectioned(["One", "Two", "Three", "Four", "Five"])))
+
+    assert report.findings == ()
+
+
+def test_a_section_declared_again_is_still_one_section(write_deck):
+    report = lint(write_deck(_sectioned(["One", "Two", "Three", "Four", "Five", "Two"])))
+
+    assert report.findings == ()
+
+
+def test_a_section_label_longer_than_the_map_holds_is_a_warning(write_deck):
+    report = lint(write_deck(_sectioned(["Evaluations"])))
+
+    assert rules(report) == ["section-locator"]
+    assert [finding.severity for finding in report.findings] == ["warning"]
+    assert "Evaluations" in report.findings[0].message
+
+
+def test_a_section_label_on_the_ceiling_is_not(write_deck):
+    report = lint(write_deck(_sectioned(["Evaluation"])))
+
+    assert report.findings == ()
+
+
+def test_backup_sections_are_outside_the_map(write_deck):
+    """A backup shows its own label and no position, so it is not one of the map's sections: it
+    neither counts towards the ceiling nor has to fit in one."""
+    report = lint(
+        write_deck(
+            _sectioned(
+                ["One", "Two", "Three", "Four", "Five", "Questions and answers"],
+                backup=("Questions and answers",),
+            )
+        )
+    )
+
+    assert report.findings == ()

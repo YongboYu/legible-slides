@@ -2,7 +2,8 @@
 
 A rule the canon marks **decided by script** is a rule nobody should have to remember, so this
 module decides them: the bullet and word ceilings, em-dashes in a headline, the inflated-register
-wordlist, the sentence-opener share, and whether the deck's palette clears the separation floor.
+wordlist, the sentence-opener share, whether the footer's section map still fits, and whether the
+deck's palette clears the separation floor.
 ``docs/agent-skill-contract.md`` §4a fixes the set; the canon fixes every number in it, and this
 module quotes those numbers through ``legible.method`` rather than keeping a second copy.
 
@@ -37,6 +38,9 @@ from legible.method import (
     INFLATED_REGISTER_WORDS,
     OPENER_SHARE_MAX,
     OPENER_WORDS,
+    SECTION_LABEL_CHARS_MAX,
+    SECTION_LOCATOR_SEVERITY,
+    SECTIONS_MAX,
     WORDS_PER_BULLET,
 )
 
@@ -105,7 +109,9 @@ def lint(deck: str | Path, themes: Iterable[str | Path] = ()) -> LintReport:
     ``themes`` is empty by default because a deck does not say which palette it wears — the theme
     is the caller's to name, and naming none checks the slides alone.
     """
-    findings = [finding for slide in read_deck(deck) for finding in _slide_findings(slide)]
+    slides = read_deck(deck)
+    findings = [finding for slide in slides for finding in _slide_findings(slide)]
+    findings.extend(_section_findings(slides))
     palette, unchecked = _palette_findings(themes)
 
     return LintReport(
@@ -158,6 +164,37 @@ def _slide_findings(slide: Slide) -> Iterator[Finding]:
             slide,
             f"{shared} of {total} sentences open with {opener!r}",
         )
+
+
+def _section_findings(slides: Sequence[Slide]) -> Iterator[Finding]:
+    """Whether the footer's map still fits the sections the deck declares.
+
+    Over the deck rather than per slide, because a section is a run of slides. Only the sections the
+    map names are counted: a backup shows its own label and no position, so it takes no place in the
+    map and its label has no map to fit. A name declared again is the same section, and is judged
+    where it was first declared.
+    """
+    named: list[str] = []
+    for slide in slides:
+        if not slide.section or slide.backup or slide.section in named:
+            continue
+        named.append(slide.section)
+
+        if len(slide.section) > SECTION_LABEL_CHARS_MAX:
+            yield _finding(
+                "section-locator",
+                slide,
+                f"section {slide.section!r} is {len(slide.section)} characters, "
+                f"ceiling {SECTION_LABEL_CHARS_MAX}",
+                severity=SECTION_LOCATOR_SEVERITY,
+            )
+        if len(named) == SECTIONS_MAX + 1:
+            yield _finding(
+                "section-locator",
+                slide,
+                f"section {slide.section!r} is one more than the map holds, ceiling {SECTIONS_MAX}",
+                severity=SECTION_LOCATOR_SEVERITY,
+            )
 
 
 def _finding(rule: str, slide: Slide, message: str, severity: str = ERROR) -> Finding:

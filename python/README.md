@@ -136,7 +136,8 @@ FAIL  deck/slides.md — 2 errors, 1 warning
 Findings are grouped by slide and named by the rule they enforce, so a finding is something you can
 look up in [`docs/method.md`](../docs/method.md) and disagree with. Five rules are decided per
 slide — `bullet-ceiling`, `word-ceiling`, `no-em-dash-headline`, `no-inflated-register` and
-`opener-variety` — and `separation-floor` is decided per theme, for each `--theme` named. A deck
+`opener-variety` — `section-locator` over the sections the deck declares, reported on the slide
+that declares the one at fault, and `separation-floor` per theme, for each `--theme` named. A deck
 does not record which palette it wears, so naming none checks the slides alone.
 
 ```python

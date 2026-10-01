@@ -293,3 +293,128 @@ def test_a_link_reads_as_its_text_and_an_image_as_nothing():
 
     assert slides[0].bullets == ("see the method",)
     assert slides[0].prose == ()
+
+
+def test_a_slide_reports_the_section_its_frontmatter_declares():
+    """`section-locator` is decided over the whole deck, so the reading has to keep the one key
+    it turns on — and only where a slide declares it, because carrying it forward is the theme's
+    job and counting sections is the linter's."""
+    slides = deck(
+        """\
+        ---
+        theme: ../theme
+        section: Problem
+        ---
+
+        # First
+
+        ---
+        layout: two-col-evidence
+        ---
+
+        # Second
+
+        ---
+        section: 'Method' # a comment is not part of the name
+        ---
+
+        # Third
+        """
+    )
+
+    assert [slide.section for slide in slides] == ["Problem", None, "Method"]
+
+
+def test_an_empty_section_is_declared_rather_than_absent():
+    """`section: ''` clears the locator, which is a declaration of its own."""
+    slides = deck(
+        """\
+        # First
+
+        ---
+        section: ''
+        ---
+
+        # Second
+        """
+    )
+
+    assert [slide.section for slide in slides] == [None, ""]
+
+
+def test_a_slide_reports_whether_it_opens_a_backup_section():
+    slides = deck(
+        """\
+        # First
+
+        ---
+        section: Backup
+        backup: true
+        ---
+
+        # Second
+        """
+    )
+
+    assert [slide.backup for slide in slides] == [False, True]
+
+
+def test_backup_is_read_the_way_yaml_reads_it():
+    """The theme sees parsed YAML, so the linter must agree with it: `True` is a boolean and
+    `"true"` is a string, not a backup."""
+    slides = deck(
+        """\
+        ---
+        section: A
+        backup: True
+        ---
+
+        # First
+
+        ---
+        section: B
+        backup: "true"
+        ---
+
+        # Second
+        """
+    )
+
+    assert [slide.backup for slide in slides] == [True, False]
+
+
+def test_a_quoted_section_keeps_a_hash_inside_its_quotes():
+    slides = deck(
+        """\
+        ---
+        section: "C # D" # the comment is after the quotes
+        ---
+
+        # First
+        """
+    )
+
+    assert slides[0].section == "C # D"
+
+
+def test_a_slide_of_frontmatter_alone_still_declares_its_section():
+    """A full-bleed image slide has no body, and Slidev renders it all the same: the section it
+    declares is on the footer, so it has to be in the count."""
+    slides = deck(
+        """\
+        # First
+
+        ---
+        layout: image
+        image: /x.png
+        section: Results
+        ---
+
+        ---
+
+        # Third
+        """
+    )
+
+    assert [slide.section for slide in slides] == [None, "Results", None]
+    assert [slide.number for slide in slides] == [1, 2, 3]

@@ -100,3 +100,32 @@ def test_beat_ten_s_caption_puts_the_binding_pair_on_the_floor(deck, themes_dir)
     measured = validate(load_palette(themes_dir / "leuven-blue.json")).groups[PER_SERIES]
 
     assert float(caption.group(1)) == min(measured.min_delta_e.values()) == DELTA_E_FLOOR
+
+
+#: The talk's sections, in order, as the footer's map names them.
+SECTIONS = ["Problem", "Method", "Legibility", "Delivery"]
+
+
+def test_the_deck_is_grouped_into_the_talk_s_sections():
+    """`section-locator`: a handful of real sections, declared where each starts. The sources come
+    after the close, as a backup outside them."""
+    slides = read_deck(DECK)
+    declared = [slide for slide in slides if slide.section]
+
+    assert [slide.section for slide in declared if not slide.backup] == SECTIONS
+    assert [slide.section for slide in declared if slide.backup] == ["Sources"]
+    assert slides[-1].backup
+
+
+def test_every_section_change_is_signposted_aloud():
+    """The footer is the backup channel. The first slide of each of the talk's sections carries
+    the spoken signpost in its notes, on a line of its own."""
+    for slide in read_deck(DECK):
+        if slide.section and not slide.backup:
+            assert slide.notes and slide.notes.startswith("Signpost: "), (
+                f"slide {slide.number} opens {slide.section!r} with no signpost"
+            )
+
+
+def test_the_deck_sets_no_retired_per_slide_locator():
+    assert not re.search(r"^locator:", DECK.read_text(encoding="utf-8"), re.MULTILINE)

@@ -61,23 +61,49 @@ script where the build can measure rendered lines · **Threshold** `headline-lin
 ### `ae-skeleton`: four zones on a content slide, and nothing else
 
 ```
-locator  →  assertion headline  →  evidence  →  page number
+assertion headline
+evidence
+locator · page number
 ```
 
-The locator and the page number are persistent chrome. Nothing is drawn between the headline and the
-evidence: weight and whitespace separate the claim from what proves it, and the evidence starts the
-same distance under the headline on every slide. Everything a slide adds beyond these four zones is a
-candidate for `coherence`.
+The slide opens on the headline: nothing sits above the claim. The locator and the page number are
+persistent chrome, sharing the footer, the locator at bottom left and the page number opposite it.
+Nothing is drawn between the headline and the evidence: weight and whitespace separate the claim
+from what proves it, and the evidence starts the same distance under the headline on every slide.
+Everything a slide adds beyond these four zones is a candidate for `coherence`.
 
 **Decided by** script (the layout supplies the zones)
 
 ### `no-section-dividers`: no slide is spent purely on navigation
 
-The persistent locator carries orientation, so the method ships no section-divider slide, no
+The footer locator carries orientation, so the method ships no section-divider slide, no
 single-word-emphasis slide, and no closing "thank you" slide. A slide whose only content is the name
 of the next section is a slide that proves nothing.
 
 **Decided by** script (the deck offers no such layout; a slide whose body is a bare section name)
+
+### `section-locator`: the footer names the talk's sections, and the current one by weight too
+
+The locator names the talk's few sections, not each slide's topic. A section is declared on its
+first slide and carries forward until the next slide that declares one. By default the footer shows
+the **section map**: every section in order, the current one marked by colour **and** weight
+(`never-sole-channel`), the rest in the text neutral, never the softest one
+(`decorative-neutral-never-text`). A deck may instead show the **single section label with a
+count**, the current section and its position among them. Backup slides, held for questions after
+the talk, sit outside the count: they show their own label and no position.
+
+The map only works while it fits in one glance across the footer, so the deck keeps to a handful of
+short section names. A deck that outgrows them is warned rather than failed: the label with a count
+still fits, and whether the structure is right is the author's call.
+
+The footer is a backup channel, not the only one. Every section change is also said aloud: the
+first slide of each section carries a **signpost line** in its speaker notes: a line of its own,
+opening `Signpost:`, with the sentence that tells the room the talk has moved on and where to.
+
+**Decided by** script (how many sections, how long a label) · judgment (the signpost, said aloud) ·
+**Threshold** `sections-max = 5`, `section-label-chars-max = 10`,
+`section-locator-severity = warning` (a finding when a deck declares more than 5 sections, or a
+section label longer than 10 characters)
 
 ### `evidence-is-visual`: the body proves the headline, visually
 

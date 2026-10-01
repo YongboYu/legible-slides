@@ -14,7 +14,8 @@ slides are set from one set of outlines.
 | File | What it is |
 |---|---|
 | `Inter-Regular` · `Inter-Medium` · `Inter-SemiBold` · `Inter-Bold` (`.ttf` + `.woff2`) | Inter, the text family, at the four weights the theme is allowed to ask for. Inter 3.019, hinted-for-Windows build. |
-| `JetBrainsMono-Regular` (`.ttf` + `.woff2`) | JetBrains Mono, the family the locator pill is set in and nothing else. One weight, because one thing is set in it. JetBrains Mono 2.304. |
+| `JetBrainsMono-Regular` (`.ttf` + `.woff2`) | JetBrains Mono, the family the locator is set in and nothing else. JetBrains Mono 2.304. |
+| `JetBrainsMono-SemiBold` (`.woff2` only) | The weight the locator marks the current section in (`section-locator`). Browser only: matplotlib draws nothing in the mono family, and a weight-suffixed TTF would report a family name of its own. JetBrains Mono 2.304. |
 | `Inter-OFL.txt` · `JetBrainsMono-OFL.txt` | The licences. Inter is © the Inter Project Authors and JetBrains Mono © the JetBrains Mono Project Authors, both under the SIL Open Font License 1.1. |
 
 The regular weight of each family is the one that carries the **bare family name**. A

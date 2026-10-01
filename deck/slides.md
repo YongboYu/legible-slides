@@ -9,7 +9,9 @@ info: |
   rule it is about, and the outline they follow is in docs/method.md.
 # No themeConfig: the cover's two logo slots show the theme's placeholders, because this project
 # ships nobody's mark. Presenting under a venue or an affiliation is dropping its mark into public/
-# and naming it here, as `themeConfig.venueLogo` or `themeConfig.affiliationLogo`.
+# and naming it here, as `themeConfig.venueLogo` or `themeConfig.affiliationLogo`. The footer shows
+# the map of this talk's four sections, which is the theme's default; `themeConfig.locator: label`
+# would show the current one with its position instead.
 # The first frontmatter block is the cover's as well as the deck's, which is why the cover's own
 # props sit here. `author` is not among them: Slidev keeps that word for the headmatter, so the
 # layout reads `speaker`, and falls back to the author above when a deck omits it.
@@ -27,7 +29,7 @@ venue: KU Leuven · Research Centre for Information Systems Engineering
 ---
 layout: two-col-evidence
 ratio: 3fr 2fr
-locator: The problem
+section: Problem
 ---
 
 # Most templates hand you files and leave the hard part to you: deciding what a slide is for.
@@ -73,6 +75,8 @@ that has not settled it grows until it is three slides wearing one page number.
 </Callout>
 
 <!--
+Signpost: first the problem, then the method, then what it does for legibility, then how it ships.
+
 Ask the room what their template handed them last time. Masters, a colour theme, a logo in the
 corner. Nobody has ever been given the decision about what a slide is for, and that is the decision
 that costs you the evening.
@@ -121,7 +125,7 @@ simulated at full severity, with the dash and the marker taken off the chart it 
 -->
 
 ---
-locator: The method
+section: Method
 ---
 
 # The method comes first, and the files are only what it ships as.
@@ -141,13 +145,13 @@ Files without a method are a look. A method without files is advice.
 </Callout>
 
 <!--
+Signpost: that was the problem, so now the method, one rule a slide.
+
 Here is the pivot. Everything before it is the problem, and everything after it is one rule and its
 demonstration. Swap the palette and every row above survives it, which is the test of which half was
 load-bearing.
 -->
 
----
-locator: The rules
 ---
 
 # Every slide answers one question, and if you cannot state it the slide is wrong.
@@ -274,7 +278,7 @@ depict a process that genuinely changes. Nothing else.
 -->
 
 ---
-locator: The floor
+section: Legibility
 ---
 
 # Body type is sized for the back row, not for your laptop.
@@ -291,6 +295,8 @@ narrow for body type. Neither is a knob for fitting more onto a slide. This para
 floor, which is how you can check the claim without taking my word for it.
 
 <!--
+Signpost: those were the rules about what goes on a slide, and next is whether the room can see it.
+
 Fixed by the method, not by the palette and not per slide. Once type becomes a knob, every slide that
 runs one line long gets solved the same way, and the room pays for it at the back.
 -->
@@ -324,8 +330,6 @@ is already the fix.
 -->
 
 ---
-locator: Your palette
----
 
 # The validator reads any palette file, yours included, and names the pair that fails.
 
@@ -350,7 +354,7 @@ pass is the floor cleared, and a fail tells you which colour to move.
 -->
 
 ---
-locator: Deliveries
+section: Delivery
 ---
 
 # One file is the slides on screen, the PDF you hand out and the deck an agent reviews.
@@ -368,12 +372,12 @@ Every output reads the same markdown, so none of them can fall out of step with 
 </Callout>
 
 <!--
+Signpost: last part, which is how all of this reaches your own deck.
+
 Say why there is no PowerPoint master. An export is one screenshot per slide, and a hand-kept twin
 drifts from the deck it copies the first time either one changes.
 -->
 
----
-locator: The close
 ---
 
 # Everything you just watched was built to the rules it was teaching you.
@@ -401,7 +405,10 @@ palette is measured in the same pipeline: nothing on any of these slides was exe
 
 ---
 layout: references
-locator: Sources
+# After the close and outside the talk's four sections, so the footer shows this section's own name
+# and no position among them.
+section: Sources
+backup: true
 # Numbered by position, which is what a `Footnote` marker earlier in the deck points at.
 #
 # No URI on any of them, though the layout takes one. A sources slide is for attribution; retrieval

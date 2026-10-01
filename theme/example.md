@@ -14,7 +14,7 @@ info: |
 ## Four layouts, four components, and a palette that had to pass the floor to get here.
 
 ---
-locator: The skeleton
+section: Skeleton
 ---
 
 # The theme ships four layouts, and refuses the ones the method forbids.
@@ -36,7 +36,7 @@ so there is no layout that builds one.
 ---
 layout: two-col-evidence
 ratio: 3fr 2fr
-locator: Evidence
+section: Evidence
 ---
 
 # Deuteranomaly is the binding condition for this palette, at exactly the floor.
@@ -71,8 +71,8 @@ chrome: false
 
 # A slide can drop the chrome, and this one has.
 
-The locator pill and the page number are one component, injected on every other slide in this
-deck. No layout opts in, so none can forget. `chrome: false` in a slide's frontmatter takes both
+The section locator and the page number are one component, injected on every other slide in
+this deck. No layout opts in, so none can forget. `chrome: false` in a slide's frontmatter takes both
 off, and the `cover` layout is without them already.
 
 This slide also names no layout. `default` is `assertion-evidence` under the name Slidev falls back
@@ -80,7 +80,8 @@ to, so the skeleton is what a slide gets by default rather than something it has
 
 ---
 layout: references
-locator: Sources
+section: Sources
+backup: true
 indexEntries:
   - title: 'Alley, M. — The Craft of Scientific Presentations'
     uri: https://www.craftofscientificpresentations.com

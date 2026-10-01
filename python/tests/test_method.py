@@ -10,6 +10,9 @@ from legible.method import (
     INFLATED_REGISTER_WORDS,
     OPENER_SHARE_MAX,
     OPENER_WORDS,
+    SECTION_LABEL_CHARS_MAX,
+    SECTION_LOCATOR_SEVERITY,
+    SECTIONS_MAX,
     WORDS_PER_BULLET,
     MethodError,
     rule,
@@ -213,3 +216,11 @@ def test_the_canon_decides_how_loudly_an_inflated_word_is_reported():
     """`established-terminology` wins over the wordlist, which is why the canon sets this to
     `warning` — and why the severity is quoted rather than chosen here."""
     assert INFLATED_REGISTER_SEVERITY == "warning"
+
+
+def test_the_canon_decides_how_far_the_section_map_stretches_and_how_loudly():
+    """A deck that outgrows the map still has the label with a count, which is why the canon sets
+    this to `warning`."""
+    assert SECTIONS_MAX == 5
+    assert SECTION_LABEL_CHARS_MAX == 10
+    assert SECTION_LOCATOR_SEVERITY == "warning"

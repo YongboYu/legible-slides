@@ -334,3 +334,13 @@ _OPENER_VARIETY = rule_thresholds("opener-variety")
 #: The openers counted, and the share of a passage's sentences that may share one of them.
 OPENER_WORDS = _listed(_OPENER_VARIETY["opener-words"])
 OPENER_SHARE_MAX = float(_OPENER_VARIETY["opener-share-max"])
+
+
+_SECTION_LOCATOR = rule_thresholds("section-locator")
+
+#: How many sections the footer's map can name, and how long each name may run, before the map
+#: stops fitting. Both are *exceeded* rather than reached, and a hit warns: the label with a count
+#: still fits a deck that outgrew the map, so outgrowing it is a finding and never a gate.
+SECTIONS_MAX = int(_SECTION_LOCATOR["sections-max"])
+SECTION_LABEL_CHARS_MAX = int(_SECTION_LOCATOR["section-label-chars-max"])
+SECTION_LOCATOR_SEVERITY = _SECTION_LOCATOR["section-locator-severity"]

@@ -70,20 +70,43 @@ and `''` leaves the slot empty.
 
 ## Chrome
 
-The locator pill and the page number are one component, injected on every slide by
-`slide-top.vue`. No layout opts in, so none can forget, and the deck never places them.
+The footer is one component, injected on every slide by `slide-top.vue`: the section locator at
+bottom left, the page number opposite it. No layout opts in, so none can forget, and the deck never
+places them. A content slide opens straight on its headline.
 
 ```yaml
 ---
-locator: The method # sets the pill, and every slide after it until another one does
+section: Method # this slide opens the Method section, and every slide after it is in it
+---
+
+---
+section: Sources
+backup: true # held for questions: its own name in the footer, and no position
+---
+
+---
 chrome: false # this slide carries none of it
 ---
 ```
 
-The locator **carries forward**: a run of slides on one part of the argument is one section, and
+The section **carries forward**: a run of slides on one part of the argument is one section, and
 making each of them restate its name is the repetition that ends in two of them disagreeing. Set it
-when the section changes; `locator: ''` clears it. This is what pays for having no section dividers —
-orientation is on every slide, so no slide is spent announcing where the talk has got to.
+on the first slide of a section; `section: ''` clears it. This is what pays for having no section
+dividers — orientation is on every slide, so no slide is spent announcing where the talk has got to.
+How many sections and how long a name still fit is `section-locator`'s, and `legible lint` warns
+past it.
+
+By default the footer shows the **section map**: every section in the order the deck first declares
+them, the current one in the brand colour and a heavier weight. A deck that would rather show the
+current section alone, with its position, says so once:
+
+```yaml
+themeConfig:
+  locator: label # PROBLEM · 1/4 rather than PROBLEM · METHOD · LEGIBILITY · DELIVERY
+```
+
+Say every section change aloud as well: the footer is the backup channel. The speaker notes of a
+section's first slide open with a `Signpost:` line for it.
 
 The `cover` layout carries no chrome, whether or not it says so.
 
@@ -145,8 +168,8 @@ use of a dense size in `layout.css` names which exception it is. There is no h2�
 slide: a subhead is a second message, and a per-context scale is how a deck drifts below the floor one
 slide at a time.
 
-The chrome is the one thing set at the smallest size deliberately. The locator and the page number
-are orientation rather than evidence, and the back-row floor is about the material the audience has to
+The chrome is the one thing set at the smallest size deliberately. The section locator and the page
+number are orientation rather than evidence, and the back-row floor is about the material the audience has to
 read.
 
 `light-ground` is locked in `package.json` (`colorSchema: light`) and again in CSS

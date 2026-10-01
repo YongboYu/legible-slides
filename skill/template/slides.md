@@ -8,10 +8,12 @@ info: |
   What this talk is, in a line. Slidev shows it in the presenter view and nowhere else.
 # The cover's two marks: the venue's above the title, the affiliation's bottom left. Left unset,
 # each shows a placeholder the theme bundles. Drop your own mark into this deck's public/ and name
-# it here, or set a slot to '' for no mark.
+# it here, or set a slot to '' for no mark. The footer maps the talk's sections; `locator: label`
+# shows only the current one, with its position, instead.
 # themeConfig:
 #   venueLogo: /venue-logo.png
 #   affiliationLogo: /affiliation-logo.png
+#   locator: label
 # The first frontmatter block is the deck's headmatter and the cover's own frontmatter at once,
 # which is why the cover's props sit here. The cover takes `speaker` when a talk is given by someone
 # other than the `author` above; `venue` and `date` are yours to fill in or to delete.
@@ -26,10 +28,11 @@ date: When
 
 ---
 layout: assertion-evidence
-# The pill that says where the talk has got to. It carries forward until another slide sets one,
-# and `locator: ''` clears it. This is the mechanism `no-section-dividers` leans on, so set it when
-# the section changes rather than spending a slide on saying so.
-locator: Where the talk has got to
+# The part of the talk this slide opens. It carries forward until another slide sets one, and
+# `section: ''` clears it. The footer names every section, and this one is marked; this is what
+# `no-section-dividers` leans on, so set it when the section changes rather than spending a slide on
+# saying so. `legible rules section-locator` says how many sections, and how short, still fit.
+section: Findings
 ---
 
 # The claim this slide proves, written as a sentence.
@@ -49,6 +52,8 @@ locator: Where the talk has got to
 </Footnotes>
 
 <!--
+Signpost: the sentence that tells the room a new part of the talk has started, and which.
+
 Everything you say out loud goes here. `legible rules no-script-on-slide` is why there is a place
 for it, and a review reads these notes like everything else in this file.
 -->
@@ -84,7 +89,9 @@ feel like it is doing two jobs, because splitting it here is cheaper than splitt
 
 ---
 layout: references
-locator: Sources
+# After the talk, so outside its sections: the footer names this one alone, with no position.
+section: Sources
+backup: true
 # Numbered in this order, so a Footnote marker earlier in the deck lines up with an entry here.
 indexEntries:
   - title: 'How the source is cited: author, year, title'

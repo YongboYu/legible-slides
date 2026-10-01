@@ -13,7 +13,8 @@ this. The deck's headmatter falls out of the same rule, being the frontmatter of
 not started yet.
 
 What comes back per slide is what the canon's script-decided rules ask about — the headline, the
-bullets, the prose and the speaker notes — and nothing else. Layouts, components and code blocks
+bullets, the prose and the speaker notes, and from the frontmatter only the section the slide
+declares — and nothing else. Layouts, components and code blocks
 are evidence: the method has rules about them, but none a script decides.
 """
 
@@ -44,6 +45,19 @@ _LINK = re.compile(r"\[(?P<text>[^\]]*)\]\([^)]*\)")
 _TAG = re.compile(r"<[^>]+>")
 _EMPHASIS = re.compile(r"[*`~]+")
 
+#: A top-level frontmatter key the rules read, and its value up to a trailing comment. Read by line
+#: rather than as YAML, for the reason the module gives for the split: Slidev does not require the
+#: block to parse, so neither does this, and the two keys asked for are scalars at column 0.
+_KEY = re.compile(
+    r"""^(?P<key>section|backup):[ \t]*"""
+    r"""(?:(?P<quote>["'])(?P<quoted>.*?)(?P=quote)|(?P<plain>.*?))"""
+    r"""[ \t]*(?:[ \t]\#.*)?$"""
+)
+
+#: How YAML 1.1, which Slidev reads frontmatter with, spells a true boolean. A quoted value is a
+#: string whatever it says, so the theme would not take it for one and neither does this.
+_TRUE = frozenset({"true", "True", "TRUE"})
+
 
 @dataclass(frozen=True)
 class Slide:
@@ -58,6 +72,11 @@ class Slide:
     bullets: tuple[str, ...]
     prose: tuple[str, ...]
     notes: str | None
+    #: The section this slide declares, ``""`` for one that clears it, and ``None`` where the slide
+    #: declares none and so carries the one before it. Carrying it forward is the theme's job.
+    section: str | None = None
+    #: Whether the section this slide declares is a backup, held for questions after the talk.
+    backup: bool = False
 
 
 def read_deck(path: str | Path) -> tuple[Slide, ...]:
@@ -68,35 +87,41 @@ def read_deck(path: str | Path) -> tuple[Slide, ...]:
 def parse_deck(text: str) -> tuple[Slide, ...]:
     """The slides of a Slidev deck, in order."""
     return tuple(
-        _slide(number, lines)
-        for number, lines in enumerate(_split(text.replace("\r\n", "\n").split("\n")), start=1)
+        _slide(number, frontmatter, lines)
+        for number, (frontmatter, lines) in enumerate(
+            _split(text.replace("\r\n", "\n").split("\n")), start=1
+        )
     )
 
 
-def _split(lines: Sequence[str]) -> Iterator[list[str]]:
-    """Every slide's lines, with the separators and the frontmatter blocks taken out.
+def _split(lines: Sequence[str]) -> Iterator[tuple[list[str], list[str]]]:
+    """Every slide's frontmatter and its lines, with the separators taken out.
 
-    A slide of nothing but blank lines is not yielded: the commonest source of one is the deck's
-    own headmatter, and an empty slide in the middle of a deck is a slide with nothing to check.
+    A slide of nothing but blank lines is not yielded unless it has frontmatter: the commonest
+    source of one is the deck's own headmatter, which belongs to the slide after it, and an empty
+    slide in the middle of a deck is a slide with nothing to check. A slide of frontmatter alone is
+    one Slidev renders, a full-bleed image say, and the section it declares is on the footer.
     """
     start = 0
     index = 0
+    frontmatter: list[str] = []
     while index < len(lines):
         line = lines[index].rstrip()
 
         if _FENCE.match(line):
             index = _fence_end(lines, index)
         elif _SEPARATOR.match(line):
-            if any(text.strip() for text in lines[start:index]):
-                yield list(lines[start:index])
+            if frontmatter or any(text.strip() for text in lines[start:index]):
+                yield frontmatter, list(lines[start:index])
             closing = _frontmatter_end(lines, index)
+            frontmatter = [] if closing is None else list(lines[index + 1 : closing])
             index = index if closing is None else closing
             start = index + 1
 
         index += 1
 
-    if any(text.strip() for text in lines[start:]):
-        yield list(lines[start:])
+    if frontmatter or any(text.strip() for text in lines[start:]):
+        yield frontmatter, list(lines[start:])
 
 
 def _fence_end(lines: Sequence[str], opened: int) -> int:
@@ -124,8 +149,9 @@ def _frontmatter_end(lines: Sequence[str], separator: int) -> int | None:
     return None
 
 
-def _slide(number: int, lines: Sequence[str]) -> Slide:
+def _slide(number: int, frontmatter: Sequence[str], lines: Sequence[str]) -> Slide:
     body, notes = _body_and_notes(_without_code(lines))
+    keys = _keys(frontmatter)
 
     headline: str | None = None
     bullets: list[str] = []
@@ -165,7 +191,28 @@ def _slide(number: int, lines: Sequence[str]) -> Slide:
         bullets=tuple(bullet for bullet in bullets if bullet),
         prose=tuple(prose),
         notes=notes,
+        section=keys.get("section"),
+        backup=keys.get("backup") in _TRUE,
     )
+
+
+def _keys(frontmatter: Sequence[str]) -> dict[str, str]:
+    """The frontmatter keys the rules read. Absent keys are absent, not empty.
+
+    A quoted section comes back unquoted. A quoted backup is a string to YAML, so it comes back
+    empty: only a plain value can be one of the spellings in ``_TRUE``.
+    """
+    keys: dict[str, str] = {}
+    for line in frontmatter:
+        found = _KEY.match(line.rstrip())
+        if not found:
+            continue
+        key = found.group("key")
+        if found.group("quote"):
+            keys[key] = found.group("quoted") if key == "section" else ""
+        else:
+            keys[key] = found.group("plain")
+    return keys
 
 
 def _flush(paragraph: list[str], prose: list[str]) -> None:
