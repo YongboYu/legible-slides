@@ -143,6 +143,11 @@ def test_every_section_change_is_signposted_aloud():
             )
 
 
+def test_the_deck_sets_no_slide_transition():
+    """`motion-purpose`. Slidev sets none unless asked, so no slide may ask."""
+    assert not re.search(r"^transition:", DECK.read_text(encoding="utf-8"), re.MULTILINE)
+
+
 def test_the_deck_sets_no_retired_per_slide_locator():
     assert not re.search(r"^locator:", DECK.read_text(encoding="utf-8"), re.MULTILINE)
 

@@ -272,14 +272,14 @@ the rest easier.
 
 # Anything that doesn't support the main message makes it harder to follow.
 
-Removing extra material consistently improves learning<sup>4</sup>, and the same idea applies to
+Removing extra material helps people learn<sup>4</sup>, and the same idea applies to
 figures: spend the ink on the data<sup>6</sup>.
 
 <v-click>
 
 <Callout accent title="Why that box appeared on a click">
 
-Animation helps in two cases: breaking content into steps, or showing a change over
+Animation helps in two cases: adding evidence one step at a time, or showing a change over
 time<sup>7</sup>.
 
 </Callout>
@@ -287,7 +287,7 @@ time<sup>7</sup>.
 </v-click>
 
 <Footnotes>
-  <Footnote :number="4">Mayer, on coherence, and on revealing content at the speaker's pace.</Footnote>
+  <Footnote :number="4">Mayer, on coherence.</Footnote>
   <Footnote :number="6">Tufte, on data ink and chartjunk.</Footnote>
   <Footnote :number="7">Tversky, Morrison and Bétrancourt (2002): animation helps when it is easy to follow and matches the idea it shows.</Footnote>
 </Footnotes>
@@ -295,8 +295,9 @@ time<sup>7</sup>.
 <!--
 Pause before the click and ask what the box might add. It's there to show that the same idea applies
 to time as well as space, and it's the only reveal in the deck. Of all the rules in the method, this
-one has the strongest research behind it. Animation is worth it when it breaks content into steps or
-shows something that actually changes.
+one has some of the best research behind it, though most of it comes from one lab. A click is worth
+it when each step adds something, never to hold back a point the headline already made. And there
+are no slide transitions anywhere in this deck.
 -->
 
 ---

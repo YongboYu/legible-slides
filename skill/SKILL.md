@@ -136,7 +136,7 @@ say so in the report where a verdict would go — silence there reads as a pass.
 ### 3. Load the rules that need judgment
 
 ```bash
-legible rules one-message assertion-headline never-sole-channel
+legible rules one-message assertion-headline never-sole-channel no-script-on-slide
 legible rules --section voice --decided-by judgment
 ```
 
@@ -160,13 +160,14 @@ and stop: a review that quietly loaded fewer rules finds fewer faults and reads 
 ### 4. Judge, slide by slide
 
 Read each slide as the room receives it — the headline, the evidence, and the speaker notes — and
-apply the four checks, in this order:
+apply the five checks, in this order:
 
 | Check | Applied to |
 |---|---|
 | `one-message` | every slide |
 | `assertion-headline` | every slide carrying a headline |
 | `never-sole-channel` | the hand-made visuals identified in step 1, and nothing else |
+| `no-script-on-slide` | the words on the slide, read beside its speaker notes |
 | the canon's judgment voice rules, loaded above | the headline, the prose and the speaker notes |
 
 Four things hold a judgment to something:

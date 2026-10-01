@@ -47,9 +47,9 @@ NOT_RULES = frozenset({"cvd-validate", "series-1", "series-2"})
 #: step 2 has to spell out to say what each of them means.
 EXIT_CODES = frozenset({"0", "1", "2"})
 
-#: The rules the v1 review judges, fixed by ``docs/agent-skill-contract.md`` §4b. The fourth is a
-#: set the canon names rather than a rule, so it is asked for the way the skill asks for it.
-SEMANTIC = ("one-message", "assertion-headline", "never-sole-channel")
+#: The rules the v1 review judges by ID, fixed by ``docs/agent-skill-contract.md`` §4b. Its voice
+#: check is a set the canon names rather than a rule, so it is asked for the way the skill asks.
+SEMANTIC = ("one-message", "assertion-headline", "never-sole-channel", "no-script-on-slide")
 
 
 @pytest.fixture(scope="module")
@@ -127,7 +127,7 @@ def test_the_skill_names_every_rule_the_v1_review_judges(skill):
         assert f"`{rule}`" in skill
 
 
-def test_the_fourth_semantic_check_asks_the_canon_which_rules_it_covers(skill):
+def test_the_voice_check_asks_the_canon_which_rules_it_covers(skill):
     """The anti-slop rules are a seed the canon says is extensible, so the skill selects them
     rather than listing them — which is what keeps a rule added there reviewed."""
     voice = rules(section="voice", decided_by="judgment")

@@ -97,13 +97,15 @@ none of its own.
 
 ### 4b. Semantic — LLM judgment
 
-The four calls that need understanding, applied by the agent against the rules loaded from
-`method.md`. The canon marks many more rules `judgment`; these are the four the v1 review covers:
+The five calls that need understanding, applied by the agent against the rules loaded from
+`method.md`. The canon marks many more rules `judgment`; these are the five the v1 review covers:
 
 - **`one-message`** — is this one slide or two?
 - **`assertion-headline`** — claim, or bare label?
 - **`never-sole-channel`, hand-made visuals only** — generated figures carry the redundancy by
   construction (#10), so this targets pasted-in images.
+- **`no-script-on-slide`** — script on the slide, or the key terms
+  ([#35](https://github.com/YongboYu/legible-slides/issues/35))?
 - **The canon's judgment anti-slop rules** (`no-contrast-for-emphasis`, `no-reflexive-tricolon`,
   `no-hedging-or-boilerplate`, `rhythm-variety`, `concrete-over-abstract`) — the structural tells a
   wordlist cannot catch.
@@ -179,6 +181,6 @@ visible in the built CSS and nowhere else.
 | Packaging | One Claude Code `SKILL.md` in `skill/`; two modes; plugin + cross-agent deferred |
 | Rule sourcing | Thin pointer — procedure in `SKILL.md`, rules + thresholds loaded from `method.md` |
 | Review surface | Slidev only |
-| Review engine | Hybrid — mechanical linter in `legible` (palette via `cvd-validate`) + LLM for 4 semantic checks |
+| Review engine | Hybrid — mechanical linter in `legible` (palette via `cvd-validate`) + LLM for 5 semantic checks |
 | Review posture | Flag + suggest (human applies); two-tier gate/advisory; merged per-slide markdown report |
 | Scaffold | Minimal Slidev starter on `leuven-blue`, review-ready from slide one |

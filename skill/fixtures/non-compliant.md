@@ -63,6 +63,12 @@ layout: default
   </svg>
 </div>
 
+Our method has a lower error than the baseline at every horizon we tried.
+
+<!--
+Our method has a lower error than the baseline at every horizon we tried.
+-->
+
 ---
 layout: default
 ---

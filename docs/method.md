@@ -173,11 +173,19 @@ violation.
 
 **Decided by** judgment
 
-### `no-script-on-slide`: do not put what you are about to say on the slide
+### `no-script-on-slide`: no sentences of script on the slide, but show the key terms
 
-Visual evidence plus spoken words beats visual evidence plus spoken words plus the same words on
-screen. Reading your slide aloud measurably hurts what the audience retains (Mayer's redundancy
-principle). Speaker notes are where the sentences go.
+What you are about to say, written out in full sentences, does not belong on the slide: the room
+reads it instead of listening, and you end up reading it to them. Speaker notes are where the
+sentences go.
+
+The key terms are a different matter, and they belong on the slide. Short labels next to a graphic
+help people remember it (Mayer & Johnson 2008). Hearing the words while also seeing them in writing
+helps most when the talk sets the pace and the audience is new to the topic (Adesope & Nesbit 2012,
+a meta-analysis of 57 studies), and written words help listeners working in a second language
+(Montero Perez et al. 2013). That describes most of a conference room. So the test is the
+sentence, not the word: a term, a label or a number on screen is fine, and a sentence you are about
+to say aloud is the script.
 
 **Decided by** judgment
 
@@ -201,8 +209,9 @@ exceeds 12)
 
 ### `coherence`: cut anything that does not serve the one message
 
-The top-level noise rule, and the best-evidenced one in the method: removing extraneous material
-improves learning across every test of it. Signal-to-noise, data-ink, restraint — all the same move.
+The top-level noise rule, and one of the best-evidenced in the method: that removing extraneous
+material improves learning is well supported, though most of the tests come from Mayer's own lab.
+Signal-to-noise, data-ink, restraint — all the same move.
 
 **Decided by** judgment
 
@@ -424,14 +433,23 @@ sitting exactly on the floor is at capacity: one more series will fail without r
 
 ## 6. Motion
 
-### `motion-purpose`: motion segments or depicts, and does nothing else
+### `motion-purpose`: motion adds evidence or depicts change, and does nothing else
 
-Two uses earn motion. **Segmenting:** a speaker-paced reveal of one congruent chunk at a time, to
-manage what the audience has to hold at once. **Process depiction:** the change over time *is* the
-content. Both must be **apprehensible** (the eye can extract the structure in the time it is on
-screen) and **congruent** (the motion's structure matches the idea's). Decorative motion, slide
-transitions and entrance effects earn nothing. Animated graphics are not better than well-designed
-static graphics; a reveal that splits a label from its referent in time is worse than either.
+Two uses earn motion. **A click reveal where each step adds evidence:** the next piece of the
+argument arrives when you get to it. A reveal never hides a conclusion the headline already states,
+because then the click holds back the answer the room has already read. **Process depiction:** the
+change over time *is* the content. Both must be **apprehensible** (the eye can extract the structure
+in the time it is on screen) and **congruent** (the motion's structure matches the idea's).
+Decorative motion and entrance effects earn nothing, and a deck sets **no slide transition**.
+Animated graphics are not better than well-designed static graphics (Tversky et al. 2002); a reveal
+that splits a label from its referent in time is worse than either.
+
+The segmenting research (Rey et al. 2019) does not back speaker-paced reveals: it is about narrated
+multimedia split into coherent segments, not about hiding a callout until a click. The case for a
+reveal is only the one above.
+
+The **final build state is the exported page**: a PDF or a handout shows each slide with every step
+revealed, so a slide has to read on its own once everything is showing.
 
 **Decided by** judgment
 
@@ -496,7 +514,10 @@ Not because three sounds complete. A padded third item is noise under `coherence
 #### `no-hedging-or-boilerplate`: start at the claim, stop when it is proved
 
 Cut the warm-up sentence that announces what you are about to say, and the closer that summarises
-what you just said.
+what you just said. This applies to a slide, a passage and its notes. A talk's **opening** and its
+**conclusion** are exempt: there, saying what is coming and summing up what was said are structural
+signals the room uses to follow along, and `answer-first` and `conclusion-stays-up` ask for exactly
+that.
 
 #### `rhythm-variety`: vary sentence length deliberately
 
@@ -554,6 +575,9 @@ time.
 - [`research/presentation-methods.md`](research/presentation-methods.md) — the evidence base: Alley
   and Neeley on assertion-evidence, Mayer on coherence, redundancy and segmenting, Tversky on
   animation, Tufte on chartjunk, Williams on layout.
+- [`research/template-audit.md`](research/template-audit.md) — where an earlier version of this file
+  overstated that evidence, and the sources the corrected rules cite: Adesope & Nesbit, Mayer &
+  Johnson and Montero Perez et al. on key terms on screen, and Rey et al. on segmenting.
 - [`cvd-validator-contract.md`](cvd-validator-contract.md) — how `separation-floor` is measured, why
   the floor is where it is, and the retired `≥39` claim it replaces.
 - [`token-contract.md`](token-contract.md) — the palette schema the colour rules are addressed to,

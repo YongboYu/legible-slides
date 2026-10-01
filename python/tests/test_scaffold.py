@@ -234,6 +234,15 @@ def test_the_deck_is_wired_to_the_theme(slides):
     assert re.search(r"^theme:\s*\S", slides, re.MULTILINE)
 
 
+def test_the_deck_sets_no_slide_transition(slides):
+    """`motion-purpose`. Slidev sets none unless asked, so the stamp must not ask, and neither may
+    the theme's defaults, which every deck on it inherits."""
+    defaults = json.loads(_read(REPO / "theme" / "package.json"))["slidev"]["defaults"]
+
+    assert not re.search(r"^transition:", slides, re.MULTILINE)
+    assert "transition" not in defaults
+
+
 def test_one_skeleton_slide_per_layout_the_theme_ships(slides):
     """The scaffold's coverage of the theme, kept honest in both directions: a layout the theme
     grows and this never stamps is a layout an author is left to discover, and a slide on a layout
