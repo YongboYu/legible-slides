@@ -69,7 +69,7 @@ layout: default
 
 # Retrieval is not just faster, it is a different way to answer a query
 
-This system is not just an optimisation, it is a rethinking of the retrieval stack. It is faster,
+This system is **not just an optimisation**, it is a **rethinking** of the retrieval stack. It is faster,
 cheaper, and more elegant. It demonstrates strong performance characteristics across the board.
 
 <!--

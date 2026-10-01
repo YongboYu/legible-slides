@@ -13,10 +13,12 @@ this. The deck's headmatter falls out of the same rule, being the frontmatter of
 not started yet.
 
 What comes back per slide is what the canon's script-decided rules ask about — the headline, the
-bullets, the prose and the speaker notes, every font size the slide's own markup sets, and from
-the frontmatter only the section the slide declares — plus the name of its layout, which no rule
-reads but which is how a test finds a deck's opening and its close. Nothing else: what a layout
-renders, components and code blocks are evidence, and no rule about them is a script's to decide.
+bullets, the prose and the speaker notes, every font size the slide's own markup sets, the visual
+groups it is built from, the spans it emphasises and the callouts it carries, the time budget its
+notes state, and from the frontmatter only the section the slide declares and the slot the deck's
+headmatter does — plus the name of its layout, which no rule reads but which is how a test finds a
+deck's opening and its close. Nothing else: what a layout renders, what a component draws and what
+a code block says are evidence, and no rule about them is a script's to decide.
 """
 
 from __future__ import annotations
@@ -58,11 +60,63 @@ _FONT_SIZE = re.compile(r"font-?size['\"]?\s*:\s*['\"]?(?P<value>[^;'\",}]+)", r
 #: A UnoCSS class that sets a font size: a named step of its scale, or an arbitrary value.
 _TEXT_SIZE_CLASS = re.compile(r"^text-(?:xs|sm|base|lg|\d?xl|\[[^\]]+\])$")
 
+#: An element's opening tag at the start of a line, which makes the block it opens one visual group.
+#: Only a name opens one: a closing tag or a stray ``<`` in prose does not.
+_ELEMENT = re.compile(r"^\s*<(?P<name>[A-Za-z][\w-]*)")
+
+#: Any tag of a given element, opening or closing, wherever the author wrapped its attributes. A
+#: quoted attribute may carry a ``>``, which is why quotes are skipped whole.
+_TAG_OF = r"""<(?P<closing>/?){name}\b(?:[^>"']|"[^"]*"|'[^']*')*?(?P<empty>/?)>"""
+
+#: The elements HTML never closes, so their opening tag is the whole of them.
+_VOID = frozenset({"br", "hr", "img", "input", "source", "wbr"})
+
+#: A run of a table, a picture alone on its line, and the slot marker a two-column layout splits on.
+_TABLE_ROW = re.compile(r"^\s*\|")
+_IMAGE_ALONE = re.compile(r"^\s*!\[[^\]]*\]\([^)]*\)\s*$")
+_SLOT = re.compile(r"^\s*::[\w-]+::\s*$")
+
+#: What a slide emphasises: a span in bold, either spelling, or a strong or highlighting element.
+#: Italics are for terms and titles and are not counted, and neither is anything in inline code.
+#: Markdown's own spellings open after a non-word character and close before one, so neither a
+#: ``snake__case`` name nor a stray pair of stars across a paragraph break reads as one.
+_EMPHASISED = re.compile(
+    r"(?<![\w*])\*\*(?P<stars>[^*\s](?:(?!\n\s*\n)[^*])*?)\*\*(?![\w*])"
+    r"|(?<!\w)__(?P<unders>[^_\s](?:(?!\n\s*\n)[^_])*?)__(?!\w)"
+    r"|<(?P<tag>strong|b|mark)\b[^>]*>(?P<inner>.*?)</(?P=tag)\s*>",
+    re.DOTALL | re.IGNORECASE,
+)
+
+#: The tags that emphasise, which are kept while every other tag is blanked out of the way.
+_EMPHASIS_TAG = re.compile(r"</?(?:strong|b|mark)\b", re.IGNORECASE)
+_INLINE_CODE = re.compile(r"`[^`]*`")
+
+#: The line a code block is folded to while the slide's groups are counted: it is one group, and
+#: nothing inside it is markup.
+_CODE = "\x00code"
+
+#: The elements that are not a group the eye lands on: a stylesheet and a script draw nothing, a
+#: line break only spaces what does, and the footnotes cite rather than say (below).
+_NOT_A_GROUP = frozenset({"style", "script", "br", "footnotes", "footnote"})
+
+#: The theme's footnotes, which cite rather than say: attribution set at the floor, which the room
+#: is not reading while the speaker talks. Their text is left out of what the slide says.
+_FOOTNOTES = re.compile(
+    r"""<(?P<name>Footnotes?)\b(?:[^>"']|"[^"]*"|'[^']*')*?(?:/>|>.*?</(?P=name)\s*>)""",
+    re.DOTALL,
+)
+
+#: A callout, by the component the theme ships for one.
+_CALLOUT = re.compile(r"<Callout\b")
+
+#: The line of a slide's notes that states its time budget, as the canon asks for it to be written.
+_TIME = re.compile(r"^\s*Time:[ \t]*(?P<budget>.+?)\s*$", re.MULTILINE)
+
 #: A top-level frontmatter key the rules read, and its value up to a trailing comment. Read by line
 #: rather than as YAML, for the reason the module gives for the split: Slidev does not require the
 #: block to parse, so neither does this, and the keys asked for are scalars at column 0.
 _KEY = re.compile(
-    r"""^(?P<key>section|backup|layout):[ \t]*"""
+    r"""^(?P<key>section|backup|layout|duration):[ \t]*"""
     r"""(?:(?P<quote>["'])(?P<quoted>.*?)(?P=quote)|(?P<plain>.*?))"""
     r"""[ \t]*(?:[ \t]\#.*)?$"""
 )
@@ -95,6 +149,19 @@ class Slide:
     #: Every font size the slide's markup sets, as written: ``font-size: 14px`` for a style,
     #: ``text-sm`` for a class. Which of them break the floor is the linter's call.
     font_sizes: tuple[str, ...] = ()
+    #: The visual groups the slide is built from, beneath its headline, each named by its kind: a
+    #: ``paragraph``, a ``list``, a ``table``, an ``image``, ``code``, or the element a block of
+    #: markup opens with. A block is counted at the top of the body, so what it wraps is part of it.
+    groups: tuple[str, ...] = ()
+    #: The text of every span the slide sets in bold or highlights, its headline's included.
+    emphasis: tuple[str, ...] = ()
+    #: How many callouts the slide carries, wherever in its markup they sit.
+    callouts: int = 0
+    #: The slot the deck is planned for, as its headmatter writes it. Only the first slide carries
+    #: headmatter, so only it can say; ``None`` everywhere else.
+    duration: str | None = None
+    #: The time budget the slide's notes state, as written, or ``None`` where they state none.
+    time: str | None = None
 
 
 def read_deck(path: str | Path) -> tuple[Slide, ...]:
@@ -170,6 +237,10 @@ def _frontmatter_end(lines: Sequence[str], separator: int) -> int | None:
 def _slide(number: int, frontmatter: Sequence[str], lines: Sequence[str]) -> Slide:
     body, notes = _body_and_notes(_without_code(lines))
     keys = _keys(frontmatter)
+    markup = "\n".join(body)
+    # What the slide says, as opposed to what it cites.
+    said = _FOOTNOTES.sub(_line_breaks, markup)
+    time = _TIME.search(notes) if notes else None
 
     headline: str | None = None
     bullets: list[str] = []
@@ -180,7 +251,9 @@ def _slide(number: int, frontmatter: Sequence[str], lines: Sequence[str]) -> Sli
     # its word count — markdown's own lazy continuation, and the ceiling depends on it.
     continuing = False
 
-    for line in body:
+    for line in _without_tags(said).split("\n"):
+        # A slot marker is where a layout splits the slide, which is layout rather than words.
+        line = "" if _SLOT.match(line) else line
         heading = _HEADING.match(line)
         bullet = _BULLET.match(line)
 
@@ -212,7 +285,135 @@ def _slide(number: int, frontmatter: Sequence[str], lines: Sequence[str]) -> Sli
         section=keys.get("section"),
         backup=keys.get("backup") in _TRUE,
         layout=keys.get("layout") or None,
-        font_sizes=_font_sizes("\n".join(body)),
+        font_sizes=_font_sizes(markup),
+        groups=_groups(lines),
+        emphasis=_emphasis(said),
+        callouts=len(_CALLOUT.findall(markup)),
+        duration=keys.get("duration") or None,
+        time=time.group("budget") if time else None,
+    )
+
+
+def _without_tags(markup: str) -> str:
+    """The slide with its tags taken out, a line break inside one kept as a line break.
+
+    A tag the author wrapped over several lines is still one tag: its attributes are the
+    component's, a figure's caption say, and not prose the room reads beside it.
+    """
+    return _TAG.sub(_line_breaks, markup)
+
+
+def _line_breaks(match: re.Match[str]) -> str:
+    """What a match leaves behind: only the line breaks it spanned."""
+    return "\n" * match.group().count("\n")
+
+
+def _groups(lines: Sequence[str]) -> tuple[str, ...]:
+    """Each block at the top of the slide's body, beneath its headline, named by its kind.
+
+    A block is a run of lines between blank ones, or an element from its opening tag to the tag
+    that closes it, blank lines and all. What is inside an element is not counted again: a click
+    reveal wrapping a callout is one thing on the slide, and it is the thing the eye lands on.
+    Within a run, a change of kind starts a new block, except that a line running on from a bullet
+    is still that bullet's, as markdown's lazy continuation has it.
+    """
+    text = _COMMENT.sub("", "\n".join(_code_as_one_line(lines)))
+    rows = text.split("\n")
+    starts = [0]
+    for row in rows:
+        starts.append(starts[-1] + len(row) + 1)
+
+    groups: list[str] = []
+    headline = False
+    block: str | None = None
+    index = 0
+    while index < len(rows):
+        line = rows[index]
+        element = _ELEMENT.match(line)
+        heading = _HEADING.match(line)
+        if not line.strip() or _SLOT.match(line):
+            block = None
+        elif element:
+            name = element.group("name")
+            closed = _element_end(text, starts[index] + element.start("name") - 1, name)
+            if name.lower() not in _NOT_A_GROUP:
+                groups.append(name)
+            block = None
+            # Resume on the line after the one the element closes on.
+            while index + 1 < len(rows) and starts[index + 1] < closed:
+                index += 1
+        elif line == _CODE:
+            groups.append("code")
+            block = None
+        elif heading and not headline:
+            headline = True
+            block = None
+        else:
+            kind = _block_kind(line, heading is not None)
+            if block is None or (kind != block and not (block == "list" and kind == "paragraph")):
+                groups.append(kind)
+                block = kind
+        index += 1
+    return tuple(groups)
+
+
+def _block_kind(line: str, heading: bool) -> str:
+    """What kind of markdown block a line of the slide's body opens, or carries on."""
+    if heading:
+        return "heading"
+    if _TABLE_ROW.match(line):
+        return "table"
+    if _BULLET.match(line):
+        return "list"
+    if _IMAGE_ALONE.match(line):
+        return "image"
+    return "paragraph"
+
+
+def _element_end(text: str, opened: int, name: str) -> int:
+    """Where the element opening at ``opened`` closes: the end of the tag that brings its depth back
+    to nothing, or the end of the slide if the author never closed it."""
+    depth = 0
+    for tag in re.finditer(_TAG_OF.format(name=re.escape(name)), text[opened:]):
+        if tag.group("closing"):
+            depth -= 1
+        elif not tag.group("empty") and name.lower() not in _VOID:
+            depth += 1
+        if depth <= 0:
+            return opened + tag.end()
+    return len(text)
+
+
+def _code_as_one_line(lines: Sequence[str]) -> list[str]:
+    """The slide with each code block folded to one line, which marks where it was."""
+    kept: list[str] = []
+    index = 0
+    while index < len(lines):
+        if _FENCE.match(lines[index].rstrip()):
+            kept.append(_CODE)
+            index = _fence_end(lines, index) + 1
+            continue
+        kept.append(lines[index])
+        index += 1
+    return kept
+
+
+def _attributes_blanked(markup: str) -> str:
+    """The slide with every tag but the emphasising ones blanked to spaces, so no attribute can be
+    read as emphasis and a match still sits where it did."""
+    return _TAG.sub(
+        lambda tag: (
+            tag.group() if _EMPHASIS_TAG.match(tag.group()) else re.sub(r"\S", " ", tag.group())
+        ),
+        markup,
+    )
+
+
+def _emphasis(markup: str) -> tuple[str, ...]:
+    """The text of every span the slide emphasises, in the order it sets them."""
+    return tuple(
+        _plain(next(group for group in match.group("stars", "unders", "inner") if group))
+        for match in _EMPHASISED.finditer(_INLINE_CODE.sub("", _attributes_blanked(markup)))
     )
 
 

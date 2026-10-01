@@ -20,6 +20,7 @@ can be tried against a known answer.
 | 4 | `never-sole-channel` | reading | warning | A hand-drawn SVG whose two series are told apart by colour and by nothing else, with a swatch legend to match. |
 | 5 | `no-inflated-register` | linter | warning | "crucial" and "leverage" in the speaker notes. |
 | 5 | `opener-variety` | linter | error | Both passages lean on one opener: "It" in the prose, "The" in the notes. |
+| 5 | `signal-budget` | linter | warning | Two spans in bold in one sentence, an advisory: it warns and never gates. |
 | 5 | `no-contrast-for-emphasis` | reading | warning | "not just an optimisation, it is a rethinking", against a position nobody held. |
 | 5 | `no-reflexive-tricolon` | reading | warning | "faster, cheaper, and more elegant", where the third item is padding. |
 | 5 | `no-hedging-or-boilerplate` | reading | warning | The notes open by announcing what the slide is about to show. |

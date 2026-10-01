@@ -86,6 +86,11 @@ grouped by slide and names each finding's rule; see
 | Type floor holds | `type-scale` | every font size a slide's markup sets (style attributes, style blocks, UnoCSS text classes): an inline px size, and any size that resolves below the rule's floor |
 | Closes on a conclusion | `conclusion-stays-up` | the last slide outside the backups: no headline, a closing label for one, or a thank-you, at the severity the rule assigns |
 | **Palette passes CVD** | `separation-floor` | **shell out to `cvd-validate`** over `themes/*.json` — never reimplement CVD |
+| Visual groups (advisory) | `element-ceiling` | the blocks at the top of each slide's body, beneath the headline, at the severity the rule assigns |
+| Words on a slide (advisory) | `on-slide-words` | word count outside the headline, figures and footnotes, at the severity the rule assigns |
+| Emphasis and callouts (advisory) | `signal-budget` | bold or highlighted spans, and callouts, per slide, at the severity the rule assigns |
+| New abbreviations (advisory) | `acronym-budget` | runs of capitals over the talk's slides, backups aside, at the severity the rule assigns |
+| Pace (advisory) | `pace-budget` | the notes' `Time:` budgets summed against the headmatter's `duration`, at the severity the rule assigns |
 
 Each row's numbers, wordlist and severity are read from that rule in `method.md`. The linter carries
 none of its own.
@@ -115,8 +120,11 @@ The four calls that need understanding, applied by the agent against the rules l
     Objective violations block. One exception, declared by the canon rather than by the skill: a rule
     whose threshold line sets its own severity to `warning` reports without blocking. The canon says
     which rules those are and why — `no-inflated-register` is one, because
-    `established-terminology` can legitimately override it.
-  - **Semantic review = advisory** — LLM judgments are fallible, so they never block CI.
+    `established-terminology` can legitimately override it, and the budgets the canon calls
+    **advisory** are the rest: a script finds them, and they belong to the advisory tier below.
+  - **Semantic review = advisory** — LLM judgments are fallible, so they never block CI. The
+    linter's warnings join them in this tier, and the review weighs each against what its rule says
+    clears it ([#34](https://github.com/YongboYu/legible-slides/issues/34)).
 - **Output = one merged per-slide markdown report.** Findings grouped by slide, each tagged severity
   **error** (mechanical gate) or **warning** (advisory judgment) and **linked to the `method.md`
   rule** it enforces; semantic findings carry a suggested rewrite.

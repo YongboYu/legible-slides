@@ -22,6 +22,10 @@ Each rule carries a stable **ID** in backticks, its statement, and a footer:
 - **Threshold** — `key = value`, present only where the rule has a number. **Quote it; never
   re-derive it.** A reviewer that recomputes a threshold at runtime is a reviewer that can drift
   from the canon.
+- **Advisory** — a script-decided rule whose threshold sets its own severity to `warning`. A
+  script finds it and reports it; it never gates. The review reports it on its slide, in the advisory tier
+  beside the judgments, and the author may override it. The budgets at the end of
+  [§3](#3-density-and-noise) are all advisory: their point is balance, not minimalism.
 
 Rules are grouped: [structure](#1-structure), [authoring order](#2-authoring-order),
 [density and noise](#3-density-and-noise), [legibility](#4-legibility), [colour](#5-colour),
@@ -223,6 +227,75 @@ No chartjunk, no heavy gridlines, no 3-D, no ornamental fills. Treat this as a d
 noise), not a ratio to optimise: some redundant non-data ink genuinely helps.
 
 **Decided by** judgment
+
+### `element-ceiling`: about six visual groups on a slide
+
+A visual group is one thing the eye lands on: a paragraph, a list, a table, an image, a figure, a
+callout, a block of code or of markup. Working memory holds about four chunks at once (Kosslyn's
+capacity principle), and a slide past about six groups is asking the room to hold more than that,
+usually because it carries a second message. The count is taken at the top of the slide's body,
+beneath the headline: a list is one group however many bullets it has (`bullet-ceiling` counts
+those), and a block of markup is one group whatever it wraps. Footnotes cite rather than say, so
+they are not a group (nor, under `on-slide-words`, words).
+
+The point is balance, not minimalism. A slide that has to be dense passes review when its headline
+says how to read it, which is why this rule warns rather than gates.
+
+**Decided by** script (the count) · judgment (whether a dense slide's headline says how to read it)
+· **Threshold** `elements-per-slide = 6`, `element-ceiling-severity = warning` (a finding when a
+slide carries more than 6 visual groups)
+
+### `on-slide-words`: about forty words on a slide, outside the headline and the figures
+
+The words the room has to read while you talk: bullets, prose, callouts and tables. The headline is
+not counted, and neither is a figure's own text, nor the footnotes that cite the sources: those are
+attribution, set at the floor, and nobody reads them while you talk. Past about forty, the slide is
+the script (`no-script-on-slide`) and the room reads instead of listening; the sentences go in the
+speaker notes. The same balance holds as for `element-ceiling`: a dense slide passes review when its
+headline says how to read it.
+
+**Decided by** script (the count) · judgment (whether a dense slide's headline says how to read it)
+· **Threshold** `words-per-slide = 40`, `on-slide-words-severity = warning` (a finding when a slide
+carries more than 40 words outside its headline and figures)
+
+### `signal-budget`: one emphasised span and one callout per slide
+
+Signalling works because it is rare (Richter et al. 2016). A slide that bolds something in every
+line has signalled nothing, and a second callout halves the first. One span set in bold or
+highlighted, and one callout, per slide. Italics are for terms and titles and are not counted. The
+attention roles are spent the same way, one locus per slide (`accent-is-attention`).
+
+**Decided by** script · **Threshold** `emphasised-spans-per-slide = 1`, `callouts-per-slide = 1`,
+`signal-budget-severity = warning` (a finding when a slide carries more than 1 emphasised span, or
+more than 1 callout)
+
+### `acronym-budget`: about five new abbreviations per talk, and the rest spelled out
+
+Every abbreviation is a definition the room has to hold for the rest of the talk, and acronyms
+measurably hinder understanding (Barnett and Doubleday 2020). Spend about five, on the terms the
+talk keeps coming back to, and spell the rest out. An abbreviation is a word of two or more
+capitals as the room reads it on a slide, and it is new on the first slide it appears on. Backup
+slides are outside the talk and outside the count.
+
+A script cannot know which abbreviations a room already owns, so it counts them all, and the
+author decides whether one is already the field's word (`established-terminology`).
+
+**Decided by** script (the count) · judgment (which abbreviations the room already owns) ·
+**Threshold** `new-acronyms-per-talk = 5`, `acronym-budget-severity = warning` (a finding on the
+slide where the talk's sixth new abbreviation appears)
+
+### `pace-budget`: the slides' time budgets fill at most 85% of the slot
+
+A talk planned to fill its slot runs over it: questions, a slow projector and a late start all come
+out of the margin, and a talk planned without one has none. The slot is the `duration` the deck's
+headmatter declares. A slide's budget is a line of its own in its speaker notes, opening `Time:`,
+with a duration written as `90s`, `1min 30s` or `1:30`. Backup slides are not budgeted into the
+slot. A slot or a budget the script cannot read is reported rather than skipped, because a budget
+left out of the sum is a talk that only looks as if it fits.
+
+**Decided by** script (where the deck declares its slot and its notes state budgets) ·
+**Threshold** `pace-share-max = 0.85`, `pace-budget-severity = warning` (a finding on the slide
+where the budgets so far pass 85% of the slot)
 
 ---
 

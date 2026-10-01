@@ -128,9 +128,8 @@ layout: two-col-evidence
   </div>
 </div>
 
-Whatever is projecting these slides is projecting both samples, so the room settles this one rather
-than the arithmetic. Red-green deficiency reaches about one man in twelve of European
-ancestry<sup>1</sup>, and no template checks for that either.
+Red-green deficiency reaches about one man in twelve of European ancestry<sup>1</sup>, and no
+template checks for that either.
 
 <Footnotes>
   <Footnote :number="1">Birch (2012), on worldwide prevalence: about 8% of men and 0.4% of women of European ancestry.</Footnote>
@@ -146,8 +145,9 @@ ancestry<sup>1</sup>, and no template checks for that either.
 />
 
 <!--
-Two numbers, both measurable, both left to the author by every template I have used. Read the small
-sample aloud from the back if anyone thinks it is fine. On the right is this deck's own palette,
+Two numbers, both measurable, both left to the author by every template I have used. Whatever is
+projecting these slides is projecting both samples, so the room settles this one rather than the
+arithmetic: read the small sample aloud from the back if anyone thinks it is fine. On the right is this deck's own palette,
 simulated at full severity, with the dash and the marker taken off the chart it draws later.
 -->
 
@@ -189,9 +189,8 @@ What is a slide *for*?
 
 </Callout>
 
-Assertion-evidence gives a slide one claim and the evidence that proves it<sup>3</sup>. Compressing
-three messages onto one saves building the other two, then spends longer than that in the
-explaining, and the room is behind by the time you are done<sup>4</sup>.
+Assertion-evidence gives a slide one claim and the evidence that proves it<sup>3</sup>. Three
+messages on one slide save building two more, and cost longer than that in the explaining<sup>4</sup>.
 
 <Footnotes>
   <Footnote :number="3">Alley and Neeley (2005), on sentence headlines and visual evidence.</Footnote>
@@ -199,7 +198,8 @@ explaining, and the room is behind by the time you are done<sup>4</sup>.
 </Footnotes>
 
 <!--
-Say the question out loud before the slide is on screen, then let the slide answer it. The beat is
+Say the question out loud before the slide is on screen, then let the slide answer it. Compress
+three messages onto one and the room is behind by the time you are done. The beat is
 the method's first rule and its own demonstration: one claim, two sentences of evidence, nothing
 else on the canvas.
 -->
@@ -218,7 +218,7 @@ Results
 
 </Callout>
 
-Someone who reads only this knows the slide is about results, and knows nothing.
+Read alone, this gives the topic and nothing else.
 
 ::right::
 
@@ -228,16 +228,15 @@ Three series pass, and a fourth would fail without retuning.
 
 </Callout>
 
-Someone who reads only this already has the finding, and the slide has only to prove
-it<sup>5</sup>. Eight to fourteen words is the band, and two rendered lines is the ceiling this
-headline is sitting inside.
+Read alone, this already gives the finding, and the slide has only to prove it<sup>5</sup>.
 
 <Footnotes>
   <Footnote :number="5">Alley, Schreiber, Ramsdell and Muffo (2006): audiences retained more from sentence headlines than from topic phrases.</Footnote>
 </Footnotes>
 
 <!--
-Read the two boxes in order and stop. One of them told you something. A deck whose headlines read as
+Read the two boxes in order and stop. One of them told you something. Eight to fourteen words is the
+band, and two rendered lines is the ceiling this headline is sitting inside. A deck whose headlines read as
 a paragraph on their own has an argument; a deck whose headlines read as a table of contents has a
 filing system.
 -->
@@ -258,16 +257,14 @@ layout: two-col-evidence
 
 <Callout accent title="The failure this order prevents">
 
-A chart turns up first, a caption gets invented to justify it, and the slide ends up being about
-whatever the chart happened to show.
+A chart arrives first, a caption is invented for it, and the slide is about whatever the chart
+showed.
 
 </Callout>
 
-Reaching for the visual first is how a deck acquires slides nobody can state the point of, and they
-are the hardest ones to cut later.
-
 <!--
-Everyone has done the other order. You have a figure from the paper, it looks like a slide's worth
+Everyone has done the other order, and it is how a deck acquires slides nobody can state the point
+of: the hardest ones to cut later. You have a figure from the paper, it looks like a slide's worth
 of work, and a heading gets written to cover it. Three steps, and the first one is a sentence you
 say out loud before anything gets drawn.
 -->
@@ -276,17 +273,15 @@ say out loud before anything gets drawn.
 
 # Whatever does not serve the one message is costing you the message.
 
-Removing extraneous material improves learning in every test of it, which is what makes this the
-best-evidenced rule in the method<sup>4</sup>. Spending ink on data rather than on decoration is the
-same move, applied to a figure<sup>6</sup>.
+Removing extraneous material improves learning in every test of it<sup>4</sup>, and data ink over
+decoration is the same move<sup>6</sup>.
 
 <v-click>
 
 <Callout accent title="Why that box arrived on a click">
 
-Motion earns a place two ways and no others: it segments what you would otherwise have to hold all
-at once, or the change over time is itself the content<sup>7</sup>. Decoration is neither, and this
-one reveal is the whole animation budget of the deck.
+Motion earns a place two ways: segmenting what you would otherwise hold at once, or depicting
+change that is the content<sup>7</sup>.
 
 </Callout>
 
@@ -300,7 +295,8 @@ one reveal is the whole animation budget of the deck.
 
 <!--
 Pause before the click. Ask what a second box could be for, then let it answer: it is here because
-the rule about cutting applies to time as well as to space. Segment what the room has to hold, and
+the rule about cutting applies to time as well as to space, and it is the deck's only reveal.
+Coherence is the best-evidenced rule in the method. Segment what the room has to hold, and
 depict a process that genuinely changes. Nothing else.
 -->
 
@@ -367,18 +363,19 @@ is already the fix.
 |---|---|---|---|
 | `leuven-blue` | 15.0 | 10.9 | passes, and is at capacity |
 
-Measured over the per-series ramp, under normal vision and all three dichromacies at full severity.
-Yours is `cvd-validate your-palette.json`, and no slide in this deck names a colour.
+Yours is `cvd-validate your-palette.json`.
 
 <Callout title="Not an endorsement">
 
-This palette is inspired by KU Leuven's house colours. It is not affiliated with or endorsed by the
-university, and the theme file carries that sentence in its own description.
+This palette is inspired by KU Leuven's house colours, and is not affiliated with or endorsed by
+the university.
 
 </Callout>
 
 <!--
-Read the last column. At capacity means a fourth series in this ramp fails, and the validator says
+Measured over the per-series ramp, under normal vision and all three dichromacies at full severity,
+and no slide in this deck names a colour. The theme file carries the not-affiliated sentence in its
+own description. Read the last column. At capacity means a fourth series in this ramp fails, and the validator says
 so by role rather than quietly reusing a colour. Run it on your own palette file before a talk: a
 pass is the floor cleared, and a fail tells you which colour to move.
 -->

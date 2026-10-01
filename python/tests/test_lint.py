@@ -11,7 +11,7 @@ from pathlib import Path
 import pytest
 
 from legible.lint import lint
-from legible.method import FLOOR_PX
+from legible.method import ELEMENTS_PER_SLIDE, FLOOR_PX, WORDS_PER_SLIDE
 
 #: The fixture decks: one that breaks nothing, and one per rule, each named for the rule it breaks
 #: so the deck and what it is expected to produce cannot drift apart.
@@ -559,3 +559,181 @@ def test_a_main_section_after_a_backup_ends_the_backups(write_deck):
 
     assert rules(report) == ["conclusion-stays-up"]
     assert [finding.slide for finding in report.findings] == [4]
+
+
+# ── the review advisories ─────────────────────────────────────────────────────
+#
+# Each one warns and never gates: the deck still passes, and the finding is the review's to weigh.
+
+
+def _advisory(report, rule):
+    """Exactly one finding, of ``rule``, as a warning that leaves the deck passing."""
+    assert rules(report) == [rule]
+    assert [finding.severity for finding in report.findings] == ["warning"]
+    assert report.passed
+
+
+def _paragraphs(count):
+    return "\n\n".join(f"Evidence number {index}." for index in range(1, count + 1))
+
+
+def test_more_visual_groups_than_the_ceiling_is_an_advisory(write_deck):
+    report = lint(write_deck(f"# A claim\n\n{_paragraphs(ELEMENTS_PER_SLIDE + 1)}\n"))
+
+    _advisory(report, "element-ceiling")
+    assert f"{ELEMENTS_PER_SLIDE + 1} visual groups" in report.findings[0].message
+
+
+def test_sitting_on_the_element_ceiling_is_not(write_deck):
+    report = lint(write_deck(f"# A claim\n\n{_paragraphs(ELEMENTS_PER_SLIDE)}\n"))
+
+    assert report.findings == ()
+
+
+def test_more_words_on_a_slide_than_the_ceiling_is_an_advisory(write_deck):
+    """One word past the budget outside the headline, which is not counted however long it runs."""
+    words = " ".join(["word"] * (WORDS_PER_SLIDE + 1))
+    report = lint(write_deck(f"# A headline whose own words are never counted here\n\n{words}\n"))
+
+    _advisory(report, "on-slide-words")
+    assert f"{WORDS_PER_SLIDE + 1} words" in report.findings[0].message
+
+
+def test_sitting_on_the_word_budget_is_not_and_a_figure_s_text_is_not_counted(write_deck):
+    words = " ".join(["word"] * WORDS_PER_SLIDE)
+    caption = " ".join(["caption"] * 30)
+    report = lint(
+        write_deck(f'# A claim\n\n{words}\n\n<Figure\n  src="/f.png"\n  caption="{caption}"\n/>\n')
+    )
+
+    assert report.findings == ()
+
+
+def test_a_second_emphasised_span_is_an_advisory(write_deck):
+    report = lint(write_deck("# A claim\n\nOne **signal** and a **second** one.\n"))
+
+    _advisory(report, "signal-budget")
+    assert "2 emphasised spans" in report.findings[0].message
+
+
+def test_a_second_callout_is_an_advisory(write_deck):
+    report = lint(
+        write_deck(
+            """\
+            # A claim
+
+            <Callout title="One">First.</Callout>
+
+            <Callout title="Two">Second.</Callout>
+            """
+        )
+    )
+
+    _advisory(report, "signal-budget")
+    assert "2 callouts" in report.findings[0].message
+
+
+def test_one_emphasised_span_and_one_callout_are_the_budget(write_deck):
+    report = lint(
+        write_deck(
+            """\
+            # A claim
+
+            One **signal**, and *terms* in italics.
+
+            <Callout title="One">First.</Callout>
+            """
+        )
+    )
+
+    assert report.findings == ()
+
+
+def _acronyms(*slides):
+    return "\n---\n\n".join(f"# A claim\n\n{words}\n" for words in slides)
+
+
+def test_a_sixth_new_abbreviation_is_an_advisory_on_the_slide_it_appears(write_deck):
+    report = lint(write_deck(_acronyms("CVD, PDF and QR.", "AV and CSS, then CVD again.", "LLMs.")))
+
+    _advisory(report, "acronym-budget")
+    assert report.findings[0].slide == 3
+    assert "'LLM'" in report.findings[0].message
+
+
+def test_five_abbreviations_used_again_and_again_are_the_budget(write_deck):
+    """A word that merely starts with a capital, or a mixed-case name, is not an abbreviation."""
+    report = lint(
+        write_deck(
+            _acronyms("CVD, PDF and QR.", "AV and CSS, then CVD again.", "PowerPoint, I and A.")
+        )
+    )
+
+    assert report.findings == ()
+
+
+def test_abbreviations_on_backup_slides_are_outside_the_talk(write_deck):
+    deck = _acronyms("CVD, PDF and QR.", "AV and CSS.") + (
+        "\n---\nsection: Backup\nbackup: true\n---\n\n# A claim\n\nLLMs and TSFMs.\n"
+    )
+
+    assert lint(write_deck(deck)).findings == ()
+
+
+def _paced(duration, *budgets):
+    headmatter = f"---\nduration: {duration}\n---\n\n" if duration else ""
+    slides = [f"# A claim\n\n<!--\nTime: {budget}\n-->\n" for budget in budgets]
+    return headmatter + "\n---\n\n".join(slides)
+
+
+def test_budgets_past_the_pace_share_are_an_advisory_on_the_slide_that_crosses_it(write_deck):
+    """Eighteen minutes of a twenty-minute slot is 90%: over by the third slide."""
+    report = lint(write_deck(_paced("20min", "6min", "1:00", "11min", "0s")))
+
+    _advisory(report, "pace-budget")
+    assert report.findings[0].slide == 3
+    assert "85%" in report.findings[0].message
+
+
+def test_budgets_on_the_pace_share_are_not(write_deck):
+    """Seventeen minutes of twenty is exactly 85%: the ceiling is exceeded rather than reached."""
+    report = lint(write_deck(_paced("20min", "8min 30s", "510s")))
+
+    assert report.findings == ()
+
+
+def test_pace_is_unchecked_without_a_slot(write_deck):
+    report = lint(write_deck(_paced(None, "30min")))
+
+    assert report.findings == ()
+
+
+def test_backup_slides_are_not_budgeted_into_the_slot(write_deck):
+    deck = _paced("10min", "8min") + (
+        "\n---\nsection: Backup\nbackup: true\n---\n\n# A claim\n\n<!--\nTime: 5min\n-->\n"
+    )
+
+    assert lint(write_deck(deck)).findings == ()
+
+
+def test_an_abbreviation_is_its_run_of_capitals_and_not_the_digits_beside_it(write_deck):
+    """``BPI2017`` and ``BPI2019`` are one abbreviation the room has to hold, not two."""
+    report = lint(write_deck(_acronyms("CVD, PDF and QR.", "AV, BPI2017 and BPI2019.", "BPIs.")))
+
+    assert report.findings == ()
+
+
+def test_a_budget_the_linter_cannot_read_is_an_advisory_rather_than_silence(write_deck):
+    """Skipping it would undercount the talk and report a pace that fits."""
+    report = lint(write_deck(_paced("20min", "5min", "about a minute")))
+
+    _advisory(report, "pace-budget")
+    assert report.findings[0].slide == 2
+    assert "about a minute" in report.findings[0].message
+
+
+def test_a_slot_the_linter_cannot_read_is_an_advisory_on_the_first_slide(write_deck):
+    report = lint(write_deck(_paced("twenty", "5min")))
+
+    _advisory(report, "pace-budget")
+    assert report.findings[0].slide == 1

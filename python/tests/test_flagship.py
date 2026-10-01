@@ -22,6 +22,7 @@ import pytest
 from legible import load_palette, validate
 from legible.deck import read_deck
 from legible.figures import smallest_type_px
+from legible.lint import lint
 from legible.method import (
     BODY_PX,
     BODY_REACH_IMAGE_HEIGHTS,
@@ -206,3 +207,29 @@ def test_the_slides_are_handed_over_on_the_first_and_the_last_slide():
     assert re.search(r"^  contact: \S", headmatter, re.MULTILINE), "the close carries no contact"
     assert (PUBLIC / qr.group(1).lstrip("/")).is_file()
     assert url.group(1) in (PUBLIC / qr.group(1).lstrip("/")).read_text(encoding="utf-8")
+
+
+# ── the review advisories ─────────────────────────────────────────────────────
+
+#: Every advisory the flagship is left carrying, and why the author overrides it. The canon's own
+#: balance clause is the ground for most of them: a dense slide passes review when its headline says
+#: how to read it. Where the words were script, they were moved to the notes instead, so a new
+#: advisory turning up here is a slide to review rather than one more line for this table.
+OVERRIDDEN = {
+    (3, "on-slide-words"): "the stock template's slide is a picture of one, and its words are it",
+    (4, "on-slide-words"): "the two type samples are the evidence, set at the sizes they compare",
+    (5, "on-slide-words"): "the table is the evidence: what the method decides, and what holds it",
+    (7, "signal-budget"): "the label and the claim are compared side by side, and one is accented",
+    (10, "on-slide-words"): "the arithmetic is `equation-worked-example`'s worked example",
+    (13, "on-slide-words"): "the table is the evidence: one file, and each output it is shipped as",
+}
+
+
+def test_the_flagship_carries_only_the_advisories_its_author_overrides():
+    """Advisories never gate, so nothing else would notice the flagship drifting into the density it
+    teaches against."""
+    report = lint(DECK)
+
+    assert report.passed
+    assert {(finding.slide, finding.rule) for finding in report.findings} == set(OVERRIDDEN)
+    assert {finding.severity for finding in report.findings} == {"warning"}

@@ -173,6 +173,8 @@ def test_no_prose_the_scaffold_stamps_carries_one_of_the_canons_numbers(prose):
 
     for path, text in prose.items():
         body = "\n".join(line for line in text.splitlines() if not line.startswith("#"))
+        # A tag's attributes are markup, not prose: a footnote's marker is `:number="1"`.
+        body = re.sub(r"<[^>]*>", "", body)
         for number in numbers:
             found = re.search(rf"(?<![\w.]){re.escape(number)}(?![\w.])", body)
             assert not found, f"{path.relative_to(TEMPLATE)} carries {number}"

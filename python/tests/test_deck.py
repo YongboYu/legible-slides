@@ -445,3 +445,233 @@ def test_a_slide_of_frontmatter_alone_still_declares_its_section():
 
     assert [slide.section for slide in slides] == [None, "Results", None]
     assert [slide.number for slide in slides] == [1, 2, 3]
+
+
+# ── what the review advisories read ───────────────────────────────────────────
+
+
+def test_each_top_level_block_beneath_the_headline_is_one_visual_group():
+    """A list is one group however many bullets it has, and a block of markup is one group whatever
+    it wraps: a callout inside a click reveal is still the one thing the eye lands on."""
+    [slide] = deck(
+        """\
+        # A claim
+
+        ::left::
+
+        Evidence sits beside the claim.
+
+        - one
+        - two
+
+        | a | b |
+        |---|---|
+        | 1 | 2 |
+
+        ![A chart](/chart.png)
+
+        <v-click>
+
+        <Callout title="Why">
+
+        Because.
+
+        </Callout>
+
+        </v-click>
+
+        ::right::
+
+        <Figure
+          src="/figure.png"
+          caption="A caption long enough to wrap onto its own line"
+        />
+
+        ```python
+        print("code")
+        ```
+        """
+    )
+
+    assert slide.groups == ("paragraph", "list", "table", "image", "v-click", "Figure", "code")
+
+
+def test_a_slide_of_a_headline_alone_has_no_visual_groups():
+    [slide] = deck("# A claim\n\n<!-- notes -->\n")
+
+    assert slide.groups == ()
+
+
+def test_a_figure_s_attributes_are_not_words_on_the_slide():
+    """A component's attributes are the figure's, not prose the room reads, even where an author
+    wrapped the tag over several lines."""
+    [slide] = deck(
+        """\
+        # A claim
+
+        <Figure
+          src="/figure.png"
+          caption="Ten pairs of colours under four conditions"
+        />
+        """
+    )
+
+    assert slide.prose == ()
+
+
+def test_bold_and_highlighted_spans_are_emphasis_and_italics_are_not():
+    [slide] = deck(
+        """\
+        # A **bold** claim
+
+        One __strong__ point, one *term*, one <mark>highlight</mark> and `**code**`.
+
+        - a <strong>bullet</strong>
+        """
+    )
+
+    assert slide.emphasis == ("bold", "strong", "highlight", "bullet")
+
+
+def test_every_callout_is_counted_wherever_it_sits():
+    [slide] = deck(
+        """\
+        # A claim
+
+        <Callout title="One">
+
+        First.
+
+        </Callout>
+
+        <v-click>
+        <Callout accent title="Two">Second.</Callout>
+        </v-click>
+        """
+    )
+
+    assert slide.callouts == 2
+
+
+def test_the_slot_is_the_headmatter_s_duration():
+    slides = deck(
+        """\
+        ---
+        theme: ../theme
+        duration: 20min
+        ---
+
+        # First
+
+        ---
+
+        # Second
+        """
+    )
+
+    assert [slide.duration for slide in slides] == ["20min", None]
+
+
+def test_a_slide_s_time_budget_is_the_notes_line_that_opens_time():
+    [slide] = deck(
+        """\
+        # A claim
+
+        <!--
+        Signpost: now the method.
+        Time: 1min 30s
+
+        Point at the chart.
+        -->
+        """
+    )
+
+    assert slide.time == "1min 30s"
+
+
+def test_a_slide_without_a_time_line_has_no_budget():
+    [slide] = deck("# A claim\n\n<!--\nThe time is up when the slide is.\n-->\n")
+
+    assert slide.time is None
+
+
+def test_a_style_block_is_not_a_visual_group():
+    [slide] = deck("# A claim\n\nEvidence.\n\n<style>\n.x { color: red }\n</style>\n")
+
+    assert slide.groups == ("paragraph",)
+
+
+def test_an_attribute_is_never_emphasis():
+    """Underscores and stars inside a component's attributes are the component's business."""
+    [slide] = deck(
+        """\
+        # A claim
+
+        <Snapshot hero-edge="offer__sent__end" note="**not prose**" />
+
+        One __real__ span.
+        """
+    )
+
+    assert slide.emphasis == ("real",)
+
+
+def test_footnotes_cite_rather_than_say_so_they_are_not_prose():
+    """A footnote is attribution, set at the floor: the room is not reading it while you talk, and a
+    source's title is not the author's register."""
+    [slide] = deck(
+        """\
+        # A claim
+
+        Red-green deficiency reaches about one man in twelve<sup>1</sup>.
+
+        <Footnotes>
+          <Footnote :number="1">Birch (2012), a robust survey of prevalence.</Footnote>
+        </Footnotes>
+        """
+    )
+
+    assert slide.prose == ("Red-green deficiency reaches about one man in twelve1.",)
+    assert slide.groups == ("paragraph",)
+
+
+def test_a_slot_marker_is_layout_and_not_prose():
+    [slide] = deck("# A claim\n\n::left::\n\nEvidence.\n\n::right::\n\n- a point\n")
+
+    assert slide.prose == ("Evidence.",)
+    assert slide.bullets == ("a point",)
+
+
+def test_a_self_closing_footnotes_tag_takes_nothing_after_it_with_it():
+    [slide] = deck(
+        """\
+        # A claim
+
+        <Footnotes />
+
+        Evidence the room reads.
+
+        <Callout title="Why">Because.</Callout>
+        """
+    )
+
+    assert slide.prose == ("Evidence the room reads.", "Because.")
+
+
+def test_footnotes_are_neither_a_group_nor_emphasis_and_a_line_break_is_not_a_group():
+    [slide] = deck(
+        """\
+        # A claim
+
+        Evidence.
+
+        <br>
+
+        <Footnotes>
+          <Footnote :number="1">**Smith** (2020).</Footnote>
+        </Footnotes>
+        """
+    )
+
+    assert slide.groups == ("paragraph",)
+    assert slide.emphasis == ()

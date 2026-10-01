@@ -372,3 +372,42 @@ _CONCLUSION_STAYS_UP = rule_thresholds("conclusion-stays-up")
 CLOSING_LABELS = _listed(_CONCLUSION_STAYS_UP["closing-labels"])
 THANK_YOU_WORDS = _listed(_CONCLUSION_STAYS_UP["thank-you-words"])
 CONCLUSION_SEVERITY = _CONCLUSION_STAYS_UP["conclusion-severity"]
+
+
+# The review advisories. Each is decided by script and warns rather than gates; why, and what may
+# clear one, is the canon's to say. Every severity below is the canon's, like every number.
+
+_ELEMENT_CEILING = rule_thresholds("element-ceiling")
+
+#: How many visual groups a slide may carry, beneath its headline, before it is asking too much.
+ELEMENTS_PER_SLIDE = int(_ELEMENT_CEILING["elements-per-slide"])
+ELEMENT_CEILING_SEVERITY = _ELEMENT_CEILING["element-ceiling-severity"]
+
+
+_ON_SLIDE_WORDS = rule_thresholds("on-slide-words")
+
+#: How many words a slide may carry outside its headline and its figures.
+WORDS_PER_SLIDE = int(_ON_SLIDE_WORDS["words-per-slide"])
+ON_SLIDE_WORDS_SEVERITY = _ON_SLIDE_WORDS["on-slide-words-severity"]
+
+
+_SIGNAL_BUDGET = rule_thresholds("signal-budget")
+
+#: How many spans a slide may emphasise, and how many callouts it may carry.
+EMPHASISED_SPANS_PER_SLIDE = int(_SIGNAL_BUDGET["emphasised-spans-per-slide"])
+CALLOUTS_PER_SLIDE = int(_SIGNAL_BUDGET["callouts-per-slide"])
+SIGNAL_BUDGET_SEVERITY = _SIGNAL_BUDGET["signal-budget-severity"]
+
+
+_ACRONYM_BUDGET = rule_thresholds("acronym-budget")
+
+#: How many abbreviations a talk may introduce before the rest should be spelled out.
+NEW_ACRONYMS_PER_TALK = int(_ACRONYM_BUDGET["new-acronyms-per-talk"])
+ACRONYM_BUDGET_SEVERITY = _ACRONYM_BUDGET["acronym-budget-severity"]
+
+
+_PACE_BUDGET = rule_thresholds("pace-budget")
+
+#: The share of the slot the slides' time budgets may fill, the rest being the talk's margin.
+PACE_SHARE_MAX = float(_PACE_BUDGET["pace-share-max"])
+PACE_BUDGET_SEVERITY = _PACE_BUDGET["pace-budget-severity"]

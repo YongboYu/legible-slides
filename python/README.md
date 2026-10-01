@@ -152,6 +152,12 @@ that declares the one at fault, `conclusion-stays-up` on the last slide outside 
 `separation-floor` per theme, for each `--theme` named. A deck
 does not record which palette it wears, so naming none checks the slides alone.
 
+Five more are the canon's **advisories**, reported as warnings and never gating: `element-ceiling`,
+`on-slide-words` and `signal-budget` per slide, `acronym-budget` on the slide where the talk's
+abbreviations pass their budget, and `pace-budget` on the slide where the time budgets in the
+speaker notes pass their share of the `duration` the headmatter declares. Whatever the canon lets clear an
+advisory is the review's to weigh, not this command's.
+
 ```python
 from legible import lint
 

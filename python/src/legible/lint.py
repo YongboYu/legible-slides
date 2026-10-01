@@ -4,7 +4,10 @@ A rule the canon marks **decided by script** is a rule nobody should have to rem
 module decides them: the bullet and word ceilings, em-dashes in a headline, the inflated-register
 wordlist, the sentence-opener share, whether the footer's section map still fits, a font size a
 slide sets inline or below the type floor, whether the talk closes on a conclusion rather than a
-thank-you, and whether the deck's palette clears the separation floor.
+thank-you, and whether the deck's palette clears the separation floor. It also counts what the
+review advisories budget — visual groups and words on a slide, emphasis and callouts, new
+abbreviations over the talk, and the notes' time budgets against the slot — and reports each at the
+severity the canon gives it, which is a warning: an advisory is the review's to weigh, never a gate.
 ``docs/agent-skill-contract.md`` §4a fixes the set; the canon fixes every number in it, and this
 module quotes those numbers through ``legible.method`` rather than keeping a second copy.
 
@@ -33,20 +36,31 @@ from typing import NamedTuple
 
 from legible.deck import Slide, read_deck
 from legible.method import (
+    ACRONYM_BUDGET_SEVERITY,
     BULLETS_PER_SLIDE,
+    CALLOUTS_PER_SLIDE,
     CLOSING_LABELS,
     CONCLUSION_SEVERITY,
+    ELEMENT_CEILING_SEVERITY,
+    ELEMENTS_PER_SLIDE,
     EM_DASHES_PER_HEADLINE,
+    EMPHASISED_SPANS_PER_SLIDE,
     FLOOR_PX,
     INFLATED_REGISTER_SEVERITY,
     INFLATED_REGISTER_WORDS,
+    NEW_ACRONYMS_PER_TALK,
+    ON_SLIDE_WORDS_SEVERITY,
     OPENER_SHARE_MAX,
     OPENER_WORDS,
+    PACE_BUDGET_SEVERITY,
+    PACE_SHARE_MAX,
     SECTION_LABEL_CHARS_MAX,
     SECTION_LOCATOR_SEVERITY,
     SECTIONS_MAX,
+    SIGNAL_BUDGET_SEVERITY,
     THANK_YOU_WORDS,
     WORDS_PER_BULLET,
+    WORDS_PER_SLIDE,
 )
 
 __all__ = ["ERROR", "WARNING", "Finding", "LintReport", "Unchecked", "lint"]
@@ -90,6 +104,19 @@ _PX_PER = {"px": 1.0, "pt": 96 / 72, "rem": 16.0}
 #: are needed, and they are UnoCSS's numbers rather than the method's: the canon fixes the floor,
 #: and these are what a class resolves to under it.
 _TEXT_CLASS_PX = {"text-xs": 12.0, "text-sm": 14.0, "text-base": 16.0, "text-lg": 18.0}
+
+#: An abbreviation as the room reads one: a run of two or more capitals, with a plural ``s`` after
+#: it at most. The run is the abbreviation, so ``BPIs`` and ``BPI2017`` are both ``BPI``; a word
+#: that merely opens on a capital, or a name in mixed case, is not one.
+_ACRONYM = re.compile(r"(?<![A-Za-z])(?P<capitals>[A-Z]{2,})s?(?![A-Za-z])")
+
+#: A duration as the canon writes one: a clock (``1:30``), or a run of numbers with units.
+_CLOCK = re.compile(r"^(?:(?P<h>\d+):)?(?P<m>\d+):(?P<s>\d{2})$")
+_DURATION_PART = re.compile(
+    r"(?P<number>\d*\.?\d+)\s*"
+    r"(?P<unit>h|hr|hours?|min|mins|minutes?|m|s|sec|secs|seconds?)(?![a-z])"
+)
+_SECONDS_PER = {"h": 3600, "m": 60, "s": 1}
 
 
 class Finding(NamedTuple):
@@ -135,6 +162,10 @@ def lint(deck: str | Path, themes: Iterable[str | Path] = ()) -> LintReport:
     findings = [finding for slide in slides for finding in _slide_findings(slide)]
     findings.extend(_section_findings(slides))
     findings.extend(_conclusion_findings(slides))
+    findings.extend(_acronym_findings(slides))
+    findings.extend(_pace_findings(slides))
+    # In slide order, the deck's own findings after them, so a report reads the way the deck runs.
+    findings.sort(key=lambda finding: (finding.slide is None, finding.slide or 0))
     palette, unchecked = _palette_findings(themes)
 
     return LintReport(
@@ -192,6 +223,41 @@ def _slide_findings(slide: Slide) -> Iterator[Finding]:
         problem = _off_scale(size)
         if problem:
             yield _finding("type-scale", slide, f"{size!r}: {problem}")
+
+    if len(slide.groups) > ELEMENTS_PER_SLIDE:
+        yield _finding(
+            "element-ceiling",
+            slide,
+            f"{len(slide.groups)} visual groups ({', '.join(slide.groups)}), "
+            f"ceiling {ELEMENTS_PER_SLIDE}",
+            severity=ELEMENT_CEILING_SEVERITY,
+        )
+
+    words = sum(_words(text) for text in (*slide.bullets, *slide.prose))
+    if words > WORDS_PER_SLIDE:
+        yield _finding(
+            "on-slide-words",
+            slide,
+            f"{words} words outside the headline and figures, ceiling {WORDS_PER_SLIDE}",
+            severity=ON_SLIDE_WORDS_SEVERITY,
+        )
+
+    if len(slide.emphasis) > EMPHASISED_SPANS_PER_SLIDE:
+        spans = ", ".join(repr(span) for span in slide.emphasis)
+        yield _finding(
+            "signal-budget",
+            slide,
+            f"{len(slide.emphasis)} emphasised spans ({spans}), "
+            f"ceiling {EMPHASISED_SPANS_PER_SLIDE}",
+            severity=SIGNAL_BUDGET_SEVERITY,
+        )
+    if slide.callouts > CALLOUTS_PER_SLIDE:
+        yield _finding(
+            "signal-budget",
+            slide,
+            f"{slide.callouts} callouts, ceiling {CALLOUTS_PER_SLIDE}",
+            severity=SIGNAL_BUDGET_SEVERITY,
+        )
 
 
 def _off_scale(size: str) -> str | None:
@@ -253,18 +319,12 @@ def _section_findings(slides: Sequence[Slide]) -> Iterator[Finding]:
 def _conclusion_findings(slides: Sequence[Slide]) -> Iterator[Finding]:
     """Whether the slide left up through Q&A is a conclusion rather than a thank-you.
 
-    That slide is the last one outside the backups. A backup is declared where its section starts
-    and carries forward with it, so it runs until a slide declares a section of the talk again.
+    That slide is the last one outside the backups.
     """
-    last: Slide | None = None
-    in_backup = False
-    for slide in slides:
-        if slide.section is not None:
-            in_backup = slide.backup
-        if not in_backup:
-            last = slide
-    if last is None:
+    talk = list(_main(slides))
+    if not talk:
         return
+    last = talk[-1]
 
     problem = _not_a_conclusion(last.headline)
     if problem:
@@ -274,6 +334,109 @@ def _conclusion_findings(slides: Sequence[Slide]) -> Iterator[Finding]:
             f"the last main slide {problem}; it stays up through Q&A, so make it the answers",
             severity=CONCLUSION_SEVERITY,
         )
+
+
+def _main(slides: Sequence[Slide]) -> Iterator[Slide]:
+    """The talk's slides, without its backups.
+
+    A backup is declared where its section starts and carries forward with it, so it runs until a
+    slide declares a section of the talk again.
+    """
+    in_backup = False
+    for slide in slides:
+        if slide.section is not None:
+            in_backup = slide.backup
+        if not in_backup:
+            yield slide
+
+
+def _acronym_findings(slides: Sequence[Slide]) -> Iterator[Finding]:
+    """The slide where the talk introduces one abbreviation more than its budget.
+
+    Once, on that slide: the abbreviations past it are the same advice again, and the finding names
+    every one the talk had introduced by then, which is the list to choose the budget from.
+    """
+    introduced: list[str] = []
+    for slide in _main(slides):
+        text = " ".join(part for part in (slide.headline, *slide.bullets, *slide.prose) if part)
+        for acronym in (match.group("capitals") for match in _ACRONYM.finditer(text)):
+            if acronym in introduced:
+                continue
+            introduced.append(acronym)
+            if len(introduced) == NEW_ACRONYMS_PER_TALK + 1:
+                yield _finding(
+                    "acronym-budget",
+                    slide,
+                    f"{acronym!r} is new abbreviation {len(introduced)} of the talk, ceiling "
+                    f"{NEW_ACRONYMS_PER_TALK} (so far: {', '.join(introduced)}); "
+                    "spell the rest out",
+                    severity=ACRONYM_BUDGET_SEVERITY,
+                )
+
+
+def _pace_findings(slides: Sequence[Slide]) -> Iterator[Finding]:
+    """The slide where the notes' time budgets, summed, pass their share of the slot.
+
+    Silent unless the deck declares a slot: a deck that plans none has made no claim to check. A
+    slot or a budget this cannot read is reported where it is written, never skipped, because a
+    budget left out of the sum is a talk that reads as fitting when it may not.
+    """
+    if not slides or not slides[0].duration:
+        return
+    slot = _seconds(slides[0].duration)
+    if not slot:
+        yield _unreadable(slides[0], "slot", slides[0].duration)
+        return
+
+    spent = 0.0
+    for slide in _main(slides):
+        if not slide.time:
+            continue
+        budget = _seconds(slide.time)
+        if budget is None:
+            yield _unreadable(slide, "time budget", slide.time)
+            continue
+        spent += budget
+        if spent > PACE_SHARE_MAX * slot:
+            yield _finding(
+                "pace-budget",
+                slide,
+                f"the budgets reach {_clock(spent)} by this slide, {spent / slot:.0%} of the "
+                f"{slides[0].duration} slot, ceiling {PACE_SHARE_MAX:.0%}",
+                severity=PACE_BUDGET_SEVERITY,
+            )
+            return
+
+
+def _unreadable(slide: Slide, what: str, written: str) -> Finding:
+    return _finding(
+        "pace-budget",
+        slide,
+        f"cannot read the {what} {written!r}; write a duration such as 90s, 1min 30s or 1:30",
+        severity=PACE_BUDGET_SEVERITY,
+    )
+
+
+def _seconds(duration: str) -> float | None:
+    """A duration in seconds, or ``None`` when it is written in no form this can read.
+
+    The canon's own forms, and the unit spellings around them a speaker is likely to type.
+    """
+    text = duration.strip().lower()
+    clock = _CLOCK.match(text)
+    if clock:
+        hours, minutes, seconds = (int(clock.group(unit) or 0) for unit in "hms")
+        return 3600 * hours + 60 * minutes + seconds
+    parts = list(_DURATION_PART.finditer(text))
+    if not parts or _DURATION_PART.sub("", text).strip():
+        return None
+    return sum(float(part.group("number")) * _SECONDS_PER[part.group("unit")[0]] for part in parts)
+
+
+def _clock(seconds: float) -> str:
+    """A number of seconds as a speaker reads a clock: ``18:00``."""
+    minutes, rest = divmod(round(seconds), 60)
+    return f"{minutes}:{rest:02d}"
 
 
 def _not_a_conclusion(headline: str | None) -> str | None:

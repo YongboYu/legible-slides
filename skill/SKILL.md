@@ -114,8 +114,12 @@ regenerate is hand-made.
 legible lint DECK --theme THEME --json          # --theme is repeatable, once per palette
 ```
 
-Findings come back tagged with the rule they enforce and the slide they are on. Take them
-**verbatim**: do not re-count a bullet, re-measure a word, or re-decide a colour by eye. The
+Findings come back tagged with the rule they enforce, the slide they are on, and a severity. Take
+them **verbatim**: do not re-count a bullet, re-measure a word, or re-decide a colour by eye.
+
+The severity is the tier. An **error** is the gate tier. A **warning** is the advisory tier: the
+canon says which script-decided rules are advisory, and the linter reports them as warnings that
+never touch the exit code. They go in the report beside the judgments, not above them. The
 palette check inside that command shells out to `cvd-validate`, and its arithmetic is the only
 arithmetic about colour anyone here does.
 
@@ -141,8 +145,17 @@ method says — that memory is what this skill exists not to rely on. The second
 canon which rules those are rather than naming them, so a rule added to that section is reviewed
 from the moment it is written.
 
-If either command exits 2, the ID or the section it names has moved in the canon. Say so and stop:
-a review that quietly loaded fewer rules finds fewer faults and reads as a pass.
+Then load every rule the linter reported a **warning** for, by the IDs it printed:
+
+```bash
+legible rules RULE …                            # each rule the mechanical run warned on
+```
+
+An advisory is the one place a judgment and a script meet. Whether anything clears one is the
+rule's own text to say, which is why it is loaded rather than remembered.
+
+If any of these commands exits 2, the ID or the section it names has moved in the canon. Say so
+and stop: a review that quietly loaded fewer rules finds fewer faults and reads as a pass.
 
 ### 4. Judge, slide by slide
 
@@ -165,12 +178,16 @@ Four things hold a judgment to something:
   would hide a violation that gates.
 - **Honour the canon's own precedence.** Where a rule you loaded defers to another rule, follow
   that; the canon says which wins, and this file does not.
+- **Weigh each advisory, and keep it.** Where the rule's own text says what clears it and the slide
+  meets that, say so on the finding, quoting what meets it. Never drop the finding: the author
+  decides whether to override it, and a dropped advisory is a decision taken for them.
 - **Carry a fix** — which every finding in the report does, the mechanical ones included. A
   rewritten headline, the split of a slide into two, the redundant channel a visual is missing. The
   linter says what broke; the review says what to do about it, and a finding without a fix is an
   opinion.
 
-Judgments are **warnings**, always. They are fallible, so they never gate.
+Judgments are **warnings**, always: the advisory tier, beside the linter's own advisories. They are
+fallible, so they never gate.
 
 ### 5. Merge into one report
 
@@ -180,9 +197,10 @@ against the deck rather than any one slide — the palette is the usual one — 
 ```markdown
 # Review — path/to/slides.md
 
-**FAIL** — 2 errors, 1 warning.
-Mechanical checks gate; judgments are advisory and never block. Palette: checked against
-themes/leuven-blue.json. Read any rule below with `legible rules <rule-id>`.
+**FAIL** — 2 errors, 2 warnings.
+Errors are the gate tier and block. Warnings are the advisory tier, the linter's advisories and the
+judgments alike, and never block. Palette: checked against themes/leuven-blue.json. Read any rule
+below with `legible rules <rule-id>`.
 
 ## Slide 4 — "Cost falls with retrieval and accuracy holds"
 
@@ -190,6 +208,8 @@ themes/leuven-blue.json. Read any rule below with `legible rules <rule-id>`.
   **Fix:** move the last bullets to the notes; they answer a different question from the ones above them.
 - **warning** · `assertion-headline` — the headline reads "Results", which names the slide rather than claiming anything.
   **Fix:** "Retrieval halves cost and holds accuracy at every window."
+- **warning** · `on-slide-words` — … words outside the headline and figures, ceiling …
+  **Fix:** the second paragraph is what you will say; move it to the notes.
 
 ## Deck
 
@@ -204,7 +224,8 @@ written into this procedure is a copy of it that can go stale.
 - The **verdict** is the linter's exit code and nothing else. A judgment never turns a PASS into a
   FAIL; it also never softens a FAIL.
 - Each finding names its **rule by ID**, which is how a reader looks it up and disagrees with it.
-- The tally counts both halves. Errors can only come from the mechanical run.
+- The tally counts both halves. Errors can only come from the mechanical run; warnings come from
+  both, and within a slide the gate tier is listed before the advisory tier.
 
 ## Posture
 
