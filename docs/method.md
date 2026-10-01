@@ -199,14 +199,40 @@ noise), not a ratio to optimise: some redundant non-data ink genuinely helps.
 
 ## 4. Legibility
 
-### `type-scale`: type is sized for the back row, not the laptop
+### `type-scale`: type is sized for the room, and nothing goes below the floor
 
-Fixed by the method, not by the palette and not per slide. On the logical canvas, body type sits at the
-floor: it projects to roughly 34px at 1920, which is what the back row of a lecture hall can read.
-The two dense sizes exist for tight figure panels and are marked exceptions, not knobs.
+Fixed by the method, not by the palette and not per slide. On the logical canvas the headline and
+the body each have one size, and every other piece of text the template sets (a caption, a table
+header, a legend, a figure's axis and tick labels, the locator, the page number) sits at or above
+the floor. A generated figure is held to the floor at the size it lands on the slide, not at the
+size it was drawn. There is nothing smaller, and the floor is not a knob for fitting more onto a
+slide: a slide that only fits below it is carrying too much.
 
-**Decided by** script · **Threshold** `canvas-width-px = 1280`, `canvas-aspect-ratio = 16:9`,
-`body-px = 23`, `headline-px = 37`, `dense-px = 18`, `dense-xs-px = 16`
+Slides size text only through the template's classes, never with an inline size in px, so the floor
+can be checked on every slide a deck writes and not only on the classes the theme ships.
+
+**The room it suits.** The canvas is scaled to the screen, so a size is a share of the image
+height, and what decides legibility is how many image heights away the farthest viewer sits. By
+the AV industry's sizing rule ([AVIXA DISCAS](https://www.avixa.org/standards/discas-calculators/discas/learn-more-about-display-size)),
+body type reads to about 4.5 image heights and the floor to about 3.5. That is a seminar
+room or a typical conference session room, roughly 30 to 150 seats. A lecture hall or a plenary is
+planned to about 6 image heights, and for one of those:
+
+1. **Raise the body** to 26–28px, with the headline at about 40–42px. It is one variable in the
+   theme, and it costs about 15–30% of each slide's text, so check the densest slides after.
+2. **Cut what the slide carries** rather than shrinking it: detail moves to the spoken track, a
+   backup slide or the shared PDF.
+3. **Share the slides** with a QR code on the first and last slide, so people can follow on their
+   own screen.
+4. **Ask the organisers** for a second screen or a confidence monitor for the rear.
+
+Before any talk, whatever the room: view the deck from about six screen heights away (about 1.1 m
+for a 13-inch laptop) and read the smallest text on every slide.
+
+**Decided by** script (an inline px size, a size below the floor, figure text) · judgment (the
+room) · **Threshold** `canvas-width-px = 1280`, `canvas-aspect-ratio = 16:9`, `body-px = 23`,
+`headline-px = 37`, `floor-px = 18`, `body-reach-image-heights = 4.5` (violation when a slide sets
+a font size in px inline, or sets text below `floor-px`)
 
 ### `fonts`: one text family, one mono family, both bundled
 
@@ -273,7 +299,8 @@ The same test governs every other role used for text: it clears WCAG contrast at
 or it does not carry text at that size. A mid-contrast chrome colour such as `brand-strong` clears it
 only at large sizes.
 
-**Decided by** script (role usage)
+**Decided by** script (role usage) · **Threshold** `text-contrast-min = 4.5` (violation when a role
+set as text below the headline size falls under it against the ground it sits on)
 
 ### `separation-floor`: data colours stay perceptually separated under colour-vision deficiency
 
@@ -397,7 +424,7 @@ full.
 | 6 | _The headline is the claim, not a label._ | The headline is a claim; label versus claim side by side | `assertion-headline`, `headline-shape` |
 | 7 | _Decide the message before you reach for the chart._ | Message-before-visual, shown as an ordering | `message-before-visual` |
 | 8 | _Cut everything that isn't the message._ | Signal-to-noise; a purposeful reveal doubles as the motion guardrail | `coherence`, `motion-purpose` |
-| 9 | _Body type is sized for the back row, not your laptop._ | Body sits at the floor; the projection arithmetic on screen | `type-scale` |
+| 9 | _Body type is sized for the back row, not your laptop._ | The body size as a share of the image height, worked through to the room it reads in | `type-scale` |
 | 10 | _If a colour dies under colour-blindness or grayscale, it's not in the palette._ | The 5-line chart under deuteranopia and grayscale, with dash and marker redundancy | `separation-floor`, `never-sole-channel` |
 | 11 | _The validator reads any palette file, yours included, and names the pair that fails._ | This deck's palette measured, at capacity, the command that measures yours, plus the not-affiliated note | `separation-floor` |
 | 12 | _One file is what you present, hand out and have reviewed._ | Slidev on screen, a PDF from the same file, plus the coding-agent skill | — |

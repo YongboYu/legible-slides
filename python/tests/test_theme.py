@@ -17,17 +17,19 @@ from pathlib import Path
 
 import pytest
 
-from legible.method import rule, rule_thresholds
+from legible import load_palette
+from legible.contrast import contrast_ratio
+from legible.method import TEXT_CONTRAST_MIN, rule, rule_thresholds
 
-THEME = Path(__file__).resolve().parents[2] / "theme"
+REPO = Path(__file__).resolve().parents[2]
+THEME = REPO / "theme"
 
 #: Every custom property in the theme's stylesheet that carries a canon number, against the rule and
 #: the threshold key it comes from. `px` is the theme's unit and the canon's own.
 DECLARED_PX = {
     "--headline-px": ("type-scale", "headline-px"),
     "--body-px": ("type-scale", "body-px"),
-    "--dense-px": ("type-scale", "dense-px"),
-    "--dense-xs-px": ("type-scale", "dense-xs-px"),
+    "--floor-px": ("type-scale", "floor-px"),
 }
 
 
@@ -312,3 +314,66 @@ def test_the_attention_fill_is_never_text_or_a_stroke():
     offenders = [name for name, source in _theme_sources().items() if misuse.search(source)]
 
     assert offenders == []
+
+
+# ── the type floor ────────────────────────────────────────────────────────────
+
+#: The only sizes the theme may set text in: `type-scale`'s headline and body, and its floor.
+SCALE = {"var(--headline-px)", "var(--body-px)", "var(--floor-px)"}
+
+#: The deck's own stylesheet, which sizes its two demonstrations off the theme's scale.
+DECK_STYLE = REPO / "deck" / "style.css"
+
+
+def _font_sizes(source: str) -> list[str]:
+    return [value.strip() for value in re.findall(r"font-size:\s*([^;]+);", source)]
+
+
+def test_every_size_the_theme_sets_is_on_the_canon_s_scale():
+    """No class sets text below the floor, because none sets it at anything but the scale's three
+    sizes: a caption, a table header, the locator and the page number included."""
+    sizes = {
+        name: [size for size in _font_sizes(source) if size not in SCALE]
+        for name, source in _theme_sources().items()
+    }
+
+    assert {name: off for name, off in sizes.items() if off} == {}
+
+
+def test_the_dense_sizes_are_gone():
+    """`type-scale` carries one floor and nothing under it, so no stylesheet may still name the
+    sizes it used to mark as exceptions."""
+    sources = {**_theme_sources(), "deck/style.css": DECK_STYLE.read_text(encoding="utf-8")}
+
+    assert [name for name, source in sources.items() if "dense" in source] == []
+
+
+#: The rules that set the template's small text: the chrome, a caption, a citation, a source line,
+#: a table header. Each is text, so each colour has to clear contrast at the floor.
+SMALL_TEXT = (
+    ".legible-locator",
+    ".legible-page",
+    ".legible-figure figcaption",
+    ".legible-footnote",
+    ".slidev-layout .legible-reference-uri",
+    ".slidev-layout th",
+)
+
+
+@pytest.mark.parametrize("selector", SMALL_TEXT)
+def test_small_text_is_set_in_a_role_that_clears_contrast(stylesheet, themes_dir, selector):
+    """`decorative-neutral-never-text`: a caption or a page number in the softest neutral is
+    exactly the text the rule bans, and the floor is where contrast matters most."""
+    colour = re.search(r"\bcolor: var\(--([a-z-]+)\);", _block(stylesheet, selector))
+    assert colour, f"{selector} sets no colour role of its own"
+    palette = load_palette(themes_dir / "leuven-blue.json")
+
+    assert colour.group(1) != "neutral-soft"
+    assert contrast_ratio(palette[colour.group(1)], palette["surface"]) >= TEXT_CONTRAST_MIN
+
+
+@pytest.mark.parametrize("selector", [".legible-figure figcaption sup", ".legible-footnote-number"])
+def test_a_citation_marker_in_the_small_text_is_set_at_the_floor(stylesheet, selector):
+    """Both are `sup` elements, which a browser shrinks to about 80% of their parent unless told
+    otherwise, and their parents already sit on the floor."""
+    assert "font-size: var(--floor-px);" in _block(stylesheet, selector)

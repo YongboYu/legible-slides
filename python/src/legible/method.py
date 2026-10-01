@@ -292,11 +292,17 @@ CANVAS_WIDTH_PX = int(_TYPE_SCALE["canvas-width-px"])
 _ASPECT_W, _ASPECT_H = (int(part) for part in _TYPE_SCALE["canvas-aspect-ratio"].split(":"))
 CANVAS_HEIGHT_PX = CANVAS_WIDTH_PX * _ASPECT_H // _ASPECT_W
 
-#: Body type, which `type-scale` puts at the floor, and the two sizes it marks as exceptions
-#: beneath. The canon owns which of them may be used where.
+#: The body size, and the floor every other piece of text sits at or above: a caption, a legend, a
+#: figure's axis and ticks, the locator, the page number. There is no size beneath it.
 BODY_PX = int(_TYPE_SCALE["body-px"])
-DENSE_PX = int(_TYPE_SCALE["dense-px"])
-DENSE_XS_PX = int(_TYPE_SCALE["dense-xs-px"])
+FLOOR_PX = int(_TYPE_SCALE["floor-px"])
+
+#: How far, in image heights, body type reads: the room the scale is stated for.
+BODY_REACH_IMAGE_HEIGHTS = float(_TYPE_SCALE["body-reach-image-heights"])
+
+
+#: The WCAG contrast any role set as text has to clear against its ground, below headline size.
+TEXT_CONTRAST_MIN = float(rule_thresholds("decorative-neutral-never-text")["text-contrast-min"])
 
 
 _FONTS = rule_thresholds("fonts")

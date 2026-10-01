@@ -39,6 +39,7 @@ from pathlib import Path
 
 from matplotlib import rc_context, rcParams
 from matplotlib.figure import Figure
+from matplotlib.text import Text
 
 from legible.cvd import NORMAL, hex_to_rgb1, rgb1_to_hex, simulate
 from legible.fonts import register
@@ -46,8 +47,7 @@ from legible.method import (
     BODY_PX,
     CANVAS_HEIGHT_PX,
     CANVAS_WIDTH_PX,
-    DENSE_PX,
-    DENSE_XS_PX,
+    FLOOR_PX,
     FONT_TEXT,
 )
 from legible.palette import Palette
@@ -60,6 +60,7 @@ __all__ = [
     "Series",
     "multi_series",
     "save",
+    "smallest_type_px",
     "two_group",
 ]
 
@@ -77,8 +78,8 @@ DASHES = (
 #: One marker per series, same order. Shapes chosen to differ in silhouette, not only in size.
 MARKERS = ("o", "s", "^", "D", "v", "P")
 
-#: How many legend entries sit on one row before it wraps. Three at body size is what fits across
-#: an evidence pane without the labels running into each other.
+#: How many legend entries sit on one row at most. Three at body size is what fits across an
+#: evidence pane without the labels running into each other; a narrower figure takes fewer.
 LEGEND_COLUMNS = 3
 
 #: The attention roles, the fill and the text-and-stroke one. `accent-is-attention` reserves both
@@ -142,8 +143,8 @@ def multi_series(
     and it is drawn by simulating the palette and then drawing the ordinary chart, so there is no
     second drawing path that could show something the ordinary one would not.
 
-    ``tight_panel`` drops the type to the dense sizes, and is the exception `type-scale` names
-    rather than a preference: take it when the pane is too small for body type, and not otherwise.
+    ``tight_panel`` drops the type to the floor `type-scale` holds everything to, and is a choice
+    for a pane too small for body type rather than a preference: take it then, and not otherwise.
     """
     if not series:
         raise FigureError("a chart needs at least one series")
@@ -186,12 +187,18 @@ def multi_series(
         # one at all: it is the redundancy made visible rather than a colour key. It sits below the
         # plot rather than inside it, because at body size a legend large enough to read is large
         # enough to land on the data, and "best" has nowhere good to put it.
-        axes.legend(
-            frameon=False,
-            loc="upper center",
-            bbox_to_anchor=(0.5, -0.16),
-            ncols=min(len(series), LEGEND_COLUMNS),
-        )
+        #
+        # Three to a row where three fit, and fewer where they do not: a legend run off the edge of
+        # a narrow pane has lost the entries that say which dash is which.
+        for columns in range(min(len(series), LEGEND_COLUMNS), 0, -1):
+            legend = axes.legend(
+                frameon=False,
+                loc="upper center",
+                bbox_to_anchor=(0.5, -0.16),
+                ncols=columns,
+            )
+            if legend.get_window_extent().width <= axes.figure.bbox.width:
+                break
 
     return axes.figure
 
@@ -218,7 +225,7 @@ def two_group(
     Every bar is labelled with its own value where it stands, so the chart needs no legend and no
     value axis: with the numbers on the bars, both would be ink spent on nothing (`figure-noise`).
 
-    ``tight_panel`` is `type-scale`'s marked exception, as in ``multi_series``.
+    ``tight_panel`` sets the type at the floor, as in ``multi_series``.
     """
     if not comparison or not highlight:
         raise FigureError(
@@ -292,6 +299,25 @@ def save(figure: Figure, path: str | Path, *, scale: int = DEFAULT_SCALE) -> Pat
             metadata={"Software": None},
         )
     return path
+
+
+def smallest_type_px(figure: Figure, *, lands_at_px: float | None = None) -> float | None:
+    """The smallest piece of type the figure draws, in canvas px, at the width it lands on a slide.
+
+    `type-scale` holds a figure's text to the floor *where it lands*, not where it was drawn: a
+    chart drawn at 960 and shown in a 480 pane has every label at half the size it was set in.
+    ``lands_at_px`` is that width on the canvas, and defaults to the width the figure was drawn at,
+    which is what the archetypes are asked for. Axis labels, tick labels, the legend and the bar
+    labels are all measured; a figure with no visible type has no smallest size.
+    """
+    drawn_px = figure.get_figwidth() * CSS_PX_PER_INCH
+    scale = 1.0 if lands_at_px is None else lands_at_px / drawn_px
+    sizes = [
+        _px(text.get_fontsize()) * scale
+        for text in figure.findobj(Text)
+        if text.get_visible() and text.get_text().strip()
+    ]
+    return min(sizes, default=None)
 
 
 # ── roles ─────────────────────────────────────────────────────────────────────
@@ -402,27 +428,32 @@ def _pt(px: float) -> float:
     return px * 72 / CSS_PX_PER_INCH
 
 
+def _px(pt: float) -> float:
+    """A point in canvas pixels: ``_pt`` the other way round."""
+    return pt * CSS_PX_PER_INCH / 72
+
+
 def _type_style(tight_panel: bool) -> dict[str, object]:
     """The canon's type, in the units matplotlib sets it in.
 
-    A figure's type defaults to the **body** size, not to the dense one. `type-scale` puts body at
-    the floor and marks the two dense sizes as exceptions for tight figure panels, so a chart that
-    reached for them by default would put every label it has below the floor — in the one place a
-    reader is squinting hardest. ``tight_panel`` is that exception, taken deliberately.
+    A figure's type defaults to the **body** size, not to the floor. `type-scale` sets evidence at
+    body size and holds everything else at or above the floor, so a chart that went to the floor by
+    default would set its whole message in the smallest type there is. ``tight_panel`` takes the
+    floor deliberately, for a pane too small for body type; nothing here goes under it.
 
     Registering the bundled family here rather than at import is what makes the typeface guarantee
     hold for a caller who never thought about fonts: you cannot draw one of these without it.
     """
     register()
-    label, tick = (DENSE_PX, DENSE_XS_PX) if tight_panel else (BODY_PX, BODY_PX)
+    size = _pt(FLOOR_PX if tight_panel else BODY_PX)
     return {
         "font.family": FONT_TEXT,
-        "font.size": _pt(label),
-        "axes.titlesize": _pt(label),
-        "axes.labelsize": _pt(label),
-        "xtick.labelsize": _pt(tick),
-        "ytick.labelsize": _pt(tick),
-        "legend.fontsize": _pt(tick),
+        "font.size": size,
+        "axes.titlesize": size,
+        "axes.labelsize": size,
+        "xtick.labelsize": size,
+        "ytick.labelsize": size,
+        "legend.fontsize": size,
     }
 
 

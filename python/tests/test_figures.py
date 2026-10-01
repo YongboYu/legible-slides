@@ -23,15 +23,17 @@ from legible.cvd import GRAYSCALE, hex_to_rgb1, rgb1_to_hex, simulate
 from legible.figures import (
     CSS_PX_PER_INCH,
     DASHES,
+    LEGEND_COLUMNS,
     MARKERS,
     FigureError,
     Series,
     multi_series,
     save,
+    smallest_type_px,
     two_group,
 )
 from legible.fonts import BUNDLE
-from legible.method import BODY_PX, DENSE_PX, DENSE_XS_PX, FONT_TEXT
+from legible.method import BODY_PX, FLOOR_PX, FONT_TEXT
 
 FIVE_SERIES = [
     Series("Chronos", [1.0, 2.0, 3.0]),
@@ -303,20 +305,45 @@ def test_every_piece_of_type_in_the_figure_is_the_family_the_canon_names(palette
 
 
 def test_a_figure_is_set_at_the_body_size_by_default(palette):
-    """`type-scale` puts body at the floor and marks the dense sizes as exceptions for tight
-    panels. A chart that took the exception by default would put every label below the floor."""
+    """`type-scale` sets evidence at the body size and holds everything else to the floor. A chart
+    that went to the floor by default would set its whole message in the smallest type there is."""
     figure = multi_series(palette, FIVE_SERIES, x_label="window", y_label="MAE")
 
     assert {text.get_fontsize() for text in type_in(figure)} == {points(BODY_PX)}
 
 
-def test_a_tight_panel_takes_the_exception_the_canon_marks_and_nothing_between(palette):
+def test_a_tight_panel_sets_its_type_at_the_floor_and_nothing_under_it(palette):
     figure = multi_series(palette, FIVE_SERIES, x_label="window", y_label="MAE", tight_panel=True)
 
-    assert {text.get_fontsize() for text in type_in(figure)} <= {
-        points(DENSE_PX),
-        points(DENSE_XS_PX),
-    }
+    assert {text.get_fontsize() for text in type_in(figure)} == {points(FLOOR_PX)}
+
+
+@pytest.mark.parametrize("tight_panel", [False, True])
+def test_every_label_holds_the_floor_where_the_figure_lands(palette, tight_panel):
+    """Axis, ticks, legend and bar labels, measured in canvas px at the size the figure is shown,
+    which is the size it was asked for: nothing in it is under the floor there."""
+    charts = [
+        multi_series(palette, FIVE_SERIES, x_label="w", y_label="MAE", tight_panel=tight_panel),
+        two_group(palette, {"ARIMA": 0.51}, {"Ours": 0.29}, tight_panel=tight_panel),
+    ]
+
+    assert all(smallest_type_px(figure) >= FLOOR_PX for figure in charts)
+
+
+def test_a_figure_shown_smaller_than_it_was_drawn_is_measured_smaller(palette):
+    """A figure squeezed into a narrower pane shrinks every label in it, and the measure says so
+    rather than reporting the size the figure was drawn at."""
+    figure = multi_series(palette, FIVE_SERIES, size_px=(800, 450), tight_panel=True)
+
+    assert smallest_type_px(figure, lands_at_px=400) == pytest.approx(FLOOR_PX / 2)
+
+
+def test_a_figure_with_no_type_has_no_smallest_size(palette):
+    figure = multi_series(palette, FIVE_SERIES)
+    for text in figure.findobj(lambda artist: hasattr(artist, "get_fontsize")):
+        text.set_visible(False)
+
+    assert smallest_type_px(figure) is None
 
 
 def test_the_two_group_chart_is_set_at_the_body_size_too(palette):
@@ -375,3 +402,23 @@ def test_saving_creates_the_directory_it_is_pointed_at(palette, tmp_path):
     written = save(multi_series(palette, FIVE_SERIES), tmp_path / "public" / "figures" / "f.png")
 
     assert written.is_file()
+
+
+def test_the_legend_wraps_to_fewer_columns_rather_than_run_off_the_figure(palette):
+    """At the floor, five long labels three to a row are wider than half a slide. A legend cut off
+    at the edge has lost the entries that say which dash is which, so it takes another row."""
+    series = [
+        Series("floor (ΔE 15)", [1.0, 1.0], role="reference"),
+        Series("normal", [3.0, 3.0], role="muted"),
+        *(Series(f"{name}anomaly", [1.0, 2.0]) for name in ("deuter", "prot", "trit")),
+    ]
+    figure = multi_series(palette, series, size_px=(540, 350), tight_panel=True)
+
+    legend = figure.axes[0].get_legend().get_window_extent()
+    assert 0 <= legend.x0 and legend.x1 <= figure.bbox.width
+
+
+def test_a_legend_that_fits_keeps_three_to_a_row(palette):
+    figure = multi_series(palette, FIVE_SERIES)
+
+    assert figure.axes[0].get_legend()._ncols == LEGEND_COLUMNS

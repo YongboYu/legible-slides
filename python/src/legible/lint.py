@@ -2,8 +2,9 @@
 
 A rule the canon marks **decided by script** is a rule nobody should have to remember, so this
 module decides them: the bullet and word ceilings, em-dashes in a headline, the inflated-register
-wordlist, the sentence-opener share, whether the footer's section map still fits, and whether the
-deck's palette clears the separation floor.
+wordlist, the sentence-opener share, whether the footer's section map still fits, a font size a
+slide sets inline or below the type floor, and whether the deck's palette clears the separation
+floor.
 ``docs/agent-skill-contract.md`` §4a fixes the set; the canon fixes every number in it, and this
 module quotes those numbers through ``legible.method`` rather than keeping a second copy.
 
@@ -34,6 +35,7 @@ from legible.deck import Slide, read_deck
 from legible.method import (
     BULLETS_PER_SLIDE,
     EM_DASHES_PER_HEADLINE,
+    FLOOR_PX,
     INFLATED_REGISTER_SEVERITY,
     INFLATED_REGISTER_WORDS,
     OPENER_SHARE_MAX,
@@ -68,6 +70,23 @@ _WORD = re.compile(r"[^\W_]", re.UNICODE)
 
 #: The end of a sentence, for counting openers over a passage.
 _SENTENCE_END = re.compile(r"(?<=[.!?])[\"')\]]*\s+")
+
+#: A size in a style, split into its number and its unit.
+_CSS_SIZE = re.compile(
+    r"^font-size:\s*(?P<number>\d*\.?\d+)\s*(?P<unit>px|pt|rem)\b", re.IGNORECASE
+)
+
+#: A UnoCSS arbitrary size in px, which is an inline px size spelled as a class.
+_ARBITRARY_PX = re.compile(r"^text-\[(?P<number>\d*\.?\d+)px\]$")
+
+#: How many canvas px one of each absolute unit is. A rem is the browser's 16 px root: Slidev scales
+#: the canvas as a whole rather than the root size, so a rem is 16 of the canvas' own px.
+_PX_PER = {"px": 1.0, "pt": 96 / 72, "rem": 16.0}
+
+#: What UnoCSS's named text sizes set, in px, at that same root. Only the steps the floor can catch
+#: are needed, and they are UnoCSS's numbers rather than the method's: the canon fixes the floor,
+#: and these are what a class resolves to under it.
+_TEXT_CLASS_PX = {"text-xs": 12.0, "text-sm": 14.0, "text-base": 16.0, "text-lg": 18.0}
 
 
 class Finding(NamedTuple):
@@ -164,6 +183,36 @@ def _slide_findings(slide: Slide) -> Iterator[Finding]:
             slide,
             f"{shared} of {total} sentences open with {opener!r}",
         )
+
+    for size in slide.font_sizes:
+        problem = _off_scale(size)
+        if problem:
+            yield _finding("type-scale", slide, f"{size!r}: {problem}")
+
+
+def _off_scale(size: str) -> str | None:
+    """What is wrong with one size a slide sets, or ``None`` if nothing is.
+
+    An inline px size is wrong whatever it says, because the floor can only be checked on slides
+    that size text through the template's classes. A size below the floor is wrong in any unit that
+    resolves to canvas px. A relative size (``em``, ``%``, a custom property) resolves only against
+    the page, so it is the theme's scale that sizes it and nothing here can say it is too small.
+    """
+    css, arbitrary = _CSS_SIZE.match(size), _ARBITRARY_PX.match(size)
+    if css:
+        unit = css.group("unit").lower()
+        px, inline = float(css.group("number")) * _PX_PER[unit], unit == "px"
+    elif arbitrary:
+        px, inline = float(arbitrary.group("number")), True
+    elif size in _TEXT_CLASS_PX:
+        px, inline = _TEXT_CLASS_PX[size], False
+    else:
+        return None
+
+    problems = ["inline px size; size text through the template's classes"] if inline else []
+    if px < FLOOR_PX:
+        problems.append(f"{px:.3g} px, below the {FLOOR_PX} px floor")
+    return ", and ".join(problems) or None
 
 
 def _section_findings(slides: Sequence[Slide]) -> Iterator[Finding]:

@@ -99,8 +99,8 @@ def separation_chart(palette, condition: str) -> Figure:
         y_label="ΔE, CAM02-UCS",
         condition=condition,
         size_px=PANE_PX,
-        # `type-scale`'s marked exception, taken deliberately: each of these lands in one half of a
-        # two-column slide, too narrow for body type to fit an axis and a five-entry legend as well.
+        # At the floor rather than the body size, deliberately: each of these lands in one half of
+        # a two-column slide, too narrow for body type to fit an axis and a five-entry legend too.
         tight_panel=True,
     )
 

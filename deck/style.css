@@ -92,12 +92,12 @@
   font-size: 0.85em;
 }
 
-/* What the mock is, in the words the theme's own figure captions use: the same role, the same size,
- * and the same reason for the dense exception — a caption labels the evidence, it is not the
- * evidence. The mock is not a `Figure`, because it is markup rather than an image. */
+/* What the mock is, in the words the theme's own figure captions use: the same role, and the same
+ * size, the floor — a caption labels the evidence, it is not the evidence. The mock is not a
+ * `Figure`, because it is markup rather than an image. */
 .demo-caption {
   color: var(--neutral);
-  font-size: var(--dense-px);
+  font-size: var(--floor-px);
   line-height: 1.4;
 }
 
@@ -117,19 +117,20 @@
   gap: 6px;
 }
 
-/* dense: a label on the sample, not the sample. The same exception the theme takes for a caption. */
+/* At the floor: a label on the sample, not the sample, and the same size the theme sets a caption. */
 .demo-type-label {
   color: var(--neutral);
-  font-size: var(--dense-xs-px);
+  font-size: var(--floor-px);
   font-variant-numeric: tabular-nums;
 }
 
-/* Roughly half the floor, which is where a placeholder that shrinks text on overflow ends up. It is
- * the one place in this deck type is set below the floor, and the point is that you cannot read it. */
+/* Roughly half the body size, which is where a placeholder that shrinks text on overflow ends up. It
+ * is the one place in this deck type is set below the floor, and the point is that you cannot read
+ * it. The stock-template mock above is the other small thing here, and it is a picture of a slide. */
 .demo-type-shrunk {
   font-size: calc(var(--body-px) * 0.52);
 }
 
-.demo-type-floor {
+.demo-type-body {
   font-size: var(--body-px);
 }

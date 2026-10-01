@@ -13,8 +13,8 @@
 Most presentation templates give you *files* — a colour scheme, some layouts, a font pairing. They
 leave the hard part to you: deciding what any given slide is actually **for**.
 
-They also quietly fail two audiences. The person in the back row of a lecture hall, who cannot read
-20px body text off a projector. And the roughly 1 in 12 men and 1 in 200 women with a colour vision
+They also quietly fail two audiences. The person in the back row, who cannot read the 14px caption
+a template shrank to fit. And the roughly 1 in 12 men and 1 in 200 women with a colour vision
 deficiency, for whom the average "nice palette" collapses into indistinguishable mud the moment it
 becomes a five-line chart.
 
@@ -29,9 +29,9 @@ Three things, in order of how much they matter:
    (Alley & Neeley) and the cognitive-load research underneath it. They live in
    [`docs/method.md`](docs/method.md) — the canon, and the only place any of them is stated. The
    ones a script can settle are settled by one (`legible lint`), reproducibly and in CI.
-2. **A verified accessibility floor.** A type scale tuned for real projection distance, and a
-   colour-vision-deficiency validator you can run against *your* palette — not just a promise that
-   ours passes.
+2. **A verified accessibility floor.** A type scale stated for the rooms it suits, with a floor no
+   text goes under, and a colour-vision-deficiency validator you can run against *your* palette —
+   not just a promise that ours passes.
 3. **A Slidev theme** that carries the method, and a skill so a coding agent can build to this
    standard on your behalf.
 

@@ -11,6 +11,7 @@ from pathlib import Path
 import pytest
 
 from legible.lint import lint
+from legible.method import FLOOR_PX
 
 #: The fixture decks: one that breaks nothing, and one per rule, each named for the rule it breaks
 #: so the deck and what it is expected to produce cannot drift apart.
@@ -398,3 +399,92 @@ def test_backup_sections_are_outside_the_map(write_deck):
     )
 
     assert report.findings == ()
+
+
+# ── type-scale ────────────────────────────────────────────────────────────────
+
+
+def _sized(body: str) -> str:
+    return f"# Retrieval carries the long tail at a tenth of the cost\n\n{body}\n"
+
+
+def messages(report):
+    return [finding.message for finding in report.findings]
+
+
+@pytest.mark.parametrize(
+    "body",
+    [
+        '<p style="font-size: 20px">Source: three runs.</p>',
+        '<p style="color: red; font-size:24px;">Source: three runs.</p>',
+        "<style>\n.source { font-size: 30px; }\n</style>",
+        "<p :style=\"{ fontSize: '20px' }\">Source: three runs.</p>",
+        '<p class="text-[20px]">Source: three runs.</p>',
+    ],
+)
+def test_an_inline_px_size_is_a_finding_even_above_the_floor(write_deck, body):
+    """Slides size text through the template's classes, so the floor can be checked: a px size
+    written into a slide is the hole the floor would leak through, whatever it says today."""
+    report = lint(write_deck(_sized(body)))
+
+    assert rules(report) == ["type-scale"]
+    assert "inline" in messages(report)[0]
+    assert not report.passed
+
+
+@pytest.mark.parametrize(
+    ("body", "px"),
+    [
+        ('<p style="font-size: 0.75rem">Source.</p>', "12"),
+        ('<p style="font-size: 10pt">Source.</p>', "13.3"),
+        ('<p class="text-xs">Source.</p>', "12"),
+        ('<p class="mt-2 text-sm">Source.</p>', "14"),
+        ('<p class="text-base">Source.</p>', "16"),
+    ],
+)
+def test_a_size_below_the_floor_is_a_finding(write_deck, body, px):
+    report = lint(write_deck(_sized(body)))
+
+    assert rules(report) == ["type-scale"]
+    assert f"{px} px, below the {FLOOR_PX} px floor" in messages(report)[0]
+
+
+def test_an_inline_px_size_below_the_floor_says_both(write_deck):
+    report = lint(write_deck(_sized('<span style="font-size: 12px">small</span>')))
+
+    assert len(report.findings) == 1
+    assert "inline" in messages(report)[0]
+    assert f"below the {FLOOR_PX} px floor" in messages(report)[0]
+
+
+@pytest.mark.parametrize(
+    "body",
+    [
+        '<p class="text-lg">At the floor.</p>',
+        '<p class="text-xl text-red-500">Above it.</p>',
+        '<p style="font-size: 1.25rem">Above it, in rem.</p>',
+        '<p style="font-size: 0.8em">Relative to its parent, which the theme sizes.</p>',
+        "```css\n.caption { font-size: 12px; }\n```",
+        "Prose that mentions font-size: 12px is not markup.",
+    ],
+)
+def test_sizes_on_or_above_the_floor_and_sizes_that_are_not_styles_pass(write_deck, body):
+    """A size the template's own scale resolves, a size a reader cannot resolve without the page,
+    and a size written as an example in a code block or a sentence are none of them findings."""
+    report = lint(write_deck(_sized(body)))
+
+    assert report.findings == ()
+
+
+def test_a_size_in_the_speaker_notes_is_not_on_the_slide(write_deck):
+    notes = '<!--\nSay it at <span style="font-size: 8px">8px</span>.\n-->'
+    report = lint(write_deck(_sized(notes)))
+
+    assert report.findings == ()
+
+
+def test_the_flagship_deck_holds_the_floor():
+    report = lint(Path(__file__).resolve().parents[2] / "deck" / "slides.md")
+
+    assert [finding for finding in report.findings if finding.rule == "type-scale"] == []
+    assert report.passed

@@ -144,9 +144,10 @@ FAIL  deck/slides.md — 2 errors, 1 warning
 ```
 
 Findings are grouped by slide and named by the rule they enforce, so a finding is something you can
-look up in [`docs/method.md`](../docs/method.md) and disagree with. Five rules are decided per
-slide — `bullet-ceiling`, `word-ceiling`, `no-em-dash-headline`, `no-inflated-register` and
-`opener-variety` — `section-locator` over the sections the deck declares, reported on the slide
+look up in [`docs/method.md`](../docs/method.md) and disagree with. Six rules are decided per
+slide — `bullet-ceiling`, `word-ceiling`, `no-em-dash-headline`, `no-inflated-register`,
+`opener-variety` and `type-scale`, which flags a font size the slide's markup sets inline in px or
+below the floor — `section-locator` over the sections the deck declares, reported on the slide
 that declares the one at fault, and `separation-floor` per theme, for each `--theme` named. A deck
 does not record which palette it wears, so naming none checks the slides alone.
 
@@ -294,12 +295,19 @@ Sizes are in the canon's **canvas pixels** — the units a slide layout is writt
 asked for at 640 wide occupies 640 of them when it lands. `save` writes PNG at twice that by
 default, for the projector.
 
-Type is set at the **body** size, which `type-scale` puts at the floor. The two dense sizes it
-marks as exceptions for tight figure panels are reachable as exactly that, and not as a
-preference:
+Type is set at the **body** size. A pane too small for body type can take the floor
+`type-scale` holds every other piece of text to, and nothing goes under it:
 
 ```python
 multi_series(palette, series, size_px=(420, 300), tight_panel=True)
+```
+
+The floor holds where the figure *lands*, not where it was drawn: a chart drawn at 960 and shown
+in a 480 pane has every label at half its size. Ask for the size of the pane, and check it with
+`smallest_type_px`:
+
+```python
+smallest_type_px(figure, lands_at_px=420)   # the smallest label, in canvas px, at that width
 ```
 
 ```python

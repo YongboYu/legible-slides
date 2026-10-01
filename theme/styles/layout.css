@@ -19,11 +19,10 @@
   --headline-px: 37px;
   --body-px: 23px;
 
-  /* The canon's two dense sizes. They are marked exceptions for tight panels — a figure caption, a
-   * citation, a source line — and never a knob for fitting more onto a slide. Every use of them in
-   * this file names which exception it is. */
-  --dense-px: 18px;
-  --dense-xs-px: 16px;
+  /* The floor. Every other piece of text the theme sets sits on it — a caption, a citation, a
+   * source line, the locator, the page number — and nothing sits below it. It is not a knob for
+   * fitting more onto a slide: a slide that only fits below the floor is carrying too much. */
+  --floor-px: 18px;
 
   /* `headline-shape`: the ceiling is what the room can read in a glance, in rendered lines. */
   --headline-lines-max: 2;
@@ -67,8 +66,8 @@
   --slidev-slide-container-background: var(--surface-alt);
 
   /* Code is evidence and is read from the back row like everything else, so it sits at body size
-   * rather than at Slidev's 12px default. Not a dense exception: a code block is not a tight panel
-   * by virtue of being code, and if it does not fit at body size it is too much code for a slide. */
+   * rather than at Slidev's 12px default. Not at the floor: a code block is not small print by
+   * virtue of being code, and if it does not fit at body size it is too much code for a slide. */
   --slidev-code-background: var(--surface-alt);
   --slidev-code-foreground: var(--ink);
   --slidev-code-font-size: var(--body-px);
@@ -176,7 +175,7 @@ html.dark {
   font-size: var(--body-px);
 }
 
-/* At body size, like the rest of the evidence. A table that only fits at a dense size is a table
+/* At body size, like the rest of the evidence. A table that only fits at the floor is a table
  * with too much in it for one slide, and shrinking it is the knob `type-scale` refuses. It carries
  * the same bottom margin a paragraph does, so evidence continuing under it is separated from its
  * last row rather than sitting on the row's rule (`layout-discipline`). */
@@ -203,10 +202,9 @@ html.dark {
  * type scale is written in — the chrome scales with the slide, and lands on an exported page.
  *
  * Both halves share the footer, on one baseline: the locator bottom left, the page number bottom
- * right. They are set at the smallest size the canon carries, in `--neutral` and never the softest
- * neutral (`decorative-neutral-never-text`). They are orientation, not evidence: the back-row floor
- * is about the material the audience has to read, and chrome that competes with the claim is noise
- * (`coherence`). */
+ * right. They are set at the floor, in `--neutral` and never the softest neutral
+ * (`decorative-neutral-never-text`). They are orientation, not evidence, so they sit no higher than
+ * the floor: chrome that competes with the claim is noise (`coherence`). */
 
 .legible-chrome {
   position: absolute;
@@ -221,7 +219,7 @@ html.dark {
   left: var(--edge-x);
   color: var(--neutral);
   font-family: 'JetBrains Mono', ui-monospace, monospace;
-  font-size: var(--dense-xs-px);
+  font-size: var(--floor-px);
   font-weight: 400;
   line-height: 1;
   letter-spacing: 0.12em;
@@ -256,7 +254,7 @@ html.dark {
   right: var(--edge-x);
   bottom: var(--edge-bottom);
   color: var(--neutral);
-  font-size: var(--dense-xs-px);
+  font-size: var(--floor-px);
   line-height: 1;
   font-variant-numeric: tabular-nums;
 }
@@ -419,10 +417,10 @@ html.dark {
   display: block;
   margin-top: 2px;
   color: var(--neutral);
-  /* dense: a source line is the reference's fine print, not its content. `brand-strong` is
+  /* At the floor: a source line is the reference's fine print, not its content. `brand-strong` is
    * deliberately not used here — at this size it would fail contrast
    * (`decorative-neutral-never-text`). */
-  font-size: var(--dense-px);
+  font-size: var(--floor-px);
   text-decoration: none;
 }
 
@@ -499,19 +497,21 @@ html.dark {
 
 .legible-figure figcaption {
   color: var(--neutral);
-  /* dense: a caption labels the evidence, it is not the evidence. */
-  font-size: var(--dense-px);
+  /* At the floor: a caption labels the evidence, it is not the evidence. */
+  font-size: var(--floor-px);
   line-height: 1.4;
 }
 
+/* Raised, but at the floor rather than shrunk under it as a `sup` is by default: the marker is
+ * what points the room at the source. */
 .legible-figure figcaption sup {
   margin-left: 2px;
+  font-size: var(--floor-px);
 }
 
 /* ── components: Footnote / Footnotes ─────────────────────────────────────────────────────────
  * Manual numbering, paired with the `references` layout. Sits on the bottom edge of the evidence
- * pane, under a hairline, at the smallest size the canon carries — dense: a citation is
- * attribution, and the room is not asked to read it from the back. */
+ * pane, under a hairline, at the floor: a citation is attribution, not evidence. */
 
 .legible-footnotes {
   margin-top: auto;
@@ -528,11 +528,17 @@ html.dark {
   display: flex;
   gap: 6px;
   color: var(--neutral);
-  font-size: var(--dense-xs-px);
+  font-size: var(--floor-px);
   line-height: 1.35;
 }
 
-/* Markers line up under each other, so a column of them reads as a list. */
+/* Markers line up under each other, so a column of them reads as a list. On the baseline and at
+ * the footnote's own size rather than raised and shrunk: a `sup` would set the number under the
+ * floor, and here it is the list's index, not a marker in running text. */
 .legible-footnote-number {
+  position: static;
+  font-size: var(--floor-px);
+  line-height: inherit;
+  vertical-align: baseline;
   font-variant-numeric: tabular-nums;
 }

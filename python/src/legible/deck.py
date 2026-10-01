@@ -13,9 +13,9 @@ this. The deck's headmatter falls out of the same rule, being the frontmatter of
 not started yet.
 
 What comes back per slide is what the canon's script-decided rules ask about — the headline, the
-bullets, the prose and the speaker notes, and from the frontmatter only the section the slide
-declares — and nothing else. Layouts, components and code blocks
-are evidence: the method has rules about them, but none a script decides.
+bullets, the prose and the speaker notes, every font size the slide's own markup sets, and from
+the frontmatter only the section the slide declares — and nothing else. Layouts, components and
+code blocks are evidence: the method has rules about them, but none a script decides.
 """
 
 from __future__ import annotations
@@ -44,6 +44,18 @@ _IMAGE = re.compile(r"!\[[^\]]*\]\([^)]*\)")
 _LINK = re.compile(r"\[(?P<text>[^\]]*)\]\([^)]*\)")
 _TAG = re.compile(r"<[^>]+>")
 _EMPHASIS = re.compile(r"[*`~]+")
+
+#: Where a slide's markup can set a size: a style attribute (Vue's bound one included), a style
+#: block, and a class list. A size anywhere else — a sentence about CSS, a code block — is not one.
+_STYLE_ATTRIBUTE = re.compile(r"\bstyle\s*=\s*(?:\"(?P<double>[^\"]*)\"|'(?P<single>[^']*)')")
+_STYLE_BLOCK = re.compile(r"<style\b[^>]*>(?P<css>.*?)</style>", re.DOTALL | re.IGNORECASE)
+_CLASS_ATTRIBUTE = re.compile(r"\bclass\s*=\s*(?:\"(?P<double>[^\"]*)\"|'(?P<single>[^']*)')")
+
+#: A font size inside a style: the CSS property, or the camel-cased key a Vue style object uses.
+_FONT_SIZE = re.compile(r"font-?size['\"]?\s*:\s*['\"]?(?P<value>[^;'\",}]+)", re.IGNORECASE)
+
+#: A UnoCSS class that sets a font size: a named step of its scale, or an arbitrary value.
+_TEXT_SIZE_CLASS = re.compile(r"^text-(?:xs|sm|base|lg|\d?xl|\[[^\]]+\])$")
 
 #: A top-level frontmatter key the rules read, and its value up to a trailing comment. Read by line
 #: rather than as YAML, for the reason the module gives for the split: Slidev does not require the
@@ -77,6 +89,9 @@ class Slide:
     section: str | None = None
     #: Whether the section this slide declares is a backup, held for questions after the talk.
     backup: bool = False
+    #: Every font size the slide's markup sets, as written: ``font-size: 14px`` for a style,
+    #: ``text-sm`` for a class. Which of them break the floor is the linter's call.
+    font_sizes: tuple[str, ...] = ()
 
 
 def read_deck(path: str | Path) -> tuple[Slide, ...]:
@@ -193,7 +208,28 @@ def _slide(number: int, frontmatter: Sequence[str], lines: Sequence[str]) -> Sli
         notes=notes,
         section=keys.get("section"),
         backup=keys.get("backup") in _TRUE,
+        font_sizes=_font_sizes("\n".join(body)),
     )
+
+
+def _font_sizes(body: str) -> tuple[str, ...]:
+    """Every size the slide's markup sets, in the order it sets them."""
+    found: list[tuple[int, str]] = []
+    for attribute in _STYLE_ATTRIBUTE.finditer(body):
+        style = attribute.group("double") or attribute.group("single") or ""
+        found.extend(
+            (attribute.start(), f"font-size: {size.group('value').strip()}")
+            for size in _FONT_SIZE.finditer(style)
+        )
+    for block in _STYLE_BLOCK.finditer(body):
+        found.extend(
+            (block.start(), f"font-size: {size.group('value').strip()}")
+            for size in _FONT_SIZE.finditer(block.group("css"))
+        )
+    for attribute in _CLASS_ATTRIBUTE.finditer(body):
+        classes = (attribute.group("double") or attribute.group("single") or "").split()
+        found.extend((attribute.start(), name) for name in classes if _TEXT_SIZE_CLASS.match(name))
+    return tuple(size for _, size in sorted(found, key=lambda at: at[0]))
 
 
 def _keys(frontmatter: Sequence[str]) -> dict[str, str]:

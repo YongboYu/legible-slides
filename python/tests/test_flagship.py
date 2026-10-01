@@ -2,16 +2,17 @@
 
 The deck teaches the method, so it does what no other file in this repo may: it writes the method's
 numbers down, on screen, in words a room can read. `type-scale`'s arithmetic *is* beat 9's evidence,
-and the achieved minima *are* beat 11's. That is sanctioned — the canon's own outline asks for "the
-projection arithmetic on screen" — but it leaves the exposure ``test_theme.py`` was written for: a
-hand-typed number is exactly where a copy drifts in silence, and a flagship quoting a threshold the
-canon no longer carries is worse than a flagship quoting none.
+and the achieved minima *are* beat 11's. That is sanctioned — the canon's own outline asks for the
+body size "worked through to the room it reads in" — but it leaves the exposure ``test_theme.py``
+was written for: a hand-typed number is exactly where a copy drifts in silence, and a flagship
+quoting a threshold the canon no longer carries is worse than a flagship quoting none.
 
 So the copies are held to their originals, in both directions. Change a number in ``docs/method.md``
 or a colour in ``themes/*.json`` without changing the slide that states it, or edit the slide's own
 copy of one, and these fail naming which.
 """
 
+import importlib.util
 import re
 from pathlib import Path
 
@@ -19,7 +20,15 @@ import pytest
 
 from legible import load_palette, validate
 from legible.deck import read_deck
-from legible.method import DELTA_E_FLOOR, rule_thresholds
+from legible.figures import smallest_type_px
+from legible.method import (
+    BODY_PX,
+    BODY_REACH_IMAGE_HEIGHTS,
+    CANVAS_HEIGHT_PX,
+    DELTA_E_FLOOR,
+    FLOOR_PX,
+    rule_thresholds,
+)
 
 DECK = Path(__file__).resolve().parents[2] / "deck" / "slides.md"
 
@@ -51,33 +60,38 @@ def test_the_deck_carries_every_beat_and_its_sources():
 def test_beat_nine_is_set_in_the_canon_s_type_scale(deck):
     """The two sizes the slide names as fixed are the canon's body size and its logical canvas."""
     type_scale = rule_thresholds("type-scale")
-    stated = re.search(r"fixed at (\d+) px on this deck's (\d+) px canvas", deck)
+    stated = re.search(r"fixed at (\d+) px on this deck's (\d+) × (\d+) canvas", deck)
     assert stated, "beat 9 no longer states the body size and the canvas it is written against"
 
     assert stated.group(1) == type_scale["body-px"]
     assert stated.group(2) == type_scale["canvas-width-px"]
+    assert int(stated.group(3)) == CANVAS_HEIGHT_PX
 
 
 def test_beat_nine_s_worked_example_is_arithmetic_that_holds(deck):
     """`equation-worked-example` asks for real numbers pushed through the formula, so the numbers
-    have to come out. Truncated rather than rounded, which is the conservative direction: the claim
-    is what the back row can read, and promising a pixel the projector does not draw is the one
-    error worth ruling out."""
-    worked = re.search(r"(\d+) × (\d+) ÷ (\d+) = (\d+) px", deck)
-    assert worked, "beat 9 no longer works the projection through on screen"
-    body, screen, canvas, projected = (int(group) for group in worked.groups())
+    have to come out: the body's share of the image height, and how far that share reads in a room
+    with a screen of a given height. The reach is the canon's, not the slide's."""
+    share = re.search(r"(\d+) ÷ (\d+) = ([\d.]+)%", deck)
+    reach = re.search(r"(\d+) × ([\d.]+) = (\d+) m", deck)
+    assert share, "beat 9 no longer works the body's share of the image height on screen"
+    assert reach, "beat 9 no longer works through how far the body size reads"
 
-    assert body == int(rule_thresholds("type-scale")["body-px"])
-    assert projected == body * screen // canvas
+    body, height, percent = int(share.group(1)), int(share.group(2)), float(share.group(3))
+    assert (body, height) == (BODY_PX, CANVAS_HEIGHT_PX)
+    assert percent == round(100 * body / height, 1)
+
+    screen, heights, metres = float(reach.group(1)), float(reach.group(2)), float(reach.group(3))
+    assert heights == BODY_REACH_IMAGE_HEIGHTS
+    assert metres == screen * heights
 
 
-def test_beat_nine_names_the_canon_s_two_dense_exceptions(deck):
-    """Named as exceptions on the slide, and they are the canon's exceptions, in its order."""
-    type_scale = rule_thresholds("type-scale")
-    named = re.search(r"Two smaller sizes exist, (\d+) px and (\d+) px", deck)
-    assert named, "beat 9 no longer names the two sizes the canon marks as exceptions"
+def test_beat_nine_names_the_canon_s_floor(deck):
+    """One size under the body, and it is a floor rather than an exception."""
+    named = re.search(r"Nothing goes below (\d+) px", deck)
+    assert named, "beat 9 no longer names the floor"
 
-    assert named.groups() == (type_scale["dense-px"], type_scale["dense-xs-px"])
+    assert int(named.group(1)) == FLOOR_PX
 
 
 @pytest.mark.parametrize("theme", TABULATED)
@@ -129,3 +143,23 @@ def test_every_section_change_is_signposted_aloud():
 
 def test_the_deck_sets_no_retired_per_slide_locator():
     assert not re.search(r"^locator:", DECK.read_text(encoding="utf-8"), re.MULTILINE)
+
+
+@pytest.fixture(scope="module")
+def deck_figures():
+    """The deck's own ``figures.py``: a script beside the deck rather than a module here."""
+    spec = importlib.util.spec_from_file_location("deck_figures", DECK.parent / "figures.py")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+@pytest.mark.parametrize("condition", ["deuteranomaly", "grayscale"])
+def test_the_deck_s_figures_hold_the_floor_in_the_pane_they_land_in(
+    deck_figures, themes_dir, condition
+):
+    """`type-scale` measures figure text where it lands: here, half a two-column slide."""
+    figure = deck_figures.separation_chart(load_palette(themes_dir / "leuven-blue.json"), condition)
+    width, _ = deck_figures.PANE_PX
+
+    assert smallest_type_px(figure, lands_at_px=width) >= FLOOR_PX

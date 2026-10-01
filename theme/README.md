@@ -163,14 +163,13 @@ the theme's own chrome and miss every word the deck writes. The layouts and comp
 markup and nothing else.
 
 `type-scale` fixes the sizes and the theme quotes them: one headline size, one body size, and the
-canon's two dense sizes for tight panels — a caption, a citation, a source line, a code block. Each
-use of a dense size in `layout.css` names which exception it is. There is no h2–h6 scale on a content
-slide: a subhead is a second message, and a per-context scale is how a deck drifts below the floor one
-slide at a time.
+floor every other piece of text sits on — a caption, a citation, a source line, the locator, the
+page number. Nothing is set below it, and `test_theme.py` holds every size in the theme to those
+three. There is no h2–h6 scale on a content slide: a subhead is a second message, and a per-context
+scale is how a deck drifts below the floor one slide at a time.
 
-The chrome is the one thing set at the smallest size deliberately. The section locator and the page
-number are orientation rather than evidence, and the back-row floor is about the material the audience has to
-read.
+A deck sizes text through these classes and never with an inline px size, so the floor can be
+checked on its slides too: `legible lint` reports both.
 
 `light-ground` is locked in `package.json` (`colorSchema: light`) and again in CSS
 (`color-scheme: light`), because a viewer's OS preference would set this ink-on-white figure set

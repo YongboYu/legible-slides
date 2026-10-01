@@ -92,12 +92,12 @@ layout: two-col-evidence
 
 <div class="demo-type">
   <div class="demo-type-row">
-    <span class="demo-type-label">12 px on the canvas → 18 px projected at 1920</span>
+    <span class="demo-type-label">12 px: shrunk until it fits</span>
     <span class="demo-type-shrunk">Shrink the body type and everything fits.</span>
   </div>
   <div class="demo-type-row">
-    <span class="demo-type-label">23 px on the canvas → 34 px projected at 1920</span>
-    <span class="demo-type-floor">Hold the floor and the back row reads it.</span>
+    <span class="demo-type-label">23 px: the body size, held</span>
+    <span class="demo-type-body">Hold the body size and the back row reads it.</span>
   </div>
 </div>
 
@@ -285,20 +285,23 @@ section: Legibility
 
 <Callout title="The arithmetic, worked">
 
-Body type is fixed at 23 px on this deck's 1280 px canvas. A projector running at 1920 renders it at
-23 × 1920 ÷ 1280 = 34 px, which is what the back row of a lecture hall can read.
+Body type is fixed at 23 px on this deck's 1280 × 720 canvas, and the canvas is scaled to fill the
+screen, so what matters is its share of the image height: 23 ÷ 720 = 3.2%, on any projector. By the
+AV industry's sizing rule that reads to about 4.5 image heights, so a screen 2 m tall carries it
+2 × 4.5 = 9 m: a seminar room or a conference session.
 
 </Callout>
 
-Two smaller sizes exist, 18 px and 16 px, and both are marked exceptions for a figure panel too
-narrow for body type. Neither is a knob for fitting more onto a slide. This paragraph is set at the
-floor, which is how you can check the claim without taking my word for it.
+Nothing goes below 18 px: not a caption, a legend or the page number. A bigger room raises the
+body size rather than lowering anything, and cuts what the slide carries.
 
 <!--
 Signpost: those were the rules about what goes on a slide, and next is whether the room can see it.
 
 Fixed by the method, not by the palette and not per slide. Once type becomes a knob, every slide that
-runs one line long gets solved the same way, and the room pays for it at the back.
+runs one line long gets solved the same way, and the room pays for it at the back. A lecture hall
+sits past where this scale reaches: share the slides by QR code, ask for a second screen. Whatever
+the room, do the distance check in the method before the talk.
 -->
 
 ---
