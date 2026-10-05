@@ -75,8 +75,9 @@ def _parser() -> argparse.ArgumentParser:
         prog="cvd-validate",
         description=(
             "Check a theme's data colours for perceptual separation under every condition the "
-            "`separation-floor` rule names, and its attention pairings for the contrast "
-            "`accent-is-attention` names. Exits 0 on pass, 1 if any pair falls below either, "
+            "`separation-floor` rule names, and its attention and text pairings for the contrast "
+            "`accent-is-attention` and `decorative-neutral-never-text` name. Exits 0 on pass, 1 if "
+            "any pair falls below its floor, "
             "and 2 if a theme could not be read. Grayscale collisions are advisory and never "
             "change the exit code."
         ),
@@ -115,6 +116,11 @@ def _as_text(theme: Path, report: Report) -> str:
     lines.append("")
     lines.append(f"  attention contrast (min {report.contrast_threshold:.{CONTRAST_PRECISION}f})")
     lines.extend(_contrast(pair, pair in report.contrast_failures) for pair in report.contrast)
+    lines.append("")
+    lines.append(f"  text contrast (min {report.text_contrast_threshold:.{CONTRAST_PRECISION}f})")
+    lines.extend(
+        _contrast(pair, pair in report.text_contrast_failures) for pair in report.text_contrast
+    )
 
     if report.failures or report.warnings:
         lines.append("")
@@ -135,7 +141,7 @@ def _measured(condition: str, delta_e: float) -> str:
 
 
 def _contrast(pair: ContrastPair, failed: bool) -> str:
-    """One attention pairing, named by role, with what it achieved — and `fail` where it fell."""
+    """One contrast pairing, named by role, with what it achieved — and `fail` where it fell."""
     tag = "fail" if failed else ""
     return (
         f"  {tag:<{_TAG_WIDTH}}{pair.ratio:>{_DELTA_E_WIDTH}.{CONTRAST_PRECISION}f}"
@@ -158,4 +164,6 @@ def _as_json(report: Report) -> str:
     data["warnings"] = [warning._asdict() for warning in report.warnings]
     data["contrast"] = [pair._asdict() for pair in report.contrast]
     data["contrast_failures"] = [pair._asdict() for pair in report.contrast_failures]
+    data["text_contrast"] = [pair._asdict() for pair in report.text_contrast]
+    data["text_contrast_failures"] = [pair._asdict() for pair in report.text_contrast_failures]
     return json.dumps(data)

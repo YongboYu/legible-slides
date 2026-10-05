@@ -35,7 +35,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import NamedTuple
 
-from legible.deck import Slide, read_deck
+from legible.deck import Slide, font_sizes, read_deck
 from legible.headline import HEADLINE_WIDTH_PX, wrap
 from legible.method import (
     ACRONYM_BUDGET_SEVERITY,
@@ -66,6 +66,7 @@ from legible.method import (
     WORDS_PER_BULLET,
     WORDS_PER_SLIDE,
 )
+from legible.method import rules as canon_rules
 
 __all__ = ["ERROR", "WARNING", "Finding", "LintReport", "Unchecked", "lint"]
 
@@ -172,6 +173,8 @@ def lint(deck: str | Path, themes: Iterable[str | Path] = ()) -> LintReport:
     findings.extend(_conclusion_findings(slides))
     findings.extend(_acronym_findings(slides))
     findings.extend(_pace_findings(slides))
+    findings = _excepted(findings, slides)
+    findings.extend(_component_findings(Path(deck).parent))
     # In slide order, the deck's own findings after them, so a report reads the way the deck runs.
     findings.sort(key=lambda finding: (finding.slide is None, finding.slide or 0))
     palette, unchecked = _palette_findings(themes)
@@ -286,21 +289,96 @@ def _off_scale(size: str) -> str | None:
     resolves to canvas px. A relative size (``em``, ``%``, a custom property) resolves only against
     the page, so it is the theme's scale that sizes it and nothing here can say it is too small.
     """
-    css, arbitrary = _CSS_SIZE.match(size), _ARBITRARY_PX.match(size)
-    if css:
-        unit = css.group("unit").lower()
-        px, inline = float(css.group("number")) * _PX_PER[unit], unit == "px"
-    elif arbitrary:
-        px, inline = float(arbitrary.group("number")), True
-    elif size in _TEXT_CLASS_PX:
-        px, inline = _TEXT_CLASS_PX[size], False
-    else:
+    resolved = _resolve(size)
+    if resolved is None:
         return None
+    px, inline = resolved
 
     problems = ["inline px size; size text through the template's classes"] if inline else []
     if px < FLOOR_PX:
         problems.append(f"{px:.3g} px, below the {FLOOR_PX} px floor")
     return ", and ".join(problems) or None
+
+
+def _excepted(findings: Sequence[Finding], slides: Sequence[Slide]) -> list[Finding]:
+    """The findings with each slide's exceptions applied, and any exception that does not apply.
+
+    An exception is the author departing from one of the method's defaults on one slide, for a
+    reason the notes give. It turns that rule's findings on that slide into warnings, with the
+    reason carried on each, so the review still weighs it; it never hides one. A rule the canon
+    marks as part of the floor is not the author's to depart from, and an exception without a
+    reason is a finding waved away rather than a decision, so neither is applied.
+    """
+    known = {rule.id: rule for rule in canon_rules()}
+    taken: dict[tuple[int, str], str] = {}
+    out: list[Finding] = []
+    for slide in slides:
+        for rule_id, reason in slide.exceptions:
+            if rule_id not in known:
+                problem = f"the exception names `{rule_id}`, which the canon carries no rule as"
+            elif known[rule_id].floor:
+                problem = "the exception is not applied: this rule is part of the floor"
+            elif not reason:
+                problem = "the exception is not applied: it gives no reason"
+            else:
+                taken[(slide.number, rule_id)] = reason
+                continue
+            out.append(Finding(rule_id, WARNING, slide.number, problem))
+
+    for finding in findings:
+        reason = taken.get((finding.slide, finding.rule)) if finding.slide else None
+        if reason is None:
+            out.append(finding)
+        else:
+            out.append(
+                finding._replace(severity=WARNING, message=f"{finding.message}; excepted: {reason}")
+            )
+    return out
+
+
+def _resolve(size: str) -> tuple[float, bool] | None:
+    """A size in canvas px, and whether it was written as an inline px size; ``None`` if it is
+    relative, and only the page can say what it comes to."""
+    css, arbitrary = _CSS_SIZE.match(size), _ARBITRARY_PX.match(size)
+    if css:
+        unit = css.group("unit").lower()
+        return float(css.group("number")) * _PX_PER[unit], unit == "px"
+    if arbitrary:
+        return float(arbitrary.group("number")), True
+    if size in _TEXT_CLASS_PX:
+        return _TEXT_CLASS_PX[size], False
+    return None
+
+
+def _component_findings(deck_dir: Path) -> Iterator[Finding]:
+    """Type below the floor in the deck's own components and stylesheets.
+
+    A slide is not the only place a deck sets type: a diagram drawn as a component, or a rule in the
+    deck's stylesheet, lands on the slide just the same, and `type-scale` holds every piece of text
+    to the floor wherever it was written. Only the floor is checked here. A component is the deck's
+    own template, so sizing in px there is how a template works, and a size written relative to the
+    page (``em``, ``calc()``, a custom property) is one only the rendered slide can measure.
+    """
+    sources = sorted(
+        {
+            *deck_dir.glob("components/**/*.vue"),
+            *deck_dir.glob("layouts/**/*.vue"),
+            *deck_dir.glob("styles/**/*.css"),
+            *deck_dir.glob("style.css"),
+        }
+    )
+    for source in sources:
+        text = source.read_text(encoding="utf-8")
+        for size in font_sizes(text, css=source.suffix == ".css"):
+            resolved = _resolve(size)
+            if resolved and resolved[0] < FLOOR_PX:
+                yield Finding(
+                    "type-scale",
+                    ERROR,
+                    None,
+                    f"{source.relative_to(deck_dir)}: {size!r}: "
+                    f"{resolved[0]:.3g} px, below the {FLOOR_PX} px floor",
+                )
 
 
 def _section_findings(slides: Sequence[Slide]) -> Iterator[Finding]:

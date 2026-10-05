@@ -27,6 +27,27 @@ Each rule carries a stable **ID** in backticks, its statement, and a footer:
   beside the judgments, and the author may override it. The budgets at the end of
   [§3](#3-density-and-noise) are all advisory: their point is balance, not minimalism.
 
+- **Floor** — the rule is part of the accessibility floor: whether someone in the room can read
+  the slide at all, whatever their eyes and wherever they sit. Everything else is a **default**:
+  the method's opinion of how a research talk lands, held firmly but not absolutely.
+
+### Departing from a default
+
+A default is right for almost every slide, and a rigid reading of it can still weaken one. A
+subheading may organise one message rather than start a second; a derivation may need more words
+than evidence usually does. Where a default would cost the argument, the author departs from it on
+that slide and says why, in a line of the speaker notes of its own:
+
+```
+Exception: on-slide-words the derivation needs every step on screen while it is walked through
+```
+
+The line names one rule by its ID and gives the reason. A script finding of that rule on that slide
+is then reported as a warning carrying the reason, and a reviewer weighs the reason rather than the
+rule: it holds if the slide still carries one claim and its evidence still reads. An exception
+never hides a finding, and it never reaches a **Floor** rule, which no reason clears. A line with no
+reason, or naming a floor, is reported and not applied.
+
 Rules are grouped: [structure](#1-structure), [authoring order](#2-authoring-order),
 [density and noise](#3-density-and-noise), [legibility](#4-legibility), [colour](#5-colour),
 [motion](#6-motion), [voice](#7-voice). The [14-beat flagship outline](#the-flagship-deck-14-beats)
@@ -330,7 +351,9 @@ size it was drawn. There is nothing smaller, and the floor is not a knob for fit
 slide: a slide that only fits below it is carrying too much.
 
 Slides size text only through the template's classes, never with an inline size in px, so the floor
-can be checked on every slide a deck writes and not only on the classes the theme ships.
+can be checked on every slide a deck writes and not only on the classes the theme ships. The floor
+holds wherever a deck sets type: in a component it draws a diagram with and in its own stylesheet
+too, because that text lands on the slide just the same.
 
 **The room it suits.** The canvas is scaled to the screen, so a size is a share of the image
 height, and what decides legibility is how many image heights away the farthest viewer sits. By
@@ -350,7 +373,7 @@ planned to about 6 image heights, and for one of those:
 Before any talk, whatever the room: view the deck from about six screen heights away (about 1.1 m
 for a 13-inch laptop) and read the smallest text on every slide.
 
-**Decided by** script (an inline px size, a size below the floor, figure text) · judgment (the
+**Floor** · **Decided by** script (an inline px size, a size below the floor, figure text) · judgment (the
 room) · **Threshold** `canvas-width-px = 1280`, `canvas-aspect-ratio = 16:9`, `body-px = 23`,
 `headline-px = 37`, `floor-px = 18`, `body-reach-image-heights = 4.5` (violation when a slide sets
 a font size in px inline, or sets text below `floor-px`)
@@ -361,7 +384,7 @@ Inter for headings and body. JetBrains Mono for the locator and nothing else. Bo
 registered with the figure toolchain, so a machine that lacks them cannot silently substitute a
 fallback and leave the figures mismatched against the slides.
 
-**Decided by** script · **Threshold** `font-text = Inter`, `font-mono = JetBrains Mono`
+**Floor** · **Decided by** script · **Threshold** `font-text = Inter`, `font-mono = JetBrains Mono`
 
 ### `light-ground`: the colour scheme is light, and locked
 
@@ -369,7 +392,7 @@ Not a preference and not a per-viewer choice. Following the viewer's OS setting 
 figure set against near-black and destroys the contrast the rest of the method depends on. A
 validated dark ground would need every colour rule re-verified on it.
 
-**Decided by** script · **Threshold** `color-scheme = light`
+**Floor** · **Decided by** script · **Threshold** `color-scheme = light`
 
 ---
 
@@ -380,7 +403,7 @@ validated dark ground would need every colour rule re-verified on it.
 Every line series carries a distinct dash pattern and marker; bars carry direct labels. This is what
 survives a grayscale photocopy, a bad projector, and the dichromacies the floor cannot fully cover.
 
-**Decided by** script (generated figures, where the redundancy is structural) · judgment (hand-made
+**Floor** · **Decided by** script (generated figures, where the redundancy is structural) · judgment (hand-made
 visuals and pasted images)
 
 ### `accent-is-attention`: the accent role marks attention, never data
@@ -398,7 +421,7 @@ first thing a washed-out projector loses.
 highlighted numeral. Isolation is what makes a highlight work, and a second one dilutes both. Pair it
 with a second cue (weight, shape or position), as `never-sole-channel` asks of all colour.
 
-**Decided by** script (the contrast pairings, generated figures) · judgment (hand-made visuals, the
+**Floor** · **Decided by** script (the contrast pairings, generated figures) · judgment (hand-made visuals, the
 one locus) · **Threshold**
 `attention-contrast-pairs = [ink on accent, accent-strong on surface, accent-strong on surface-alt]`,
 `attention-contrast-min = 4.5`, `attention-stroke-px-min = 3` (violation when a pairing's WCAG
@@ -420,8 +443,13 @@ The same test governs every other role used for text: it clears WCAG contrast at
 or it does not carry text at that size. A mid-contrast chrome colour such as `brand-strong` clears it
 only at large sizes.
 
-**Decided by** script (role usage) · **Threshold** `text-contrast-min = 4.5` (violation when a role
-set as text below the headline size falls under it against the ground it sits on)
+The roles the template sets as text are `ink`, `neutral` and `brand`, and the grounds they sit on
+are `surface` and `surface-alt`, so every one of those pairings is measured, whatever the palette.
+A palette that makes `neutral` unreadable fails here, however well its data colours separate.
+
+**Floor** · **Decided by** script (role usage) · **Threshold** `text-contrast-min = 4.5`,
+`text-contrast-pairs = [ink on surface, ink on surface-alt, neutral on surface, neutral on surface-alt, brand on surface, brand on surface-alt]`
+(violation when a pairing's WCAG contrast ratio is below `text-contrast-min`)
 
 ### `separation-floor`: data colours stay perceptually separated under colour-vision deficiency
 
@@ -434,7 +462,7 @@ The floor is a **tunable design parameter**, grounded in the just-noticeable-dif
 not a physical constant. Comparison is inclusive, so a pair landing exactly on it passes. A palette
 sitting exactly on the floor is at capacity: one more series will fail without retuning.
 
-**Decided by** script · **Threshold** `delta-e-floor = 15.0`, `delta-e-metric = CAM02-UCS`,
+**Floor** · **Decided by** script · **Threshold** `delta-e-floor = 15.0`, `delta-e-metric = CAM02-UCS`,
 `cvd-simulation = Machado 2009`, `cvd-severity = 100`,
 `cvd-conditions = [normal, deuteranomaly, protanomaly, tritanomaly]`,
 `grayscale = advisory` (violation when a pair's ΔE is below `delta-e-floor`)
@@ -465,7 +493,7 @@ revealed, so a slide has to read on its own once everything is showing.
 
 ### `motion-ceiling`: fifteen seconds, maximum
 
-**Decided by** script (where a duration is declared) · **Threshold** `animation-seconds-max = 15`
+**Floor** · **Decided by** script (where a duration is declared) · **Threshold** `animation-seconds-max = 15`
 (violation when a declared animation runs longer than 15 seconds)
 
 ---

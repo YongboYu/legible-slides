@@ -529,6 +529,74 @@ def test_a_size_in_the_speaker_notes_is_not_on_the_slide(write_deck):
     assert report.findings == ()
 
 
+def test_an_svg_size_on_a_slide_is_an_inline_px_size(write_deck):
+    """An SVG's ``font-size`` attribute is a size written into the slide, in px by another name."""
+    svg = '<svg viewBox="0 0 400 100"><text font-size="8">Encoder</text></svg>'
+    report = lint(write_deck(_sized(svg)))
+
+    assert rules(report) == ["type-scale"]
+    assert "inline" in messages(report)[0]
+    assert f"8 px, below the {FLOOR_PX} px floor" in messages(report)[0]
+
+
+@pytest.mark.parametrize(
+    ("path", "source"),
+    [
+        (
+            "components/Pipeline.vue",
+            '<template><p class="tiny">x</p></template>\n'
+            "<style scoped>\n.tiny { font-size: 8px; }\n</style>\n",
+        ),
+        (
+            "components/Pipeline.vue",
+            '<template><svg><text font-size="8">x</text></svg></template>\n',
+        ),
+        ("components/nested/Box.vue", '<template><p class="text-xs">x</p></template>\n'),
+        ("style.css", ".label { font-size: 0.5rem; }\n"),
+        ("styles/diagram.css", ".label { font-size: 9pt; }\n"),
+    ],
+)
+def test_type_below_the_floor_in_the_decks_own_components_is_a_finding(
+    write_deck, tmp_path, path, source
+):
+    """The slide is not the only place a deck sets type: a component's text lands on the slide
+    just the same, and a lint that read only slides.md would pass it."""
+    deck = write_deck(_sized("<Pipeline />"))
+    (tmp_path / path).parent.mkdir(parents=True, exist_ok=True)
+    (tmp_path / path).write_text(source, encoding="utf-8")
+
+    report = lint(deck)
+
+    assert rules(report) == ["type-scale"]
+    finding = report.findings[0]
+    assert finding.slide is None
+    assert finding.message.startswith(path)
+    assert f"below the {FLOOR_PX} px floor" in finding.message
+    assert not report.passed
+
+
+@pytest.mark.parametrize(
+    "css",
+    [
+        ".label { font-size: var(--floor-px); }",
+        ".label { font-size: 24px; }",
+        ".label { font-size: calc(var(--body-px) * 0.5); }",
+        ".label { font-size: 0.8em; }",
+    ],
+)
+def test_component_sizes_at_the_floor_or_relative_to_the_page_pass(write_deck, tmp_path, css):
+    """A component is the deck's own template, so a px size at or above the floor is how it works,
+    and a relative size is the rendered slide's to measure."""
+    deck = write_deck(_sized("<Pipeline />"))
+    (tmp_path / "components").mkdir()
+    (tmp_path / "components" / "Pipeline.vue").write_text(
+        f'<template><p class="label">x</p></template>\n<style>\n{css}\n</style>\n',
+        encoding="utf-8",
+    )
+
+    assert lint(deck).findings == ()
+
+
 def test_the_flagship_deck_holds_the_floor():
     report = lint(Path(__file__).resolve().parents[2] / "deck" / "slides.md")
 
@@ -783,3 +851,69 @@ def test_a_slot_the_linter_cannot_read_is_an_advisory_on_the_first_slide(write_d
 
     _advisory(report, "pace-budget")
     assert report.findings[0].slide == 1
+
+
+# ── exceptions ────────────────────────────────────────────────────────────────
+
+
+def _six_bullets(notes: str) -> str:
+    bullets = "\n".join(f"- step {n}" for n in range(1, 7))
+    return f"# The derivation takes six steps\n\n{bullets}\n\n<!--\n{notes}\n-->\n"
+
+
+def test_an_exception_with_a_reason_turns_a_defaults_error_into_a_warning(write_deck):
+    """The author departs from a default on one slide and says why: the finding stays, carrying the
+    reason for the review to weigh, and no longer gates."""
+    notes = "Exception: bullet-ceiling each step is one line of the worked derivation"
+    report = lint(write_deck(_six_bullets(notes)))
+
+    assert rules(report) == ["bullet-ceiling"]
+    finding = report.findings[0]
+    assert finding.severity == "warning"
+    assert finding.message.endswith("excepted: each step is one line of the worked derivation")
+    assert report.passed
+
+
+def test_an_exception_reaches_only_the_slide_and_rule_it_names(write_deck):
+    deck = (
+        _six_bullets("Exception: word-ceiling a reason about another rule")
+        + "\n---\n\n"
+        + (_six_bullets(""))
+    )
+    report = lint(write_deck(deck))
+
+    assert [(f.rule, f.slide, f.severity) for f in report.findings] == [
+        ("bullet-ceiling", 1, "error"),
+        ("bullet-ceiling", 2, "error"),
+    ]
+
+
+def test_an_exception_without_a_reason_is_reported_and_not_applied(write_deck):
+    report = lint(write_deck(_six_bullets("Exception: bullet-ceiling")))
+
+    severities = {(f.rule, f.severity) for f in report.findings}
+    assert severities == {("bullet-ceiling", "error"), ("bullet-ceiling", "warning")}
+    assert any("gives no reason" in f.message for f in report.findings)
+    assert not report.passed
+
+
+def test_no_reason_clears_a_floor(write_deck):
+    """The floor is a reader's access to the slide, not a default of the method's style."""
+    slide = (
+        "# Retrieval carries the long tail at a tenth of the cost\n\n"
+        '<p class="text-xs">Source.</p>\n\n'
+        "<!--\nException: type-scale the table has to fit\n-->\n"
+    )
+    report = lint(write_deck(slide))
+
+    severities = sorted((f.rule, f.severity) for f in report.findings)
+    assert severities == [("type-scale", "error"), ("type-scale", "warning")]
+    assert any("part of the floor" in f.message for f in report.findings)
+    assert not report.passed
+
+
+def test_an_exception_naming_no_rule_is_reported(write_deck):
+    report = lint(write_deck(_six_bullets("Exception: bullet-cieling a typo in the ID")))
+
+    assert ("bullet-cieling", "warning") in {(f.rule, f.severity) for f in report.findings}
+    assert not report.passed

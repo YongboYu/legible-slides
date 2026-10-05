@@ -249,3 +249,20 @@ def test_the_canon_names_the_attention_pairings_and_what_they_must_clear():
     )
     assert ATTENTION_CONTRAST_MIN == 4.5
     assert rule_thresholds("accent-is-attention")["attention-stroke-px-min"] == "3"
+
+
+def test_the_floor_is_the_accessibility_rules_and_nothing_else():
+    """The rules no exception reaches. A style default marked as floor would be a preference
+    nobody can argue with; a floor rule left unmarked would be one a reason could clear."""
+    from legible.method import rules
+
+    assert {rule.id for rule in rules() if rule.floor} == {
+        "type-scale",
+        "fonts",
+        "light-ground",
+        "never-sole-channel",
+        "accent-is-attention",
+        "decorative-neutral-never-text",
+        "separation-floor",
+        "motion-ceiling",
+    }
