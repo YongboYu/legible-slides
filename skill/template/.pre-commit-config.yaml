@@ -7,7 +7,10 @@
 #
 # All three commands come from the `legible` package:
 #
-#     uv tool install "git+https://github.com/YongboYu/legible-slides#subdirectory=python"
+#     uv tool install "git+https://github.com/YongboYu/legible-slides@main#subdirectory=python"
+#
+# The scaffold writes the commit the theme was copied from in place of `main`, here and in the
+# workflow, so the hooks and the gate check against the same rules.
 repos:
   - repo: local
     hooks:

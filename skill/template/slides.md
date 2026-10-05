@@ -1,7 +1,8 @@
 ---
-# The theme, by path: slidev-theme-legible is not on npm yet, so a deck consumes it from a checkout
-# of legible-slides. Point this at that checkout's theme/ directory.
-theme: ../legible-slides/theme
+# The theme, vendored: the scaffold copies slidev-theme-legible into theme/ from the same commit of
+# legible-slides that .github/workflows/method.yml installs the checks from, so a fresh clone builds
+# with nothing else and the rules it is checked against are the ones it was built to.
+theme: ./theme
 title: Your title
 author: You
 info: |

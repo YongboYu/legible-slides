@@ -6,10 +6,13 @@
   "description": "A talk, built to the legible-slides method.",
   "scripts": {
     "dev": "slidev slides.md --open",
-    "build": "slidev build slides.md --base ./ --out dist"
+    "build": "slidev build slides.md --base ./ --out dist",
+    "export": "slidev export slides.md --format pdf --output dist/slides.pdf",
+    "render": "slidev export slides.md --format png --with-clicks --output render"
   },
   "devDependencies": {
-    "@slidev/cli": "^52.18.0"
+    "@slidev/cli": "^52.18.0",
+    "playwright-chromium": "^1.62.0"
   },
   "pnpm": {
     "overrides": {
