@@ -60,14 +60,16 @@ and quoting where; a setup that makes the case for the problem and the approach;
 question by question. Every entry is one slide, its headline written before its evidence is picked
 (`message-before-visual`). Where the evidence calls for it, an entry also carries a callout, a click
 reveal, a figure returning from an earlier slide, the terms it introduces, and notes written as a
-rehearsal script. Every number is checked against its source as it goes in, and whatever didn't fit
-the slot, or didn't hold up, is listed under the plan's cuts with the reason. Then it stops. The
-author edits the plan, and that's where the argument gets settled, because changing a line is
-cheaper than redrawing a slide.
+rehearsal script. Every number is checked against its source as it goes in. What the talk leaves
+out is sorted in two: what held up and the room is likely to ask about becomes a backup slide, with
+the question it answers, and what was off the argument or didn't hold up is listed under the plan's
+cuts with the reason. Then it stops. The author edits the plan, and that's where the argument gets
+settled, because changing a line is cheaper than redrawing a slide.
 
 Build stamps the template and fills each slide from its entry: the headline word for word, the
 layout, the section, the evidence, footnotes for the sources, and the notes, plus whichever of the
-optional fields the entry carries, and none it doesn't. It draws every chart from data with the
+optional fields the entry carries, and none it doesn't. The plan's backups follow the conclusion,
+in a backup section the slot doesn't count. It draws every chart from data with the
 figure helper, builds the deck, and runs review mode over it. The report goes to the author with the
 deck. An error is fixed as part of the build; a warning is left for the author.
 

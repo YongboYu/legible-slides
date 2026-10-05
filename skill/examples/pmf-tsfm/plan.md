@@ -240,6 +240,62 @@ over many days, and there the pre-trained models' graphs miss most traces.
 The next step is to make a better forecast give a better process model. The slides, the code and
 the data are all linked from the QR code. Thank you, and I'm happy to take questions.
 
+## Backup
+
+### 14. Measured by RMSE, the best pre-trained model still beats the best baseline on every log, by 22 to 33%.
+
+- **Asked:** Does RMSE tell the same story?
+- **Layout:** assertion-evidence
+- **Evidence:** figure. The best model's root mean squared error on each log, as a share of the best baseline's, with the baseline at 1: slide 8's chart, on the other error measure.
+- **Source:** Table 5 of the paper.
+
+The best baseline changes under this measure: XGBoost on the two BPI logs, seasonal naive on Sepsis
+and Hospital Billing. Against whichever is better, the best pre-trained model still wins on all
+four, by about as much as it does on the mean absolute error.
+
+### 15. A larger Chronos-Bolt cuts the error on BPI 2017 by a third, and on Hospital Billing barely moves it.
+
+- **Asked:** Within one family, do larger models do better?
+- **Layout:** assertion-evidence
+- **Evidence:** table. Zero-shot mean absolute error of the four Chronos-Bolt sizes, on BPI 2017 and Hospital Billing.
+- **Source:** Table 4 of the paper, with the sizes from Table 1.
+
+Size helps where there's a regular pattern to learn. BPI 2017 has the strongest seasonality of the
+four logs, and the error falls from 11.64 to 7.62 as the model grows. On Hospital Billing all four
+sizes land within a hundredth of each other.
+
+### 16. The newest model of each family is best on at least one log, so no family wins them all.
+
+- **Asked:** Which model should I use?
+- **Layout:** assertion-evidence
+- **Evidence:** table. Zero-shot mean absolute error of Chronos-2, MOIRAI 2.0 and TimesFM 2.5 on each log.
+- **Source:** Table 4 of the paper.
+
+MOIRAI 2.0 is best or tied for it on three logs, TimesFM 2.5 on two, and Chronos-2 ties on Hospital
+Billing. If you can run only one, start with the newest model of any family: within each family,
+the newest generation is best or tied for best on every log.
+
+### 17. Sepsis's series have the weakest trend, the least stationarity and the most non-Gaussian values of the four logs.
+
+- **Asked:** Why do the process models fail on Sepsis?
+- **Layout:** assertion-evidence
+- **Evidence:** table. Three of the paper's seven characteristics of the directly-follows series, for each log.
+- **Source:** Table 3 of the paper; Table 2 for how its cases spread over days.
+
+Sepsis has about two new cases a day over more than a year, so most relations are zero on most
+days. What's left has little trend and little regularity to forecast a week ahead, and a graph
+rebuilt from those forecasts misses most of the traces.
+
+### 18. LoRA trained a rank-2 add-on for three epochs, and full fine-tuning followed each model's own recipe.
+
+- **Asked:** How exactly did you fine-tune them?
+- **Layout:** assertion-evidence
+- **Evidence:** table. What each kind of fine-tuning trained, and with which settings.
+- **Source:** Section 4.1 of the paper.
+
+We kept LoRA small on purpose: with logs this size, a larger add-on has more room to overfit. Both
+kinds used the same patch size and batch size, so the two can be compared with each other fairly.
+
 ## Challenges
 
 Taken from the author's speaker notes and backup slides in the CAiSE deck, which stand in here for
@@ -250,31 +306,29 @@ asking them.
 - **Were the baselines tuned, and are they the strongest you had?** Slide 5's notes, and in Q&A
   from Section 4.1: they are two of the strongest from the earlier benchmark, and XGBoost's
   hyperparameters were optimized.
-- **Does RMSE tell the same story?** Slide 8's notes, from Table 5: it agrees with the mean absolute error
-  everywhere the talk makes a claim.
-- **Why does Sepsis fail?** Slide 12, and in Q&A from Tables 2 and 3: its cases are spread thin
-  over many days, and its series carry the weakest temporal signal.
-- **Which model should I use?** Slide 9's notes, from Table 4: no family wins every log,
-  and the three newest models hold the best result on all four between them.
+- **Does RMSE tell the same story?** Slide 8's notes, and slide 14 in Q&A, from Table 5: it agrees
+  with the mean absolute error everywhere the talk makes a claim.
+- **Why does Sepsis fail?** Slide 12, and slide 17 in Q&A, from Tables 2 and 3: its cases are spread
+  thin over many days, and its series carry the weakest temporal signal.
+- **Which model should I use?** Slide 9's notes, and slide 16 in Q&A, from Table 4: no family wins
+  every log, and the three newest models hold the best result on all four between them.
 
 ## Cut
 
-- **Model size, as its own slide.** Within Chronos-Bolt, the larger models cut the error on BPI 2017
-  by a third, but on Hospital Billing all four sizes land within a hundredth of each other. It's
-  Section 4.1's first question, and evidence under the talk's first. Slide 9 makes the stronger
-  point, that a newer generation beats a bigger model, and its notes say the rest.
-- **Model families, as their own slide.** The best zero-shot model on each log is a different
-  family's, but always one of the newest three. It's Section 4.1's fourth question; slide 8's notes
-  and the challenges carry it.
+Model size, model families, the RMSE table and the series' characteristics were cut from the talk
+for time, and their evidence held up, so each is a backup now, answering one of the challenges.
+What is left here is what the talk could not show.
+
 - **The drift figure.** The paper shows four series where the pre-trained models recover from a
   sudden drop and XGBoost does not. XGBoost's per-day forecasts are not in the codebase, only its
   averages. Against the seasonal naive baseline, which can be rebuilt from the data, the
   pre-trained models do worse on that relation after the drop (mean absolute error about 21 to 22,
   against 10; `deck/data/bpi2017-drift.csv`). Showing it would need the XGBoost forecasts first.
-- **The RMSE table.** It agrees with the MAE results everywhere the talk makes a claim, so it stays
-  in the paper, and in the challenges.
-- **Time series characteristics.** The paper's Table 3 explains why the logs differ, and relating
-  the results to it is the other half of the contribution question 3 quotes. Slide 4 says it in
-  words, and the table stays in the paper for Q&A.
-- **How LoRA works.** The equation is in the paper. The talk needs only that LoRA trains a small
-  add-on and full fine-tuning trains everything.
+- **The LoRA equation.** It's in the paper, and off the argument: the talk needs only that LoRA
+  trains a small add-on and full fine-tuning trains everything. Its settings are slide 18.
+- **Why seven days ahead.** Section 4.1 states the horizon and that it follows the earlier
+  benchmark, and gives no other reason. Any more would be the author's to say, so it's an answer for
+  Q&A rather than a slide.
+- **Multivariate forecasting.** Section 4.1 says, in a footnote, that multivariate models did not
+  beat their univariate counterparts in initial experiments, and reports no numbers. There's nothing
+  to put on a slide; the footnote is the answer in Q&A.

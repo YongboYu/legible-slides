@@ -402,6 +402,128 @@ the data are all linked from the QR code. Thank you, and I'm happy to take quest
 -->
 
 ---
+layout: assertion-evidence
+section: Backup
+backup: true
+---
+
+# Measured by RMSE, the best pre-trained model still beats the best baseline on every log, by 22 to 33%.
+
+<Figure
+  src="/figures/against-the-baseline-rmse.png"
+  caption="The best model's root mean squared error on each log, as a share of the best baseline's."
+  :cite="1"
+/>
+
+<Footnotes>
+  <Footnote :number="1">Yu et al. (2026), Table 5: root mean squared error.</Footnote>
+</Footnotes>
+
+<!--
+Question: Does RMSE tell the same story?
+
+The best baseline changes under this measure: XGBoost on the two BPI logs, seasonal naive on Sepsis
+and Hospital Billing. Against whichever is better, the best pre-trained model still wins on all
+four, by about as much as it does on the mean absolute error.
+-->
+
+---
+layout: assertion-evidence
+---
+
+# A larger Chronos-Bolt cuts the error on BPI 2017 by a third, and on Hospital Billing barely moves it.
+
+| Chronos-Bolt | Tiny, 9M | Mini, 21M | Small, 48M | Base, 205M |
+|---|---:|---:|---:|---:|
+| BPI 2017 | 11.64 | 9.70 | 7.72 | 7.62 |
+| Hospital Billing | 1.39 | 1.40 | 1.40 | 1.40 |
+
+<Footnotes>
+  <Footnote :number="1">Yu et al. (2026), Table 4: mean absolute error; sizes from Table 1.</Footnote>
+</Footnotes>
+
+<!--
+Question: Within one family, do larger models do better?
+
+Size helps where there's a regular pattern to learn. BPI 2017 has the strongest seasonality of the
+four logs, and the error falls from 11.64 to 7.62 as the model grows. On Hospital Billing all four
+sizes land within a hundredth of each other.
+-->
+
+---
+layout: assertion-evidence
+---
+
+# The newest model of each family is best on at least one log, so no family wins them all.
+
+| Log | Chronos-2 | MOIRAI 2.0 | TimesFM 2.5 |
+|---|---:|---:|---:|
+| BPI 2017 | 7.25 | 6.87 | 6.87 |
+| BPI 2019 | 11.39 | 10.99 | 10.75 |
+| Sepsis | 0.090 | 0.084 | 0.096 |
+| Hospital Billing | 1.39 | 1.39 | 1.42 |
+
+<Footnotes>
+  <Footnote :number="1">Yu et al. (2026), Table 4: mean absolute error, zero-shot.</Footnote>
+</Footnotes>
+
+<!--
+Question: Which model should I use?
+
+MOIRAI 2.0 is best or tied for it on three logs, TimesFM 2.5 on two, and Chronos-2 ties on Hospital
+Billing. If you can run only one, start with the newest model of any family: within each family,
+the newest generation is best or tied for best on every log.
+-->
+
+---
+layout: assertion-evidence
+---
+
+# Sepsis's series have the weakest trend, the least stationarity and the most non-Gaussian values of the four logs.
+
+| Log | Trend | Stationarity | Non-Gaussianity |
+|---|---:|---:|---:|
+| BPI 2017 | 0.255 | 0.222 | 0.334 |
+| BPI 2019 | 0.154 | 0.094 | 0.465 |
+| Sepsis | 0.087 | 0.003 | 0.585 |
+| Hospital Billing | 0.260 | 0.137 | 0.457 |
+
+<Footnotes>
+  <Footnote :number="1">Yu et al. (2026), Table 3, three of its seven characteristics; Table 2 for the cases.</Footnote>
+</Footnotes>
+
+<!--
+Question: Why do the process models fail on Sepsis?
+
+Sepsis has about two new cases a day over more than a year, so most relations are zero on most
+days. What's left has little trend and little regularity to forecast a week ahead, and a graph
+rebuilt from those forecasts misses most of the traces.
+-->
+
+---
+layout: assertion-evidence
+---
+
+# LoRA trained a rank-2 add-on for three epochs, and full fine-tuning followed each model's own recipe.
+
+| | LoRA | Full fine-tuning |
+|---|---|---|
+| What trains | A rank-2 add-on to the attention weights | Every weight |
+| Schedule | AdamW, learning rate 1e-4, 3 epochs | Each model's original recipe |
+| Patch, batch | 16, 32 | 16, 32 |
+
+<Footnotes>
+  <Footnote :number="1">Yu et al. (2026), Section 4.1.</Footnote>
+</Footnotes>
+
+<!--
+Question: How exactly did you fine-tune them?
+
+We kept LoRA small on purpose: with logs this size, a larger add-on has more room to overfit. Both
+kinds used the same patch size and batch size, so the two can be compared with each other fairly.
+-->
+
+---
 layout: references
 section: Sources
 backup: true

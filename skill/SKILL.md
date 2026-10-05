@@ -87,13 +87,22 @@ Check every number in a claim against its source as you write it. Where the code
 behind a figure, extract it into the plan's data directory with a script that says where it read
 from, so the figure can be drawn again without the codebase.
 
-### 5. Fit the slot, and write down the cuts
+### 5. Fit the slot, and sort what is left out into backups and cuts
 
-Give every entry a time budget and add them up against the slot, the way `pace-budget` does. What
-does not fit, and every claim from the paper whose evidence you could not find or that
-did not hold up when you checked it, goes under the plan's cuts, with the reason.
+Give every entry a time budget and add them up against the slot, the way `pace-budget` does. Then
+sort everything the talk leaves out, one item at a time, into the format's two places for it:
 
-Then the challenges the author named in step 1: say where each is met, as the format asks.
+| Goes under | When |
+|---|---|
+| the backups | its evidence held up when you checked it, and the room is likely to ask for it. Write it as an entry, with the question it answers as **Asked**. |
+| the cuts | it is off the argument, or its evidence could not be found or did not hold up. Write the reason. |
+
+The challenges the author named in step 1 are where the likely questions come from: a challenge the
+talk meets only in Q&A, from a table the slides do not show, is a backup waiting to be written. A
+backup is a reason to have checked its numbers, not to skip checking them.
+
+Then the challenges: say where each is met, as the format asks, by the backup's number where one
+meets it.
 
 ### 6. Hand the plan over, and stop
 
@@ -142,6 +151,12 @@ filling them:
 ```bash
 legible rules signal-budget accent-is-attention motion-purpose established-terminology acronym-budget
 ```
+
+Then the backups, after the conclusion and before the references, one slide per entry in the
+plan's order, filled the same way. The first declares `section: Backup` and `backup: true`, and the
+rest carry it forward, so the footer labels them and `pace-budget` leaves them out. Each slide's
+notes open on its **Asked** as a `Question:` line, so the speaker can find it by what was asked, and
+carry no `Time:` line.
 
 Delete the placeholder image and anything else the template stamped that no entry asked for.
 

@@ -2,13 +2,15 @@
 
 _Resolves part of [#36](https://github.com/YongboYu/legible-slides/issues/36); the questions'
 sources, the setup part and the author's answers are
-[#38](https://github.com/YongboYu/legible-slides/issues/38)'s, and the optional fields are
-[#39](https://github.com/YongboYu/legible-slides/issues/39)'s._
+[#38](https://github.com/YongboYu/legible-slides/issues/38)'s, the optional fields are
+[#39](https://github.com/YongboYu/legible-slides/issues/39)'s, and the backups are
+[#40](https://github.com/YongboYu/legible-slides/issues/40)'s._
 
 A talk plan is a markdown file with one entry per slide: the slide's section, its headline claim,
 the evidence that proves it and where that evidence comes from, plus the talk's slot, the
-questions it answers and where the paper states them, and the challenges the author expects. It is where `message-before-visual` gets done: every claim is written down,
-and argued over, before anything is drawn.
+questions it answers and where the paper states them, the backups held for questions from the
+room, and the challenges the author expects. It is where `message-before-visual` gets done: every
+claim is written down, and argued over, before anything is drawn.
 
 It sits between the paper and the deck, and the skill works on both sides of it
 ([`skill/SKILL.md`](../skill/SKILL.md)):
@@ -119,9 +121,18 @@ What to say while it is up. This becomes the slide's speaker notes.
   - **Out:** The line that hands over to the slide after.
   - **Q&A:** The question the author expects here, and the answer, with its source.
 
+## Backup
+
+### 9. The claim this backup proves, written as a sentence.
+
+- **Asked:** The question it answers, the way the room would ask it?
+- **Layout:** assertion-evidence
+- **Evidence:** table. …
+- **Source:** Table 5 of the paper.
+
 ## Challenges
 
-- **The pushback the author expects.** Where the talk meets it: Slide 6, or in Q&A from Table 5.
+- **The pushback the author expects.** Where the talk meets it: Slide 6, or Slide 9 in Q&A.
 
 ## Cut
 
@@ -250,6 +261,25 @@ first is the slide that, cut, would most weaken the talk, usually because the ro
 something basic wrong without it. Its entry carries **Load-bearing**, with what the room would get
 wrong, and exactly one entry does.
 
+### Backup
+
+The slides held for questions after the talk, shown only if someone asks. Each is an entry like the
+talk's, numbered on from the conclusion, because that is where the deck puts it: its headline is a
+claim, and it carries **Layout**, **Evidence** and **Source**, and any of the optional fields but
+**Terms**, since a term the talk leans on is introduced in the talk. It does not carry **Time**,
+because a backup is not part of the slot (`pace-budget`), nor **Section**, **Setup**, **Answers** or
+**Load-bearing**, because it is not part of the argument. In their place, one field:
+
+| Field | What |
+|---|---|
+| **Asked** | The question the backup answers, the way the room would ask it. It is the reason the slide exists, so a backup nobody would ask for is a cut. |
+
+A backup comes from the cuts. Something left out of the talk whose evidence held up, and that the
+room is likely to ask about, moves here; the challenges the author expects are the first place to
+look for those questions. Something off the argument, or whose evidence did not hold up, stays
+under **Cut**: a backup has to survive a question, so one whose evidence would not is worse than
+none.
+
 ### Challenges
 
 The second is what the author expects the room to push back on. One line each: the challenge in
@@ -258,10 +288,11 @@ challenge no slide and no source meets is one to settle before the talk, not dur
 
 ### Cut
 
-What the plan left out, and why, one line each. Draft mode records here any claim from the paper
-that it could not back with evidence in the sources, or that would not fit the slot. A cut written
-down is one the author can overrule, and one nobody has to rediscover when the deck comes back up
-for revision.
+What the plan left out, and why, one line each: what was cut, in bold, then the reason. Draft mode
+records here any claim from the paper that it could not back with evidence in the sources, or that
+was off the argument. A claim that held up but did not fit the slot is a backup instead, if the
+room is likely to ask for it. A cut written down is one the author can overrule, and one nobody has
+to rediscover when the deck comes back up for revision.
 
 ## What build mode holds itself to
 
@@ -270,6 +301,7 @@ same layouts, in the same sections, with the same time budgets, and the plan's q
 answer slide and its answers on the conclusion. Where an entry carries an optional field, its slide
 shows it: the callout's text in its one callout, one click per step of the reveal, the returning
 figure drawn by the chart its first slide shows, every term on the slide, and the notes' parts in
-its speaker notes, in order. Backup slides, like the references, come after the
-plan's entries and are not part of it. `python/tests/test_plan.py` holds the worked example to all
-of that, so the format and the example cannot drift apart.
+its speaker notes, in order. After the conclusion come the plan's backups, one slide per entry, in
+order, under a backup section the first of them declares, each with its question at the head of its
+notes and no time budget; then the references, which no entry plans. `python/tests/test_plan.py`
+holds the worked example to all of that, so the format and the example cannot drift apart.

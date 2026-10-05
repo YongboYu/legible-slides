@@ -186,12 +186,14 @@ written before anything is drawn.
   challenges they expect, and writes a plan: the paper's own questions, quoted from where it states
   them, a setup part before the findings, and the findings question by question
   ([#38](https://github.com/YongboYu/legible-slides/issues/38)). It checks each number against its
-  source, records what it cut and why, and then stops: the author edits the plan, and the argument
-  is settled there.
+  source, sorts what the talk leaves out into two places, each with its reason: backups, for the
+  questions the room is likely to ask, and cuts ([#40](https://github.com/YongboYu/legible-slides/issues/40)),
+  and then stops: the author edits the plan, and the argument is settled there.
 - **build** runs scaffold, fills each slide from its entry, draws the figures with the figure
   helper, builds, and runs review mode. An entry's optional fields, its callout, reveal, returning
   figure, terms and structured notes, go on the slide where the entry carries them
-  ([#39](https://github.com/YongboYu/legible-slides/issues/39)). The report is handed over with the
+  ([#39](https://github.com/YongboYu/legible-slides/issues/39)). The plan's backups follow the
+  conclusion, marked `backup: true`, outside `pace-budget`. The report is handed over with the
   deck. An error is fixed as part of the build, and the plan is updated to match; a warning is left
   for the author.
 

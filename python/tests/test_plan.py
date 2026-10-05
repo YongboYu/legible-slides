@@ -35,6 +35,14 @@ EVIDENCE_KINDS = frozenset(
     {"figure", "table", "equation", "callout", "subtitle", "questions", "answers"}
 )
 
+#: What a backup entry carries, with a question in place of a time budget, and what it leaves to the
+#: talk's entries.
+BACKUP_ENTRY = frozenset({"Layout", "Evidence", "Source", "Asked"})
+NOT_ON_A_BACKUP = frozenset({"Time", "Section", "Setup", "Answers", "Load-bearing", "Terms"})
+
+#: The section build mode opens the backups with, declared once on the first of them.
+BACKUP_SECTION = "Backup"
+
 #: The setup part's beats, in the order the talk makes its case before the findings.
 SETUP_BEATS = ("stakes", "difficulty", "gap", "approach")
 
@@ -129,17 +137,28 @@ def plan_text() -> str:
     return PLAN.read_text(encoding="utf-8")
 
 
-@pytest.fixture(scope="module")
-def entries(plan_text) -> list[Entry]:
-    slides = _part(plan_text, "Slides")
-    matches = list(_ENTRY.finditer(slides))
-    assert matches, "the plan has no slides"
+def _entries(part: str) -> list[Entry]:
+    matches = list(_ENTRY.finditer(part))
     return [
-        Entry(int(match["number"]), match["claim"], slides[match.end() : following])
+        Entry(int(match["number"]), match["claim"], part[match.end() : following])
         for match, following in zip(
-            matches, [m.start() for m in matches[1:]] + [len(slides)], strict=True
+            matches, [m.start() for m in matches[1:]] + [len(part)], strict=True
         )
     ]
+
+
+@pytest.fixture(scope="module")
+def entries(plan_text) -> list[Entry]:
+    slides = _entries(_part(plan_text, "Slides"))
+    assert slides, "the plan has no slides"
+    return slides
+
+
+@pytest.fixture(scope="module")
+def backup_entries(plan_text) -> list[Entry]:
+    backups = _entries(_part(plan_text, "Backup"))
+    assert backups, "the plan has no backups"
+    return backups
 
 
 @pytest.fixture(scope="module")
@@ -162,10 +181,30 @@ def report():
     return lint(DECK / "slides.md", themes=[PALETTE])
 
 
+def _in_backup(deck) -> list[bool]:
+    """Whether each slide is a backup. A backup is declared where its section starts and carries
+    forward with it, the way the theme's footer reads it, until a slide declares a section again.
+
+    Read here rather than taken from the linter, so a deck that only the linter thought was split
+    right would still fail."""
+    flags, backup = [], False
+    for slide in deck:
+        if slide.section is not None:
+            backup = slide.backup
+        flags.append(backup)
+    return flags
+
+
 @pytest.fixture(scope="module")
 def talk(deck):
     """The deck's slides before its backups: the ones the plan's entries are for."""
-    return [slide for slide in deck if not slide.backup]
+    return [slide for slide, backup in zip(deck, _in_backup(deck), strict=True) if not backup]
+
+
+@pytest.fixture(scope="module")
+def after_the_talk(deck, talk):
+    """The deck's slides after the conclusion: the plan's backups, then the references."""
+    return deck[len(talk) :]
 
 
 @pytest.fixture(scope="module")
@@ -210,8 +249,33 @@ def test_the_conclusion_answers_every_question_by_its_number(entries, questions)
     assert len(_numbered(entries[-1].fields["Evidence"] + entries[-1].body)) == len(questions)
 
 
-def test_the_plan_says_what_it_cut(plan_text):
-    assert _part(plan_text, "Cut").strip()
+def test_the_plan_says_what_it_cut_and_why(plan_text):
+    """Each cut is one line: what was left out, in bold, and the reason after it."""
+    cuts = re.findall(r"^- \*\*(?P<what>[^*]+)\*\*(?P<why>.*)$", _part(plan_text, "Cut"), re.M)
+
+    assert cuts
+    for what, why in cuts:
+        assert why.strip(), what
+
+
+def test_the_backups_follow_the_slides_and_continue_their_numbers(
+    plan_text, entries, backup_entries
+):
+    assert plan_text.index("## Backup\n") > plan_text.index("## Slides\n")
+    assert [entry.number for entry in backup_entries] == list(
+        range(len(entries) + 1, len(entries) + len(backup_entries) + 1)
+    )
+
+
+def test_every_backup_names_the_question_it_answers_and_takes_no_time(backup_entries):
+    """A backup is held for a question from the room, so it says which one, and it is shown only
+    if asked, so it has no place in the slot (`pace-budget`)."""
+    for entry in backup_entries:
+        assert BACKUP_ENTRY <= entry.fields.keys(), entry.claim
+        assert not NOT_ON_A_BACKUP & entry.fields.keys(), entry.claim
+        assert entry.layout in CONTENT_LAYOUTS, entry.claim
+        assert entry.kind in EVIDENCE_KINDS, entry.claim
+        assert entry.fields["Asked"].endswith("?"), entry.claim
 
 
 def test_every_question_says_where_the_paper_states_it(plan_text, questions):
@@ -251,30 +315,57 @@ def test_one_entry_is_marked_as_the_slide_the_talk_rests_on(entries):
     assert len([entry for entry in entries if "Load-bearing" in entry.fields]) == 1
 
 
-def test_the_plan_says_where_it_meets_each_challenge_it_expects(plan_text, entries):
+def test_the_plan_says_where_it_meets_each_challenge_it_expects(plan_text, entries, backup_entries):
     challenges = _part(plan_text, "Challenges")
 
     assert re.findall(r"^- \*\*", challenges, re.MULTILINE)
     for match in _SLIDE_REFERENCE.finditer(challenges):
-        assert 1 <= int(match["number"]) <= len(entries), match[0]
+        assert 1 <= int(match["number"]) <= len(entries) + len(backup_entries), match[0]
 
 
-def test_the_format_names_every_field_the_example_uses(entries):
+def test_the_format_names_every_field_the_example_uses(entries, backup_entries):
     documented = FORMAT.read_text(encoding="utf-8")
 
-    used = {key for entry in entries for key in entry.fields} | {"Stated in"}
-    for key in used | {part for entry in entries for part in entry.notes}:
+    every = entries + backup_entries
+    used = {key for entry in every for key in entry.fields} | {"Stated in"}
+    for key in used | {part for entry in every for part in entry.notes}:
         assert f"**{key}**" in documented, key
-    for part in ("Questions", "Challenges", "Cut"):
+    for part in ("Questions", "Backup", "Challenges", "Cut"):
         assert f"### {part}" in documented, part
 
 
 # The deck, against the plan it was built from.
 
 
-def test_the_deck_has_one_slide_per_entry_and_its_backups_after(deck, talk, entries):
+def test_the_deck_has_one_slide_per_entry_and_its_backups_after(talk, after_the_talk, entries):
     assert len(talk) == len(entries)
-    assert all(slide.backup for slide in deck[len(talk) :])
+    assert after_the_talk and after_the_talk[0].backup, (
+        "the first slide after the conclusion opens a backup"
+    )
+
+
+def test_the_plan_s_backups_come_after_the_conclusion_and_before_the_references(
+    after_the_talk, backup_entries
+):
+    """One slide per backup entry, in order, in one backup section the first of them declares; the
+    references come last, as their own."""
+    planned, rest = after_the_talk[: len(backup_entries)], after_the_talk[len(backup_entries) :]
+
+    assert (planned[0].section, planned[0].backup) == (BACKUP_SECTION, True)
+    assert all(slide.section is None for slide in planned[1:])
+    assert [slide.layout for slide in rest] == ["references"]
+    for slide, entry in zip(planned, backup_entries, strict=True):
+        assert slide.headline == entry.claim, slide.number
+        assert slide.layout == entry.layout, slide.number
+
+
+def test_a_backup_s_notes_open_on_the_question_it_answers_and_budget_no_time(
+    after_the_talk, backup_entries
+):
+    """The speaker finds a backup by the question asked, and `pace-budget` never counts it."""
+    for slide, entry in zip(after_the_talk[: len(backup_entries)], backup_entries, strict=True):
+        assert slide.time is None, slide.number
+        assert slide.notes.strip().startswith(f"Question: {entry.fields['Asked']}"), slide.number
 
 
 def test_every_headline_is_its_entry_s_claim_word_for_word(talk, entries):

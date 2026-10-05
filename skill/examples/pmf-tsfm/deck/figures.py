@@ -39,6 +39,11 @@ COLUMN = {"size_px": (540, 350), "tight_panel": True}
 BEST_BASELINE = {"BPI 2017": 8.30, "BPI 2019": 14.47, "Sepsis": 0.117, "Billing": 1.77}
 BEST_MODEL = {"BPI 2017": 6.87, "BPI 2019": 10.75, "Sepsis": 0.084, "Billing": 1.39}
 
+#: Zero-shot root mean squared error, Table 5. The best baseline is XGBoost on the two BPI logs and
+#: the seasonal naive forecast on the other two; the best model is again the lowest in each column.
+BEST_BASELINE_RMSE = {"BPI 2017": 11.91, "BPI 2019": 23.87, "Sepsis": 0.187, "Billing": 2.21}
+BEST_MODEL_RMSE = {"BPI 2017": 9.32, "BPI 2019": 18.12, "Sepsis": 0.125, "Billing": 1.70}
+
 #: The tuned XGBoost baseline's mean absolute error, Table 4, beside the seasonal naive's above.
 XGBOOST = {"BPI 2017": 8.50, "BPI 2019": 14.70, "Sepsis": 0.169, "Billing": 2.67}
 
@@ -84,6 +89,17 @@ def against_the_baseline(palette, **pane):
         BEST_BASELINE,
         y_label="Error, relative to the best baseline",
         **pane,
+    )
+
+
+def against_the_baseline_rmse(palette):
+    """Slide 8's chart on the other error measure, for the backup that answers whether it agrees."""
+    return relative_to(
+        palette,
+        "Best\nbaseline",
+        BEST_MODEL_RMSE,
+        BEST_BASELINE_RMSE,
+        y_label="RMSE, relative to the best baseline",
     )
 
 
@@ -134,6 +150,7 @@ CHARTS = {
     "process-model-relevance.png": process_model_relevance,
     "against-the-baseline-beside.png": partial(against_the_baseline, **COLUMN),
     "sepsis-fit.png": sepsis_fit,
+    "against-the-baseline-rmse.png": against_the_baseline_rmse,
 }
 
 

@@ -33,6 +33,15 @@ models that the same forecasts make, and eight slides carry notes written for re
 Q&A answer on each slide a challenge is met on. Slide 8 was going to get a callout too, but under a
 figure that fills the pane it shrank the figure below the type floor, so it was left out.
 
+Under [#40](https://github.com/YongboYu/legible-slides/issues/40), the cuts were sorted. The CAiSE
+deck kept ten backup slides for Q&A, and this one had none. Four of the cuts held up and answer a
+challenge the author expects, so they're backups now: RMSE, model size, model families, and why
+Sepsis is hard. A fifth, the fine-tuning settings, came from the cut on how LoRA works. They follow
+the conclusion as slides 14 to 18, before the references, and the slot doesn't count them. What
+stays cut is what the talk couldn't show: the drift figure, the LoRA equation, a reason for the
+seven-day horizon the paper doesn't give, and multivariate results the paper reports only in a
+footnote.
+
 ## What is here, and what isn't
 
 `deck/` holds only the files build mode wrote. Everything else in a built deck, like the palette,
@@ -49,8 +58,8 @@ cd /tmp/pmf-tsfm-deck && pnpm install && pnpm build
 
 CI does exactly that on every push, and lints the result.
 [`python/tests/test_plan.py`](../../../python/tests/test_plan.py) holds the rest: the plan is
-complete, the deck matches it slide for slide, every optional field in the plan shows up on its
-slide, the deck passes the mechanical checks, every image is drawn by the figure script, and the
+complete, the deck matches it slide for slide with its backups after the conclusion, every optional
+field in the plan shows up on its slide, the deck passes the mechanical checks, every image is drawn by the figure script, and the
 review reports the linter's verdict and every one of its findings.
 
 ## Redrawing
