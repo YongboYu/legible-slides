@@ -20,12 +20,18 @@ legible rules one-message
 pnpm install
 pnpm dev      # with hot reload
 pnpm build
+pnpm exec playwright install chromium   # once per machine, for the two below
+pnpm export   # the PDF, every slide in its final state, into dist/
+pnpm render   # a PNG per click step, into render/, to look at before you present
 ```
 
-The `theme` key in `slides.md`'s headmatter is a **path**, which is how a deck consumes
-`slidev-theme-legible` until the package is on npm — point it at your checkout of this project, and
-nowhere else names it. Nothing else is configured here, because everything the method fixes — the
-canvas, the type scale, the bundled typefaces, the light ground — arrives with the theme.
+The theme lives in `theme/`, a copy of `slidev-theme-legible` taken from one commit of
+legible-slides, and `slides.md` names it as `./theme`. The checks in `.github/workflows/method.yml`
+and `.pre-commit-config.yaml` install the `legible` tooling from that same commit, so this deck
+builds from a clean clone and is always checked against the rules it was built to. Updating is a
+choice you make: copy the theme again from a later commit and change both pins to it. Nothing else
+is configured here, because everything the method fixes — the canvas, the type scale, the bundled
+typefaces, the light ground — arrives with the theme.
 
 `package.json` holds markdown-it to its 14.x line under `pnpm.overrides`. Slidev's markdown plugin
 imports a file the next major version of markdown-it no longer exports, and with no lockfile a fresh
@@ -77,10 +83,11 @@ locally and is opt-in; `.github/workflows/method.yml` runs it where nobody can s
 gate. Both need the `legible` package:
 
 ```bash
-uv tool install "git+https://github.com/YongboYu/legible-slides#subdirectory=python"
+uv tool install "git+https://github.com/YongboYu/legible-slides@<the pinned commit>#subdirectory=python"
 ```
 
-What is left is judgment — whether a slide carries one message, whether its headline is a claim.
+A green run is the gate and nothing more: the deck has none of the faults a script can find. What is
+left is judgment, and what the rendered pages show — whether a slide carries one message, whether its headline is a claim.
 That is a reader's, or the review mode of the
 [legible-slides skill](https://github.com/YongboYu/legible-slides/tree/main/skill), which reports
 both halves as one review with a proposed fix on every finding.
@@ -89,6 +96,7 @@ both halves as one review with a proposed fix on every finding.
 
 | | |
 |---|---|
+| `theme/` | the vendored theme. Not edited here: a change to it belongs upstream, or it drifts from the commit the checks are pinned to. |
 | `slides.md` | the deck. The first frontmatter block is the headmatter *and* the cover's own frontmatter, which is why the cover's props sit up there. |
 | `themes/palette.json` | the palette. One file, and the only place a colour is written. |
 | `styles/tokens.css` | generated from it, committed, imported by `styles/index.ts`. Do not edit. |

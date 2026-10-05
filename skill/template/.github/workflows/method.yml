@@ -7,7 +7,13 @@ permissions:
 
 # The half of a review that gates, run where nobody can skip it. What is checked here is exactly
 # what docs/method.md marks decided by script; the rules it leaves to a reader are advisory and
-# never block, which is why they are not a job.
+# never block, which is why they are not a job. A green run says the gate holds, not that the deck is
+# ready: that is the review's, read off the rendered pages.
+#
+# The checks are installed from one commit of legible-slides, the same one the theme in theme/ was
+# copied from. The scaffold writes it in place of `main` below; a later release of the rules is
+# something you take on purpose, by changing it here and copying the theme again, not something a
+# rerun picks up on its own.
 #
 # Blocking is the half a workflow cannot grant itself: make this a required status check in the
 # branch ruleset, or a red run merges anyway.
@@ -20,7 +26,7 @@ jobs:
       - uses: astral-sh/setup-uv@v5
         with:
           enable-cache: true
-      - run: uv tool install "git+https://github.com/YongboYu/legible-slides#subdirectory=python"
+      - run: uv tool install "git+https://github.com/YongboYu/legible-slides@main#subdirectory=python"
       # uv installs a tool's commands here. The runner has it on PATH already; saying so is one
       # line, and cheaper than a green run that silently ran nothing.
       - run: echo "$HOME/.local/bin" >> "$GITHUB_PATH"
@@ -36,11 +42,19 @@ jobs:
       # The deck itself. A finding this calls an error turns the run red.
       - run: legible lint slides.md --theme themes/palette.json
 
-# No build job, deliberately — and this is the one check above that is missing rather than refused.
-# slides.md names the theme by path until slidev-theme-legible is on npm, so a fresh runner has
-# nothing to resolve that path against and a build job here would fail for a reason about this
-# workflow rather than about the deck.
-#
-# Add one the moment that stops being true: when the package is published, or when you vendor the
-# theme into this repository. Until then `pnpm build` locally is the only place the deck is proved
-# to render, and the checks above are what a runner can settle without it.
+
+  # The deck renders from a clean checkout: the theme is vendored, so nothing outside this
+  # repository is needed. What the pages look like is still the review's to read.
+  build:
+    name: the deck builds from a clean checkout
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: pnpm install
+      - run: pnpm run build

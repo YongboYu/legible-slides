@@ -142,7 +142,7 @@ jobs:
   # result renders, and whether the palette that reaches it is the deck's own.
   #
   # That second half is the one worth a runner. The stamped deck carries its own generated tokens
-  # and consumes the theme by path, so a checkout wearing another palette is exactly what it has to
+  # and a vendored copy of the theme, so a theme wearing another palette is exactly what it has to
   # outrank — and a deck that silently wore the checkout's palette instead would look fine everywhere
   # except in the built CSS.
   scaffold:
@@ -162,9 +162,12 @@ jobs:
         run: |
           mkdir -p "$RUNNER_TEMP/stamped"
           cp -R skill/template/. "$RUNNER_TEMP/stamped/"
-          # The one blank a runner has to fill for itself: the theme is consumed by path until the
-          # package is on npm, and the author is the one who says where their checkout is.
-          sed -i "s|^theme: .*|theme: $GITHUB_WORKSPACE/theme|" "$RUNNER_TEMP/stamped/slides.md"
+          # The theme, vendored from this commit the way the skill's scaffold step vendors it, so
+          # the build below proves a stamped deck needs nothing outside itself.
+          git archive HEAD theme | tar -x -C "$RUNNER_TEMP/stamped"
+          sed -i "s|legible-slides@main|legible-slides@$GITHUB_SHA|" \
+            "$RUNNER_TEMP/stamped/.github/workflows/method.yml" "$RUNNER_TEMP/stamped/.pre-commit-config.yaml"
+          ! grep -rq "legible-slides@main" "$RUNNER_TEMP/stamped/.github" "$RUNNER_TEMP/stamped/.pre-commit-config.yaml"
       # The template arrives holding the theme's own palette, so a deck that wore the checkout's
       # colours instead would pass the check below by coincidence. Recolour it first, the way the
       # skill's step 4 does, so the two differ and the check can tell them apart. Any hex other than
