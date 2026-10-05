@@ -68,7 +68,8 @@ cvd-validate my-theme.json
 
 It names each failing pair by role rather than by hex, prints the achieved minimum even when you
 pass — so you can see whether you have headroom — and exits non-zero if any pair falls below the
-floor or an attention pairing falls short of its contrast (`accent-is-attention`). See
+floor, or an attention or text pairing falls short of its contrast (`accent-is-attention`,
+`decorative-neutral-never-text`). See
 [`python/README.md`](python/README.md).
 
 Inside this repo the same command gates CI over the theme in [`themes/`](themes) on push and pull
@@ -130,13 +131,19 @@ designed in on a lecture-room laptop with no network — and in the same one the
 What it refuses is as much the point. There is no section-divider, no opener, no closer and no
 single-word-emphasis layout, because the method forbids the slides they build.
 
-A deck consumes it by path until it is published. See [`theme/README.md`](theme/README.md), and
+A deck stamped by the skill carries its own copy of it, taken from one commit of this repo, with its
+checks pinned to that same commit, so it builds from a clean clone. See
+[`theme/README.md`](theme/README.md), and
 [`theme/example.md`](theme/example.md) for every layout exercised once.
 
 [`deck/`](deck) is the flagship: the deck that teaches the method by being it, and the artifact to
-read if you would rather see the rules applied than read them. It is being written beat by beat —
-what stands today is the frame, the cover and the sources around one worked assertion-evidence
-slide, wired to the theme and green in CI. See [`deck/README.md`](deck/README.md).
+read if you would rather see the rules applied than read them. It runs the fourteen beats the canon
+outlines, plus a references slide, and is built and linted in CI. See
+[`deck/README.md`](deck/README.md).
+
+A green lint is the gate, not a verdict on the deck: what the scripts cover, rule by rule, and what
+they leave to a reader of the rendered pages, is
+[`docs/agent-skill-contract.md`](docs/agent-skill-contract.md) §4c.
 
 ## Provenance
 

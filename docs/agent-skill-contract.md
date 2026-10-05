@@ -18,7 +18,9 @@ must remember into checks an agent runs. It never restates those rules — it po
 ## 1. Shape — one `SKILL.md` skill, four modes
 
 A single **Claude Code skill** defined by a `SKILL.md`, living in **`skill/`** at the repo root (a
-shippable delivery, not a project-private `.claude/skills/` helper). One skill covering four modes:
+shippable delivery, not a project-private `.claude/skills/` helper). One skill covering four modes.
+`SKILL.md` is a router: it holds what every mode shares and points at one file per mode in
+`skill/modes/`, so a run loads only the mode it takes:
 
 - **draft** — write a talk plan from a paper and its codebase (§7).
 - **build** — build a deck from a talk plan, and review it (§7).
@@ -38,7 +40,7 @@ shippable delivery, not a project-private `.claude/skills/` helper). One skill c
 `method.md` is the single source of truth (#3: `AGENTS.md` and `design-provenance.md` *point to* it
 rather than restate). The skill obeys the same rule:
 
-- `SKILL.md` carries only the **review procedure** — the ordered workflow, which checks are
+- The skill carries only the **procedure** — the ordered workflow, which checks are
   mechanical vs judgment, and the report format. It does **not** restate what a good slide is.
 - The **rule content and thresholds are loaded from `method.md` at review time**. A rule change in
   `method.md` therefore never silently un-syncs the reviewer.
@@ -86,9 +88,9 @@ grouped by slide and names each finding's rule; see
 | No inflated-register words | `no-inflated-register` | the rule's wordlist, at the severity the rule assigns |
 | Sentence-opener distribution | `opener-variety` | opener share per passage, against the rule's ceiling |
 | Section map fits | `section-locator` | the sections a deck declares, their count and each label's length, at the severity the rule assigns |
-| Type floor holds | `type-scale` | every font size a slide's markup sets (style attributes, style blocks, UnoCSS text classes): an inline px size, and any size that resolves below the rule's floor |
+| Type floor holds | `type-scale` | every font size a slide's markup sets (style attributes, style blocks, UnoCSS text classes, SVG `font-size` attributes): an inline px size, and any size that resolves below the rule's floor; and every absolute size in the deck's own `components/`, `layouts/`, `styles/` and `style.css` that resolves below it |
 | Closes on a conclusion | `conclusion-stays-up` | the last slide outside the backups: no headline, a closing label for one, or a thank-you, at the severity the rule assigns |
-| **Palette passes CVD** | `separation-floor` | **shell out to `cvd-validate`** over `themes/*.json` — never reimplement CVD |
+| **Palette passes CVD and contrast** | `separation-floor`, `accent-is-attention`, `decorative-neutral-never-text` | **shell out to `cvd-validate`** over `themes/*.json` — never reimplement CVD. It measures the data colours' separation and the attention and text pairings' contrast |
 | Visual groups (advisory) | `element-ceiling` | the blocks at the top of each slide's body, beneath the headline, at the severity the rule assigns |
 | Words on a slide (advisory) | `on-slide-words` | word count outside the headline, figures and footnotes, at the severity the rule assigns |
 | Emphasis and callouts (advisory) | `signal-budget` | bold or highlighted spans, and callouts, per slide, at the severity the rule assigns |
@@ -98,10 +100,18 @@ grouped by slide and names each finding's rule; see
 Each row's numbers, wordlist and severity are read from that rule in `method.md`. The linter carries
 none of its own.
 
+A slide's `Exception:` notes line, as the canon's "Departing from a default" sets it out, turns that
+rule's findings on that slide into warnings carrying the reason. The linter reads which rules are
+**Floor** from the canon and applies no exception to one.
+
+Figure type is held where the figure is written: `legible.figures.save` refuses a figure whose
+smallest type lands below the floor at the width it is shown at (`lands_at_px`).
+
 ### 4b. Semantic — LLM judgment
 
-The six calls that need understanding, applied by the agent against the rules loaded from
-`method.md`. The canon marks many more rules `judgment`; these are the six the review covers:
+The calls that need understanding, applied by the agent against the rules loaded from `method.md`.
+§4c lists which judgment rules the review covers and which it leaves to the plan. From the source
+and the speaker notes:
 
 - **`one-message`** — is this one slide or two?
 - **`assertion-headline`** — claim, or bare label?
@@ -115,6 +125,85 @@ The six calls that need understanding, applied by the agent against the rules lo
 - **The canon's judgment anti-slop rules** (`no-contrast-for-emphasis`, `no-reflexive-tricolon`,
   `no-hedging-or-boilerplate`, `rhythm-variety`, `concrete-over-abstract`) — the structural tells a
   wordlist cannot catch.
+- **`answer-first` and `conclusion-stays-up`** — does the second slide give the result and the
+  questions, and does the last main slide answer each question by its number?
+- **`equation-worked-example`**, **`no-section-dividers`** and the signpost half of
+  **`section-locator`**.
+
+From the rendered pages, at presentation size and with every reveal step exported, because a build
+that succeeds says nothing about what the room sees:
+
+- **`evidence-is-visual`**, **`coherence`**, **`layout-discipline`** and the hand-made half of
+  **`figure-noise`** — does the visual prove the headline, and is anything there that does not?
+- **`motion-purpose`** — does each reveal step add evidence, and does the final state read on its own?
+- **What no rule names but every room notices** — clipped or overlapping content, an asset that did
+  not load, raw markup where a component should be, a figure label too small or cut off.
+
+### 4c. Coverage — what a PASS establishes, and what it does not
+
+A PASS is the linter's exit code, and it says one thing: nothing the scripts check is broken. It
+does not say the deck is ready to present. Every rule in the canon is listed here once, with what
+covers it on a deck an author wrote, so a reader can see where the gate ends and the reading begins.
+`python/tests/test_skill.py` holds this table to the canon: a rule added there fails the suite until
+it has a row.
+
+| Covered by | Means |
+|---|---|
+| gate | `legible lint` or `cvd-validate` settles it on any deck, and an error blocks |
+| advisory | the linter counts it and warns; the review weighs it |
+| theme | the theme is built to it and this repo's tests hold the theme to it; a deck that overrides the theme is not checked |
+| review | review mode judges it on every deck, from the source and the speaker notes |
+| render | review mode judges it on the rendered pages, at presentation size, every step revealed |
+| plan | draft and build shape it from the talk plan; nothing judges it on a finished deck |
+| none | nothing checks it yet |
+
+| Rule | Covered by | What is left |
+|---|---|---|
+| `one-message` | review | |
+| `assertion-headline` | review | |
+| `headline-shape` | gate | the line ceiling is measured; that the headline reads as a claim is `assertion-headline`'s, and reviewed there |
+| `ae-skeleton` | theme, render | a deck's own layout or component can add a zone; the rendered pages show it |
+| `no-section-dividers` | theme, review | the theme ships no divider layout; a slide that is a bare section name is judged |
+| `answer-first` | review | |
+| `conclusion-stays-up` | advisory, review | the last main slide's headline is checked; that it answers each question by number is judged |
+| `section-locator` | advisory, review | the signpost lines in the notes are judged |
+| `evidence-is-visual` | render | |
+| `equation-worked-example` | review | nothing detects an equation by script yet; the review looks for one |
+| `message-before-visual` | plan | |
+| `established-terminology` | review | |
+| `no-script-on-slide` | review | |
+| `bullet-ceiling` | gate | |
+| `word-ceiling` | gate | |
+| `coherence` | render | |
+| `signaling` | plan, render | |
+| `layout-discipline` | render | |
+| `figure-noise` | theme, render | generated figures are drawn without chartjunk; hand-made visuals are judged |
+| `element-ceiling` | advisory | |
+| `on-slide-words` | advisory | |
+| `signal-budget` | advisory | |
+| `acronym-budget` | advisory | |
+| `pace-budget` | advisory | |
+| `type-scale` | gate, render | absolute sizes on slides, in components and in figures are measured; a relative size (`em`, `calc()`, a custom property) and the room itself are judged on the rendered pages |
+| `fonts` | theme | |
+| `light-ground` | theme | a deck's headmatter could override the scheme; nothing checks it |
+| `never-sole-channel` | theme, review | generated figures carry the redundancy by construction; hand-made visuals are judged |
+| `accent-is-attention` | gate, review | the contrast pairings are measured; the one locus per slide is judged |
+| `spend-colour-on-discrimination` | plan, render | |
+| `decorative-neutral-never-text` | gate | the roles the template sets as text are measured; a deck's own component that sets text in another role is not |
+| `separation-floor` | gate | |
+| `motion-purpose` | review, render | the reveals are judged step by step, and the final state as the exported page |
+| `motion-ceiling` | none | nothing reads an animation's duration yet; the deck sets no transition and the method asks for little motion |
+| `no-em-dash-headline` | gate | |
+| `no-inflated-register` | advisory | |
+| `opener-variety` | gate | |
+| `no-contrast-for-emphasis` | review | |
+| `no-reflexive-tricolon` | review | |
+| `no-hedging-or-boilerplate` | review | |
+| `rhythm-variety` | review | |
+| `concrete-over-abstract` | review | |
+
+So the report states two verdicts, not one: the **gate**, which is the exit code, and **readiness**,
+which no script can give and which the review and the rendered pages answer between them.
 
 ## 5. Review posture & output
 
@@ -137,7 +226,7 @@ The six calls that need understanding, applied by the agent against the rules lo
   **error** (mechanical gate) or **warning** (advisory judgment) and **linked to the `method.md`
   rule** it enforces; semantic findings carry a suggested rewrite.
 
-The report's shape is fixed in [`skill/SKILL.md`](../skill/SKILL.md), and
+The report's shape is fixed in [`skill/modes/review.md`](../skill/modes/review.md), and
 [`skill/fixtures/`](../skill/fixtures) is a deck built to fail it with the answer key beside it —
 every planted violation, by slide and by rule, and which half of the review surfaces it.
 
@@ -160,9 +249,10 @@ It stamps:
 and the scaffold stamps a copy of it. It carries no institution's marks, so nothing stamped claims an
 endorsement: the cover's logo slots arrive as placeholders. Slidev only.
 
-Built in **#24** as the scaffold mode of [`skill/SKILL.md`](../skill/SKILL.md), which stamps
+Built in **#24** as the scaffold mode of the skill, [`skill/modes/scaffold.md`](../skill/modes/scaffold.md), which stamps
 [`skill/template/`](../skill/template) — files rather than instructions, so what a stamp produces is
-something a suite can be run over. It is: the deck wired to the theme by path, the palette at
+something a suite can be run over. It is: the deck wired to a vendored copy of the theme, archived from the same commit its checks are
+pinned to, the palette at
 `themes/palette.json` with the stylesheet `legible gen-css` emits from it committed beside it, both
 checks as a pre-commit config and a workflow, and one skeleton slide per layout.
 

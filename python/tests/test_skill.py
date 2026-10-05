@@ -1,10 +1,10 @@
 """The review skill's half of the contract, from the side a script can hold it to.
 
 Two claims are testable here, and they are the two ``docs/agent-skill-contract.md`` §2 turns on.
-`SKILL.md` carries the procedure and no rule, so nothing in it may restate a rule's statement or one
-of its thresholds, and every rule it names by ID has to be a rule the canon still carries. And the
-fixture deck breaks what it says it breaks, so the review has something with a known answer to be
-tried against.
+The skill, `SKILL.md` and the mode files it routes to, carries the procedure and no rule, so
+nothing in it may restate a rule's statement or one of its thresholds, and every rule it names by
+ID has to be a rule the canon still carries. And the fixture deck breaks what it says it breaks,
+so the review has something with a known answer to be tried against.
 
 What no test here asserts is a judgment. Whether a slide carries one message is the reviewer's
 call, and it is advisory precisely because it is fallible; asserting it would be asserting a reading
@@ -22,6 +22,15 @@ from legible.method import rules
 REPO = Path(__file__).resolve().parents[2]
 SKILL = REPO / "skill" / "SKILL.md"
 FIXTURES = REPO / "skill" / "fixtures"
+CONTRACT = REPO / "docs" / "agent-skill-contract.md"
+
+#: One row of the contract's coverage inventory (§4c): a rule, and what covers it.
+_COVERAGE_ROW = re.compile(
+    r"^\|\s*`(?P<rule>[a-z0-9-]+)`\s*\|\s*(?P<covered>[a-z, ]+?)\s*\|", re.MULTILINE
+)
+
+#: What may cover a rule, as §4c defines each.
+COVERAGE = frozenset({"gate", "advisory", "theme", "review", "render", "plan", "none"})
 
 #: One row of the fixture's table of planted violations: the slide, the rule, which half of the
 #: review surfaces it, and the severity a reader should see it reported at.
@@ -61,7 +70,9 @@ SEMANTIC = (
 
 @pytest.fixture(scope="module")
 def skill() -> str:
-    return SKILL.read_text(encoding="utf-8")
+    """The whole skill as an agent can reach it: the router, then every mode file it points at."""
+    modes = sorted((SKILL.parent / "modes").glob("*.md"))
+    return "\n".join(path.read_text(encoding="utf-8") for path in (SKILL, *modes))
 
 
 @pytest.fixture(scope="module")
@@ -186,7 +197,8 @@ def test_every_rule_the_fixture_plants_is_a_rule_the_canon_carries(planted):
 
 def test_the_skill_carries_a_mode_for_every_step_from_paper_to_review(skill):
     for mode in ("draft", "build", "scaffold", "review"):
-        assert f"## Mode: {mode}" in skill
+        assert f"# Mode: {mode}" in skill
+        assert f"(modes/{mode}.md)" in _read(SKILL)
 
 
 def test_the_skill_points_at_the_talk_plan_s_format_and_its_worked_example(skill):
@@ -195,3 +207,40 @@ def test_the_skill_points_at_the_talk_plan_s_format_and_its_worked_example(skill
     for path in ("docs/talk-plan.md", "skill/examples/pmf-tsfm/"):
         assert f"`{path}`" in skill
         assert (REPO / path).exists(), path
+
+
+@pytest.fixture(scope="module")
+def coverage() -> dict[str, set[str]]:
+    """The contract's coverage inventory: every rule, and what covers it on an author's deck."""
+    section = _read(CONTRACT).split("### 4c.", 1)[1].split("\n## ", 1)[0]
+    rows = {}
+    for match in _COVERAGE_ROW.finditer(section):
+        assert match.group("rule") not in rows, f"`{match.group('rule')}` is listed twice"
+        rows[match.group("rule")] = {part.strip() for part in match.group("covered").split(",")}
+    return rows
+
+
+def test_the_coverage_inventory_lists_every_rule_the_canon_carries(coverage):
+    """What a PASS establishes is only legible if every rule says where it is covered. A rule added
+    to the canon without a row here would read as covered when nothing covers it."""
+    assert set(coverage) == {rule.id for rule in rules()}
+    for rule_id, covered in coverage.items():
+        assert covered <= COVERAGE, rule_id
+
+
+def test_the_inventory_claims_a_gate_only_where_the_canon_decides_by_script(coverage):
+    by_id = {rule.id: rule for rule in rules()}
+
+    for rule_id, covered in coverage.items():
+        if covered & {"gate", "advisory"}:
+            assert "script" in by_id[rule_id].decided_by, rule_id
+
+
+def test_the_skill_judges_every_rule_the_inventory_leaves_to_the_review(skill, coverage):
+    """A row that says the review covers a rule is a promise the procedure has to keep. The voice
+    rules are the exception the skill already makes: it asks the canon for them by section."""
+    voice = {rule.id for rule in rules(section="voice")}
+
+    for rule_id, covered in coverage.items():
+        if covered & {"review", "render"} and rule_id not in voice:
+            assert f"`{rule_id}`" in skill, rule_id
