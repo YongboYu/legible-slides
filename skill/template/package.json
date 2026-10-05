@@ -13,7 +13,8 @@
   },
   "pnpm": {
     "overrides": {
-      "markdown-it": "^14.1.0"
+      "markdown-it": "^14.1.0",
+      "unocss": "~66.7.5"
     }
   }
 }
