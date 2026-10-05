@@ -24,13 +24,17 @@ against the rules as `legible rules` printed them: `one-message`, `assertion-hea
 - `one-message`: each content slide makes one setup beat or answers one of the plan's questions.
   Slides 4 and 10 join two clauses in their headlines, and each pair makes a single claim: that the
   data is hard, and that fine-tuning doesn't pay. The answer slide joins the result and its limit,
-  which is what an answer slide is for.
+  which is what an answer slide is for. Slide 11's two panes are one argument: the relevance that
+  proves its headline, and slide 8's error beside it, which is what makes "yet" true.
 - `assertion-headline`: every headline is a full claim, written in the plan before its slide,
   including the five setup slides, none of which is a section label.
-- `never-sole-channel`: the deck has no hand-made visuals. All six charts come from `figures.py`
-  through the shipped archetypes, and the four tables carry no color.
+- `never-sole-channel`: the deck has no hand-made visuals. All seven images come from `figures.py`
+  through the shipped archetypes, slide 11's returning figure included, and the four tables carry no
+  color. Slide 10's callout is the theme's component, and its text says what its fill marks.
 - `no-script-on-slide`: the words on the slides are labels, numbers and short captions. Slide 6's
-  table is the most wordy, and its cells are labels rather than sentences. Everything said aloud is
+  table is the most wordy, and its cells are labels rather than sentences. Slide 10's callout,
+  "Full fine-tuning on BPI 2019: from 12.3 to 23.1", is a label with its numbers, not a sentence to
+  read out. Everything said aloud is
   in the notes, which is where build mode put each entry's paragraph.
 - Voice: slide 6's notes say "we're not using a language model here". That names the alternative
   the plan says half the room would assume, so it's a real contrast, not a foil

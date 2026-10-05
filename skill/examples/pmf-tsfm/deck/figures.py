@@ -16,6 +16,7 @@ from __future__ import annotations
 
 import csv
 import sys
+from functools import partial
 from pathlib import Path
 
 from legible import load_palette
@@ -28,6 +29,10 @@ PALETTE = HERE / "themes" / "palette.json"
 
 #: Where the deck serves its figures from, under public/.
 FIGURES = "figures"
+
+#: One pane of a two-column evidence slide: its size in canvas px, and type at the floor rather than
+#: the body size, because a pane this narrow has no room for body type on an axis (`type-scale`).
+COLUMN = {"size_px": (540, 350), "tight_panel": True}
 
 #: Zero-shot mean absolute error, Table 4 of the paper. The best baseline on every log is the
 #: seasonal naive forecast, and the best model is the lowest error in that log's column.
@@ -65,19 +70,20 @@ def weekly_series(palette):
     )
 
 
-def relative_to(palette, reference, values, baseline, y_label):
+def relative_to(palette, reference, values, baseline, y_label, **pane):
     """Each log's value as a share of its baseline's, beside the baseline itself at 1."""
     relative = {log: values[log] / baseline[log] for log in values}
-    return two_group(palette, {reference: 1.0}, relative, y_label=y_label)
+    return two_group(palette, {reference: 1.0}, relative, y_label=y_label, **pane)
 
 
-def against_the_baseline(palette):
+def against_the_baseline(palette, **pane):
     return relative_to(
         palette,
         "Best\nbaseline",
         BEST_MODEL,
         BEST_BASELINE,
         y_label="Error, relative to the best baseline",
+        **pane,
     )
 
 
@@ -93,12 +99,14 @@ def xgboost_against_naive(palette):
 
 
 def process_model_relevance(palette):
+    """One pane of a two-column slide, beside the error figure it is read against."""
     return relative_to(
         palette,
         "Best\nbaseline",
         RELEVANCE_MODEL,
         RELEVANCE_BASELINE,
-        y_label="Entropic relevance, relative to the baseline",
+        y_label="Entropic relevance, relative",
+        **COLUMN,
     )
 
 
@@ -116,13 +124,15 @@ def sepsis_fit(palette):
     )
 
 
-#: Each figure the deck shows, by the path it is served at.
+#: Each figure the deck shows, by the path it is served at. A figure that returns on a later slide
+#: is the same chart, drawn again for the pane it returns to.
 CHARTS = {
     "bpi2017-weekly.png": weekly_series,
     "xgboost-against-naive.png": xgboost_against_naive,
     "against-the-baseline.png": against_the_baseline,
     "moirai-generations.png": moirai_generations,
     "process-model-relevance.png": process_model_relevance,
+    "against-the-baseline-beside.png": partial(against_the_baseline, **COLUMN),
     "sepsis-fit.png": sepsis_fit,
 }
 

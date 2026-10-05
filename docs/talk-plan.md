@@ -2,7 +2,8 @@
 
 _Resolves part of [#36](https://github.com/YongboYu/legible-slides/issues/36); the questions'
 sources, the setup part and the author's answers are
-[#38](https://github.com/YongboYu/legible-slides/issues/38)'s._
+[#38](https://github.com/YongboYu/legible-slides/issues/38)'s, and the optional fields are
+[#39](https://github.com/YongboYu/legible-slides/issues/39)'s._
 
 A talk plan is a markdown file with one entry per slide: the slide's section, its headline claim,
 the evidence that proves it and where that evidence comes from, plus the talk's slot, the
@@ -98,7 +99,25 @@ What to say while it is up. This becomes the slide's speaker notes.
 - **Layout:** assertion-evidence
 - **Evidence:** figure. What it shows, and what the reader should see in it.
 - **Source:** Table 4 of the paper; `outputs/zero_shot/…` in the code.
+- **Callout:** The number the evidence turns on, as the box shows it.
 - **Time:** 1min
+
+### 8. The claim this slide proves, written as a sentence.
+
+- **Section:** Findings
+- **Answers:** 1
+- **Layout:** two-col-evidence
+- **Evidence:** figure. What it shows, and what the reader should see in it.
+- **Source:** Table 7 of the paper.
+- **Returns:** Slide 7, beside the new figure, so the room sees both results at once.
+- **Reveal:** slide 7's figure, after the new one.
+- **Terms:** a term this slide introduces, another
+- **Time:** 1min
+- **Notes:**
+  - **Question:** The question this slide answers, the way the room would ask it?
+  - **In:** The line that takes the room here from the slide before.
+  - **Out:** The line that hands over to the slide after.
+  - **Q&A:** The question the author expects here, and the answer, with its source.
 
 ## Challenges
 
@@ -157,6 +176,37 @@ a list of fields:
 Any paragraph after the fields is what to say while the slide is up. Build mode puts it in the
 speaker notes, so a plan that has it is also a first draft of the script, kept off the slide
 (`no-script-on-slide`).
+
+### Optional fields
+
+An entry can carry five more fields, each where its evidence calls for it and nowhere else. Draft
+mode fills them as it writes the entry; build mode puts each one on the slide, and leaves it off
+where the entry does. Each is held to the rules the table names: the linter's advisories check the
+ones decided by script, and review mode reads the slide for the rest.
+
+| Field | What | Held to |
+|---|---|---|
+| **Callout** | The text of a box set over or beside the evidence: the number it turns on, or the definition it leans on. | `signal-budget`, `accent-is-attention` |
+| **Reveal** | What each click adds, in order, separated by semicolons: one step per click. | `motion-purpose` |
+| **Returns** | The figure brought back from an earlier slide, as `Slide N`, then what is added to it here. The figure is the same chart the room saw, redrawn for its pane at most. | `one-message` |
+| **Terms** | The terms the slide introduces and later slides lean on, separated by commas. Each is spelled the way the field spells it, shown on the slide, and introduced on one entry only. | `established-terminology`, `acronym-budget` |
+| **Notes** | Speaker notes as a rehearsal script, in parts indented under it (below). | `no-script-on-slide` |
+
+A callout takes its height from the pane it sits in, so under a figure that fills the pane it
+shrinks the figure, and the figure's type with it (`type-scale`). It fits beside a table, or in a
+column of its own.
+
+**Notes** has four parts, each one line, in this order, and an entry gives the ones it needs:
+
+| Part | What |
+|---|---|
+| **Question** | The question the slide answers, the way the room would ask it (`one-message`). |
+| **In** | The line that takes the room here from the slide before. The first slide of a section has its signpost instead (`section-locator`), so it leaves this out. |
+| **Out** | The line that hands over to the slide after. |
+| **Q&A** | The pushback the author expects while this slide is up, and the answer, with its source. A challenge the plan says this slide meets is answered here. |
+
+The paragraph after the fields stays what it was: what to say while the slide is up. **Notes**
+adds the parts a rehearsal needs around it.
 
 ### The setup, then the findings
 
@@ -217,6 +267,9 @@ for revision.
 
 A deck built from a plan matches it slide for slide: the same headlines, in the same order, on the
 same layouts, in the same sections, with the same time budgets, and the plan's questions on the
-answer slide and its answers on the conclusion. Backup slides, like the references, come after the
+answer slide and its answers on the conclusion. Where an entry carries an optional field, its slide
+shows it: the callout's text in its one callout, one click per step of the reveal, the returning
+figure drawn by the chart its first slide shows, every term on the slide, and the notes' parts in
+its speaker notes, in order. Backup slides, like the references, come after the
 plan's entries and are not part of it. `python/tests/test_plan.py` holds the worked example to all
 of that, so the format and the example cannot drift apart.

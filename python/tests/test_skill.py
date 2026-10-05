@@ -40,8 +40,9 @@ LINTER, READING = "linter", "reading"
 _NAMED = re.compile(r"`(?P<rule>[a-z0-9-]+)`")
 
 #: Hyphenated the way a rule ID is, and not one: the command the palette check runs, and the two
-#: palette roles the worked report names. Everything else shaped like a rule has to be one.
-NOT_RULES = frozenset({"cvd-validate", "series-1", "series-2"})
+#: palette roles the worked report names, and the Slidev directive build mode writes for a reveal.
+#: Everything else shaped like a rule has to be one.
+NOT_RULES = frozenset({"cvd-validate", "series-1", "series-2", "v-click"})
 
 #: The three numbers the procedure owns rather than the canon: `legible lint`'s exit codes, which
 #: step 2 has to spell out to say what each of them means.

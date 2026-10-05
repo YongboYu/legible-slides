@@ -45,6 +45,20 @@ _IMAGE = re.compile(r'src="/(?P<path>[^"]+)"')
 _STATED_IN = re.compile(r"^\s+- \*\*Stated in:\*\* (?P<where>.+)$", re.MULTILINE)
 _SLIDE_REFERENCE = re.compile(r"\bslides? (?P<number>\d+)", re.IGNORECASE)
 
+#: The optional fields, each of which build mode puts on the slide where an entry carries it.
+OPTIONAL_FIELDS = frozenset({"Callout", "Reveal", "Returns", "Terms", "Notes"})
+
+#: The parts of an entry's structured notes, in the order they run, indented under **Notes**.
+NOTES_PARTS = ("Question", "In", "Out", "Q&A")
+_NOTES_PART = re.compile(r"^\s+- \*\*(?P<part>Question|In|Out|Q&A):\*\* (?P<text>.+)$", re.M)
+
+#: A callout on a slide, and the text build mode copied into it from the entry.
+_CALLOUT = re.compile(r"<Callout\b[^>]*>(?P<text>.*?)</Callout>", re.DOTALL)
+#: One click step, as Slidev's directive or its element; `v-clicks` is not one.
+_CLICK = re.compile(r"\bv-click\b")
+#: The slide a returning figure was first shown on, as **Returns** opens.
+_RETURNS = re.compile(r"^Slide (?P<number>\d+)\b")
+
 
 class Entry:
     """One `###` entry of the plan: its number, its claim, and the fields listed under it."""
@@ -75,6 +89,17 @@ class Entry:
         answers = self.fields.get("Answers")
         return int(answers.rstrip(".")) if answers else None
 
+    @property
+    def notes(self) -> dict[str, str]:
+        """The structured notes' parts, by name, if the entry carries **Notes**."""
+        return {match["part"]: match["text"] for match in _NOTES_PART.finditer(self.body)}
+
+    @property
+    def terms(self) -> list[str]:
+        """The terms the entry introduces, if it carries **Terms**."""
+        terms = self.fields.get("Terms")
+        return [term.strip() for term in terms.rstrip(".").split(",")] if terms else []
+
 
 def _headmatter(text: str) -> dict[str, str]:
     block = text.split("---", 2)[1]
@@ -93,6 +118,10 @@ def _part(text: str, heading: str) -> str:
 
 def _numbered(text: str) -> list[str]:
     return [match["text"] for match in _NUMBERED.finditer(text)]
+
+
+def _flat(text: str) -> str:
+    return " ".join(text.split())
 
 
 @pytest.fixture(scope="module")
@@ -137,6 +166,17 @@ def report():
 def talk(deck):
     """The deck's slides before its backups: the ones the plan's entries are for."""
     return [slide for slide in deck if not slide.backup]
+
+
+@pytest.fixture(scope="module")
+def shown(deck_text, entries) -> list[str]:
+    """What each entry's slide shows the room, as markup: from its headline to its notes."""
+    slides = []
+    for entry in entries:
+        start = deck_text.index(f"# {entry.claim}\n")
+        end = deck_text.find("\n---\n", start)
+        slides.append(deck_text[start : end if end != -1 else None].split("<!--", 1)[0])
+    return slides
 
 
 # The plan, against its format.
@@ -222,7 +262,8 @@ def test_the_plan_says_where_it_meets_each_challenge_it_expects(plan_text, entri
 def test_the_format_names_every_field_the_example_uses(entries):
     documented = FORMAT.read_text(encoding="utf-8")
 
-    for key in {key for entry in entries for key in entry.fields} | {"Stated in"}:
+    used = {key for entry in entries for key in entry.fields} | {"Stated in"}
+    for key in used | {part for entry in entries for part in entry.notes}:
         assert f"**{key}**" in documented, key
     for part in ("Questions", "Challenges", "Cut"):
         assert f"### {part}" in documented, part
@@ -274,6 +315,57 @@ def test_the_conclusion_gives_the_plan_s_answers(deck_text, entries):
     assert _numbered(given) == _numbered(entries[-1].body)
 
 
+def test_the_example_uses_every_optional_field_where_its_evidence_earns_one(entries):
+    used = {key for entry in entries for key in entry.fields}
+
+    assert OPTIONAL_FIELDS <= used, OPTIONAL_FIELDS - used
+
+
+def test_a_callout_in_the_plan_is_the_one_callout_on_its_slide(talk, entries, shown):
+    """Held to `signal-budget`: an entry whose evidence is already a callout carries no second."""
+    for slide, entry, markup in zip(talk, entries, shown, strict=True):
+        if "Callout" in entry.fields:
+            assert entry.kind != "callout", entry.claim
+            assert slide.callouts == 1, slide.number
+            assert _flat(entry.fields["Callout"]) in _flat(_CALLOUT.search(markup)["text"])
+        elif entry.kind != "callout":
+            assert slide.callouts == 0, slide.number
+
+
+def test_a_reveal_in_the_plan_is_one_click_per_step_on_its_slide(entries, shown):
+    for entry, markup in zip(entries, shown, strict=True):
+        steps = [step for step in entry.fields.get("Reveal", "").split(";") if step.strip()]
+        assert len(_CLICK.findall(markup)) == len(steps), entry.claim
+
+
+def test_every_term_is_introduced_once_shown_on_its_slide_and_said_in_its_notes(
+    talk, entries, shown
+):
+    """The room sees a term the first time it is defined, and no later slide defines it again."""
+    introduced = [term.casefold() for entry in entries for term in entry.terms]
+
+    assert len(introduced) == len(set(introduced))
+    for slide, entry, markup in zip(talk, entries, shown, strict=True):
+        for term in entry.terms:
+            assert term.casefold() in _flat(markup).casefold(), (entry.claim, term)
+            assert term.casefold() in _flat(slide.notes).casefold(), (entry.claim, term)
+
+
+def test_structured_notes_reach_the_slide_s_speaker_notes_in_order(talk, entries):
+    for slide, entry in zip(talk, entries, strict=True):
+        if "Notes" not in entry.fields:
+            assert not entry.notes, entry.claim
+            continue
+        assert entry.notes, entry.claim
+        assert list(entry.notes) == [part for part in NOTES_PARTS if part in entry.notes]
+        written = [f"{part}: {text}" for part, text in entry.notes.items()]
+        assert all(line in slide.notes for line in written), slide.number
+        # After the time budget and any signpost, in the plan's order, and before the paragraph.
+        lines = [line for line in slide.notes.strip().split("\n\n") if line.strip()]
+        leading = [line for line in lines if line.startswith(("Time:", "Signpost:"))]
+        assert lines[len(leading) : len(leading) + len(written)] == written, slide.number
+
+
 def test_the_built_deck_passes_the_mechanical_checks(report):
     """Build mode's own acceptance bar: the gate tier is clean. Its advisories are the review's."""
 
@@ -306,6 +398,26 @@ def test_every_image_the_deck_shows_is_drawn_by_its_figure_script(figures, deck_
     drawn = figures.draw(PALETTE, tmp_path)
 
     assert {path.relative_to(tmp_path).as_posix() for path in drawn} == shown
+
+
+def test_a_returning_figure_is_drawn_by_the_chart_its_first_slide_shows(figures, entries, shown):
+    """A figure that comes back is the same chart the room saw, redrawn for its pane at most, so
+    what it adds is all that is new on the slide."""
+
+    def charts(markup):
+        return {
+            getattr(chart, "func", chart)
+            for chart in (figures.CHARTS[path.split("/", 1)[1]] for path in _IMAGE.findall(markup))
+        }
+
+    for entry, markup in zip(entries, shown, strict=True):
+        if "Returns" not in entry.fields:
+            continue
+        returned = _RETURNS.match(entry.fields["Returns"])
+        assert returned, entry.fields["Returns"]
+        first = int(returned["number"])
+        assert first < entry.number, entry.claim
+        assert charts(markup) & charts(shown[first - 1]), entry.claim
 
 
 # The review, against the linter.

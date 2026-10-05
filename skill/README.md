@@ -54,19 +54,22 @@ institution's mark ships, so the author points the cover at their own.
 ## What draft and build do
 
 Draft reads the paper for the argument and the codebase for the numbers, and asks the author for
-what neither says: the slide the talk rests on, and the challenges they expect. It writes a plan: the
-questions the talk answers, taken from the paper's stated research questions or contributions and
-quoting where; a setup that makes the case for the problem and the approach; then the findings,
+what neither says: the slide the talk rests on, and the challenges they expect. It writes a plan:
+the questions the talk answers, taken from the paper's stated research questions or contributions
+and quoting where; a setup that makes the case for the problem and the approach; then the findings,
 question by question. Every entry is one slide, its headline written before its evidence is picked
-(`message-before-visual`). Every number is checked against its source as it goes in, and
-whatever didn't fit the slot, or didn't hold up, is listed under the plan's cuts with the reason.
-Then it stops. The author edits the plan, and that's where the argument gets settled, because
-changing a line is cheaper than redrawing a slide.
+(`message-before-visual`). Where the evidence calls for it, an entry also carries a callout, a click
+reveal, a figure returning from an earlier slide, the terms it introduces, and notes written as a
+rehearsal script. Every number is checked against its source as it goes in, and whatever didn't fit
+the slot, or didn't hold up, is listed under the plan's cuts with the reason. Then it stops. The
+author edits the plan, and that's where the argument gets settled, because changing a line is
+cheaper than redrawing a slide.
 
 Build stamps the template and fills each slide from its entry: the headline word for word, the
-layout, the section, the evidence, footnotes for the sources, and the notes. It draws every chart
-from data with the figure helper, builds the deck, and runs review mode over it. The report goes to
-the author with the deck. An error is fixed as part of the build; a warning is left for the author.
+layout, the section, the evidence, footnotes for the sources, and the notes, plus whichever of the
+optional fields the entry carries, and none it doesn't. It draws every chart from data with the
+figure helper, builds the deck, and runs review mode over it. The report goes to the author with the
+deck. An error is fixed as part of the build; a warning is left for the author.
 
 [`examples/pmf-tsfm/`](examples/pmf-tsfm) is both modes run end to end on a real paper, with the
 review attached, and `python/tests/test_plan.py` holds the deck to its plan.

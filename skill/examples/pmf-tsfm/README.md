@@ -26,6 +26,13 @@ codebase has no per-day XGBoost forecasts to redraw it from, and against the bas
 rebuilt, the figure doesn't show what the paper's caption says. Draft mode is where that came up,
 and the plan is where it was written down.
 
+Under [#39](https://github.com/YongboYu/legible-slides/issues/39), the same comparison's second
+half: the plan gained the optional fields that deck uses on most slides. Slide 10 sets its key
+number in a callout, slide 11 brings back slide 8's error figure on a click, beside the process
+models that the same forecasts make, and eight slides carry notes written for rehearsal, with a
+Q&A answer on each slide a challenge is met on. Slide 8 was going to get a callout too, but under a
+figure that fills the pane it shrank the figure below the type floor, so it was left out.
+
 ## What is here, and what isn't
 
 `deck/` holds only the files build mode wrote. Everything else in a built deck, like the palette,
@@ -42,9 +49,9 @@ cd /tmp/pmf-tsfm-deck && pnpm install && pnpm build
 
 CI does exactly that on every push, and lints the result.
 [`python/tests/test_plan.py`](../../../python/tests/test_plan.py) holds the rest: the plan is
-complete, the deck matches it slide for slide, the deck passes the mechanical checks, every image
-is drawn by the figure script, and the review reports the linter's verdict and every one of its
-findings.
+complete, the deck matches it slide for slide, every optional field in the plan shows up on its
+slide, the deck passes the mechanical checks, every image is drawn by the figure script, and the
+review reports the linter's verdict and every one of its findings.
 
 ## Redrawing
 

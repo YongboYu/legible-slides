@@ -70,6 +70,10 @@ Time: 1min
 
 Signpost: first the problem, then our approach, then three findings.
 
+Question: Why forecast a process model at all?
+
+Out: Forecasting a few hundred counts sounds easy. Here's why it isn't.
+
 A process model here is a directly-follows graph: how often one activity is followed straight away
 by another. Discover it from last month's events and it describes last month. These three counts
 come from a loan application process, and each one moves on its own schedule. Count each arrow per
@@ -121,6 +125,14 @@ layout: assertion-evidence
 <!--
 Time: 1min
 
+Question: Don't the methods we have already handle this?
+
+In: So the data is small and noisy. Here's what a tuned model makes of it.
+
+Out: Training from scratch doesn't pay on data this small. What if the model needed no training at all?
+
+Q&A: Were the baselines tuned? Yes: they're two of the strongest from our earlier benchmark, and XGBoost's hyperparameters were optimized (Section 4.1).
+
 In our earlier benchmark, machine learning and deep learning models gave only modest gains over
 simple statistical ones. These are two of the strongest from it: a seasonal naive forecast, which says
 next week looks like this week, and an XGBoost model with its hyperparameters tuned. XGBoost loses
@@ -149,6 +161,12 @@ section: Approach
 Time: 1min
 
 Signpost: that's the problem. Here is what we tried.
+
+Question: Is this just a language model?
+
+Out: So why should a model trained on other data help with ours?
+
+Q&A: Did you fine-tune GPT? No: these are forecasters pre-trained on time series, not language models (Section 3.2).
 
 The current direction in forecasting is foundation models. A language model learns from a huge
 amount of text and then works on text it has never seen. A time series foundation model does the
@@ -207,6 +225,12 @@ Time: 1min 15s
 
 Signpost: now the three findings, one question at a time.
 
+Question: Used as they are, do they beat the best methods?
+
+Out: There are twelve of them, so which one should you pick?
+
+Q&A: Does RMSE tell the same story? Yes: it agrees with the mean absolute error everywhere the talk makes a claim (Table 5).
+
 The first question, and the answer is yes. For each log, the baseline is whichever of the two did
 better, and that was the seasonal naive forecast every time. Sepsis and BPI 2019 have the most
 irregular series, and that's where the gap is largest. The best result on every log comes from one
@@ -232,9 +256,17 @@ layout: assertion-evidence
 <!--
 Time: 45s
 
-So which one to pick? A newer generation helped more than a bigger model did. MOIRAI 2.0 was
-trained on about ten times as many observations as 1.1, which is our best guess at why. Within a
-generation, larger models do help, but most on logs with a regular pattern to learn.
+Question: Does a bigger model help?
+
+In: Here are two generations of one family, on one log.
+
+Out: They're strong as they are. Can training them on the log make them stronger?
+
+Q&A: Which model should I use? No family wins every log, and the three newest models hold the best result on all four between them (Table 4).
+
+A newer generation helped more than a bigger model did. MOIRAI 2.0 was trained on about ten times as
+many observations as 1.1, which is our best guess at why. Within a generation, larger models do
+help, but most on logs with a regular pattern to learn.
 -->
 
 ---
@@ -249,6 +281,12 @@ layout: assertion-evidence
 | Chronos-2, BPI 2017 | 7.25 | not run | 7.89 |
 | MOIRAI 1.1 large, BPI 2019 | 12.30 | 12.27 | 23.06 |
 
+<Callout accent>
+
+Full fine-tuning on BPI 2019: from 12.3 to 23.1
+
+</Callout>
+
 <Footnotes>
   <Footnote :number="1">Yu et al. (2026), Table 6: mean absolute error.</Footnote>
 </Footnotes>
@@ -256,17 +294,25 @@ layout: assertion-evidence
 <!--
 Time: 1min
 
-The second question. LoRA trains a small add-on and leaves the model itself alone, and it moved the
-error by up to about a tenth, in either direction. Full fine-tuning retrains everything, and on BPI
-2019 it took one model from 12.3 to 23.1. With logs this small, the model mostly learns the noise,
-the same thing that held XGBoost back.
+Question: Does fine-tuning make it better still?
+
+In: Now the second question: training them further on each log.
+
+Out: So far, every number is the error on each series. Now the process model they add up to.
+
+LoRA trains a small add-on and leaves the model itself alone, and it moved the error by up to about
+a tenth, in either direction. Full fine-tuning retrains everything, and on BPI 2019 it took one
+model from 12.3 to 23.1. With logs this small, the model mostly learns the noise, the same thing
+that held XGBoost back.
 -->
 
 ---
-layout: assertion-evidence
+layout: two-col-evidence
 ---
 
 # Yet on three logs, the process models they forecast score 6 to 13% worse than the baselines' on entropic relevance.
+
+::left::
 
 <Figure
   src="/figures/process-model-relevance.png"
@@ -274,20 +320,35 @@ layout: assertion-evidence
   :cite="1"
 />
 
+::right::
+
+<Figure
+  v-click
+  src="/figures/against-the-baseline-beside.png"
+  caption="From slide 8: the error of the same forecasts, as a share of the best baseline's."
+  :cite="2"
+/>
+
 <Footnotes>
   <Footnote :number="1">Yu et al. (2026), Table 7.</Footnote>
+  <Footnote :number="2">Yu et al. (2026), Table 4.</Footnote>
 </Footnotes>
 
 <!--
 Time: 1min 15s
 
-The third question, and the one we find most interesting. We rebuild the forecast counts into a
-directly-follows graph for each week and replay the real traces on it. Entropic relevance is how
-many bits that graph needs to describe them, so lower is better. The pre-trained models' graphs come
-out slightly worse than the baselines', even though their counts were more accurate. All of them do
-better than reusing the graph from the training data, which scores 1.15, 3.89 and 5.83 on these
-three logs. So forecasting the graph is worth it, but a lower error per series doesn't add up to a
-better graph.
+Question: Does a better forecast give a better process model?
+
+In: Now the third question: what those forecasts add up to.
+
+Out: And on the fourth log, Sepsis, the graphs do much worse.
+
+We find this one the most interesting. We rebuild the forecast counts into a directly-follows graph
+for each week and replay the real traces on it. Entropic relevance is how many bits that graph needs
+to describe them, so lower is better. The pre-trained models' graphs come out slightly worse than
+the baselines', even though their counts were more accurate. All of them do better than reusing the
+graph from the training data, which scores 1.15, 3.89 and 5.83 on these three logs. So forecasting
+the graph is worth it, but a lower error per series doesn't add up to a better graph.
 -->
 
 ---
@@ -308,6 +369,14 @@ layout: assertion-evidence
 
 <!--
 Time: 45s
+
+Question: What happens on the sparsest log?
+
+In: Now the fourth log, the one the last slide left out.
+
+Out: So, to answer the three questions.
+
+Q&A: Why does Sepsis fail? Its cases are spread thin over many days, and its series carry the weakest temporal signal (Tables 2 and 3).
 
 On the other three logs, at least 98% of traces fit for every model. Sepsis has few cases spread
 over many days, and there the pre-trained models' graphs miss most traces.

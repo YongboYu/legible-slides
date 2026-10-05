@@ -50,6 +50,7 @@ you read them.
 ```bash
 legible rules message-before-visual answer-first conclusion-stays-up one-message assertion-headline
 legible rules no-section-dividers section-locator pace-budget acronym-budget
+legible rules signal-budget accent-is-attention motion-purpose established-terminology
 ```
 
 As in review mode: work from what these print, not from memory of them, and stop if one exits 2.
@@ -74,6 +75,13 @@ question got with how much of the paper it takes up, and say in the hand-over wh
 
 For every entry, write it in the order `message-before-visual` asks for, and then say exactly where
 its evidence is: a table or section of the paper, a file in the codebase.
+
+Then the format's optional fields, where the evidence calls for them and nowhere else: a callout
+for the one number a figure or a table turns on, a reveal where the evidence arrives in steps, a
+figure that returns where a later slide adds to one the room has seen, the terms each slide
+introduces, and notes structured for rehearsal. Write the **Q&A** part on the slide each challenge
+from step 1 is met on. A field added to every entry is decoration, and the rules it is held to will
+say so.
 
 Check every number in a claim against its source as you write it. Where the codebase holds the data
 behind a figure, extract it into the plan's data directory with a script that says where it read
@@ -120,7 +128,20 @@ Replace the template's skeleton slides with one slide per entry:
 | **Source** | a footnote on the slide, and an entry on the references slide |
 | **Time** | a `Time:` line in the speaker notes |
 | the paragraph under it | the speaker notes, with a `Signpost:` line where the section changes |
+| **Callout** | a `Callout` over or beside the evidence, its text word for word, held to `signal-budget` and `accent-is-attention` |
+| **Reveal** | a `v-click` on each element that arrives, one per step, in the plan's order |
+| **Returns** | the earlier slide's figure on this one, drawn by the same chart in the figure script, sized for its pane, beside what the entry adds |
+| **Terms** | each term on the slide where the evidence names it, spelled as the plan spells it, and said in the notes where it is defined |
+| **Notes** | a `Question:`, `In:`, `Out:` and `Q&A:` paragraph in the speaker notes, one per part the entry gives, in that order, after the `Time:` and `Signpost:` lines and before the paragraph |
 | **Setup**, **Answers**, **Load-bearing** | nothing: they shape the argument in the plan, and the slide shows only what proves its claim |
+
+An optional field the entry leaves out is left off the slide too: build mode adds no callout, click,
+returning figure or term the plan did not ask for. Load what the optional fields are held to before
+filling them:
+
+```bash
+legible rules signal-budget accent-is-attention motion-purpose established-terminology acronym-budget
+```
 
 Delete the placeholder image and anything else the template stamped that no entry asked for.
 
