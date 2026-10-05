@@ -15,6 +15,7 @@ report.min_delta_e     # {'normal': …, 'deuteranomaly': …, 'protanomaly': �
 report.failures        # pairs below the floor, named by role — never by hex
 report.warnings        # grayscale collisions; advisory, never a failure
 report.contrast        # the attention pairings and the WCAG contrast each achieves
+report.text_contrast   # the text pairings, likewise
 ```
 
 ## What `validate()` checks
@@ -38,7 +39,9 @@ so `brand ↔ series` is never compared: those roles cannot share an axis.
 
 It also measures the pairings **`accent-is-attention`** names, in WCAG contrast. The canon owns the pairings and the
 ratio they clear; a pairing below it fails the palette like a pair below the floor, and is listed in
-`report.contrast_failures`.
+`report.contrast_failures`. The pairings **`decorative-neutral-never-text`** names, every role the
+template sets as text on every ground it sits on, are measured the same way and listed in
+`report.text_contrast_failures`.
 
 Pass your own floor to move the boundary:
 
@@ -69,6 +72,10 @@ FAIL  my-theme.json — min ΔE … (floor …)
          …  ink on accent
   fail   …  accent-strong on surface
          …  accent-strong on surface-alt
+
+  text contrast (min …)
+         …  ink on surface
+         …  …
 
   fail  deuteranomaly   …  series-1 ↔ series-2
   warn  grayscale       …  muted ↔ series-1

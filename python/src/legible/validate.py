@@ -5,9 +5,9 @@ and under which vision. The rule is `separation-floor`, and the canon owns its f
 and grayscale carve-out; ``docs/cvd-validator-contract.md`` fixes what this module adds — the two
 co-occurrence groups and the shape of the report.
 
-It also reads the pairings `accent-is-attention` names in WCAG contrast, because attention that
-cannot be read is a palette that fails as surely as two series that cannot be told apart. The canon
-owns the pairings and the ratio they clear.
+It also reads the pairings `accent-is-attention` and `decorative-neutral-never-text` name in WCAG
+contrast, because attention or a caption that cannot be read is a palette that fails as surely as
+two series that cannot be told apart. The canon owns the pairings and the ratios they clear.
 """
 
 from __future__ import annotations
@@ -19,7 +19,13 @@ from typing import NamedTuple
 
 from legible.contrast import contrast_ratio
 from legible.cvd import CVD_CONDITIONS, GRAYSCALE, delta_e, hex_to_rgb1, simulate
-from legible.method import ATTENTION_CONTRAST_MIN, ATTENTION_CONTRAST_PAIRS, DELTA_E_FLOOR
+from legible.method import (
+    ATTENTION_CONTRAST_MIN,
+    ATTENTION_CONTRAST_PAIRS,
+    DELTA_E_FLOOR,
+    TEXT_CONTRAST_MIN,
+    TEXT_CONTRAST_PAIRS,
+)
 from legible.palette import Palette
 
 #: Decimal places every ΔE is measured, reported and compared at. One precision throughout, so the
@@ -80,6 +86,9 @@ class Report:
     contrast_threshold: float = ATTENTION_CONTRAST_MIN
     contrast: tuple[ContrastPair, ...] = ()
     contrast_failures: tuple[ContrastPair, ...] = ()
+    text_contrast_threshold: float = TEXT_CONTRAST_MIN
+    text_contrast: tuple[ContrastPair, ...] = ()
+    text_contrast_failures: tuple[ContrastPair, ...] = ()
 
 
 class _Pair(NamedTuple):
@@ -92,7 +101,8 @@ def validate(palette: Palette, threshold: float = DELTA_E_FLOOR) -> Report:
     """Check a palette's data-encoding roles for perceptual separation.
 
     Passes if every pair within each co-occurrence group stays at or above ``threshold`` under
-    every condition the canon names, and every attention pairing clears its contrast ratio.
+    every condition the canon names, and every attention and text pairing clears its contrast
+    ratio.
     Grayscale collisions come back as warnings instead: the method already covers them by never
     letting colour be the sole channel.
     """
@@ -118,18 +128,13 @@ def validate(palette: Palette, threshold: float = DELTA_E_FLOOR) -> Report:
             grayscale_min=min(pair.delta_e for pair in grayscale),
         )
 
-    contrast = tuple(
-        ContrastPair(
-            foreground,
-            background,
-            round(contrast_ratio(palette[foreground], palette[background]), CONTRAST_PRECISION),
-        )
-        for foreground, background in ATTENTION_CONTRAST_PAIRS
-    )
+    contrast = _measure(palette, ATTENTION_CONTRAST_PAIRS)
     contrast_failures = tuple(pair for pair in contrast if pair.ratio < ATTENTION_CONTRAST_MIN)
+    text_contrast = _measure(palette, TEXT_CONTRAST_PAIRS)
+    text_contrast_failures = tuple(pair for pair in text_contrast if pair.ratio < TEXT_CONTRAST_MIN)
 
     return Report(
-        passed=not failures and not contrast_failures,
+        passed=not failures and not contrast_failures and not text_contrast_failures,
         threshold=threshold,
         groups=group_reports,
         min_delta_e={
@@ -143,6 +148,21 @@ def validate(palette: Palette, threshold: float = DELTA_E_FLOOR) -> Report:
         contrast_threshold=ATTENTION_CONTRAST_MIN,
         contrast=contrast,
         contrast_failures=contrast_failures,
+        text_contrast_threshold=TEXT_CONTRAST_MIN,
+        text_contrast=text_contrast,
+        text_contrast_failures=text_contrast_failures,
+    )
+
+
+def _measure(palette: Palette, pairs: Sequence[tuple[str, ...]]) -> tuple[ContrastPair, ...]:
+    """Each (foreground, background) pairing, and the WCAG contrast ratio it achieves."""
+    return tuple(
+        ContrastPair(
+            foreground,
+            background,
+            round(contrast_ratio(palette[foreground], palette[background]), CONTRAST_PRECISION),
+        )
+        for foreground, background in pairs
     )
 
 

@@ -386,8 +386,19 @@ def small_multiples(
     return figure
 
 
-def save(figure: Figure, path: str | Path, *, scale: int = DEFAULT_SCALE) -> Path:
+def save(
+    figure: Figure,
+    path: str | Path,
+    *,
+    scale: int = DEFAULT_SCALE,
+    lands_at_px: float | None = None,
+) -> Path:
     """Write a figure to PNG at ``scale`` times its canvas size, and return where it went.
+
+    ``lands_at_px`` is the width the figure is shown at on the canvas, and defaults to the width it
+    was drawn at. A figure whose smallest type lands below the floor there is not written:
+    `type-scale` holds a figure to the floor where it lands, and a figure script is the one place
+    that knows both sizes, so the check belongs here rather than in a test only this repo runs.
 
     Reproducible on purpose. Figures are committed alongside the deck, so the same palette and the
     same data have to produce the same file — otherwise every rerun is a diff and nobody reads the
@@ -396,6 +407,12 @@ def save(figure: Figure, path: str | Path, *, scale: int = DEFAULT_SCALE) -> Pat
     is a separate question, and ``pyproject.toml`` says where that pin stands.
     """
     path = Path(path)
+    smallest = smallest_type_px(figure, lands_at_px=lands_at_px)
+    if smallest is not None and round(smallest, 1) < FLOOR_PX:
+        raise ValueError(
+            f"{path.name}: its smallest type lands at {smallest:.3g} px, below the {FLOOR_PX} px "
+            "floor; draw it at the width it lands, or with fewer, larger labels"
+        )
     path.parent.mkdir(parents=True, exist_ok=True)
     # The family again, because text this draw creates reads it at creation. Sizes and colours are
     # already on the axes, where `tick_params` keeps them for ticks that do not exist yet.

@@ -44,6 +44,9 @@ _THRESHOLD = re.compile(r"`(?P<key>[a-z0-9-]+)\s*=\s*(?P<value>[^`]+)`")
 #: The footers a rule's own metadata lives in.
 _DECIDED_BY, _THRESHOLD_MARKER = "**Decided by**", "**Threshold**"
 
+#: The footer mark of a rule that is part of the accessibility floor, which no slide may except.
+_FLOOR_MARKER = "**Floor**"
+
 #: The two sides of the seam, and the only words a `**Decided by**` footer may name. `script` is a
 #: rule `legible lint` settles; `judgment` is one only a reader can.
 DECIDERS = ("script", "judgment")
@@ -78,6 +81,9 @@ class Rule:
     decided_by: tuple[str, ...]
     text: str
     thresholds: Mapping[str, str] = field(default_factory=dict)
+    #: Whether the rule is part of the floor: a reader's access to the slide rather than a default
+    #: of the method's style, so an `Exception:` in a slide's notes never reaches it.
+    floor: bool = False
 
 
 #: Where the canon may live, in preference order: `docs/method.md` in a checkout of this repo,
@@ -194,6 +200,7 @@ def _parse(text: str) -> list[Rule]:
                 decided_by=_decided_by(body) or inherited,
                 text=_trimmed(block),
                 thresholds=_thresholds(body),
+                floor=_FLOOR_MARKER in body,
             )
         )
 
@@ -305,8 +312,16 @@ HEADLINE_LINES_MAX = int(rule_thresholds("headline-shape")["headline-lines-max"]
 BODY_REACH_IMAGE_HEIGHTS = float(_TYPE_SCALE["body-reach-image-heights"])
 
 
+_DECORATIVE_NEUTRAL = rule_thresholds("decorative-neutral-never-text")
+
 #: The WCAG contrast any role set as text has to clear against its ground, below headline size.
-TEXT_CONTRAST_MIN = float(rule_thresholds("decorative-neutral-never-text")["text-contrast-min"])
+TEXT_CONTRAST_MIN = float(_DECORATIVE_NEUTRAL["text-contrast-min"])
+
+#: The pairings text is read in, as (foreground, background) roles: every role the template sets as
+#: text, on every ground it sits on. Written `x on y` in the canon, as the attention pairings are.
+TEXT_CONTRAST_PAIRS = tuple(
+    tuple(pair.split(" on ")) for pair in _listed(_DECORATIVE_NEUTRAL["text-contrast-pairs"])
+)
 
 
 _FONTS = rule_thresholds("fonts")

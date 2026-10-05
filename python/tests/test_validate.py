@@ -105,6 +105,34 @@ def test_the_shipped_theme_clears_every_attention_pairing(themes_dir):
     }
 
 
+def test_the_shipped_theme_clears_every_text_pairing(themes_dir):
+    report = validate(load_palette(themes_dir / "leuven-blue.json"))
+
+    assert report.text_contrast_failures == ()
+    measured = {(pair.foreground, pair.background) for pair in report.text_contrast}
+    assert measured == {
+        (foreground, background)
+        for foreground in ("ink", "neutral", "brand")
+        for background in ("surface", "surface-alt")
+    }
+
+
+def test_a_neutral_that_vanishes_into_the_ground_fails_on_text_contrast(
+    write_theme, invisible_neutral_palette
+):
+    """Captions, the footer and every other neutral text unreadable, while the data colours still
+    separate: the palette fails, and says which pairings."""
+    report = validate(load_palette(write_theme(invisible_neutral_palette)))
+
+    assert not report.passed
+    assert report.failures == ()
+    failing = {(pair.foreground, pair.background) for pair in report.text_contrast_failures}
+    assert failing == {("neutral", "surface"), ("neutral", "surface-alt")}
+    assert all(
+        pair.ratio < report.text_contrast_threshold for pair in report.text_contrast_failures
+    )
+
+
 def test_attention_text_too_faint_on_the_ground_fails_naming_the_pairing(
     write_theme, faint_attention_palette
 ):

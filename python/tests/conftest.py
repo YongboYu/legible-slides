@@ -87,3 +87,11 @@ def faint_attention_palette(base_palette: dict) -> dict:
     contrast under ink, and fails it as text on the ground."""
     base_palette["accent-strong"] = base_palette["accent"]
     return base_palette
+
+
+@pytest.fixture
+def invisible_neutral_palette(base_palette: dict) -> dict:
+    """A palette whose text neutral is the ground itself: every caption and footer vanishes, and
+    not one data colour moves, so only the text pairings can notice."""
+    base_palette["neutral"] = base_palette["surface"]
+    return base_palette

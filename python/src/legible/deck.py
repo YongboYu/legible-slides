@@ -28,7 +28,7 @@ from collections.abc import Iterator, Sequence
 from dataclasses import dataclass
 from pathlib import Path
 
-__all__ = ["Slide", "parse_deck", "read_deck"]
+__all__ = ["Slide", "font_sizes", "parse_deck", "read_deck"]
 
 #: A slide separator: three dashes alone on a line. Four or more is a horizontal rule, which is
 #: what Slidev's own parser makes of it too.
@@ -56,6 +56,12 @@ _CLASS_ATTRIBUTE = re.compile(r"\bclass\s*=\s*(?:\"(?P<double>[^\"]*)\"|'(?P<sin
 
 #: A font size inside a style: the CSS property, or the camel-cased key a Vue style object uses.
 _FONT_SIZE = re.compile(r"font-?size['\"]?\s*:\s*['\"]?(?P<value>[^;'\",}]+)", re.IGNORECASE)
+
+#: An SVG text element's size as a presentation attribute, ``font-size="8"``. Unitless, it is in the
+#: SVG's user units, which are canvas px when the SVG is drawn at the size it lands.
+_SVG_FONT_SIZE = re.compile(
+    r"\bfont-size\s*=\s*(?:\"(?P<double>[^\"]*)\"|'(?P<single>[^']*)')", re.IGNORECASE
+)
 
 #: A UnoCSS class that sets a font size: a named step of its scale, or an arbitrary value.
 _TEXT_SIZE_CLASS = re.compile(r"^text-(?:xs|sm|base|lg|\d?xl|\[[^\]]+\])$")
@@ -112,6 +118,12 @@ _CALLOUT = re.compile(r"<Callout\b")
 #: The line of a slide's notes that states its time budget, as the canon asks for it to be written.
 _TIME = re.compile(r"^\s*Time:[ \t]*(?P<budget>.+?)\s*$", re.MULTILINE)
 
+#: An exception the author takes to one of the method's defaults on this slide: a line of the notes
+#: opening ``Exception:``, then the rule's ID, then the reason, which is the part that matters.
+_EXCEPTION = re.compile(
+    r"^\s*Exception:[ \t]*`?(?P<rule>[a-z0-9-]+)`?[ \t:,—–-]*(?P<reason>.*?)\s*$", re.MULTILINE
+)
+
 #: A top-level frontmatter key the rules read, and its value up to a trailing comment. Read by line
 #: rather than as YAML, for the reason the module gives for the split: Slidev does not require the
 #: block to parse, so neither does this, and the keys asked for are scalars at column 0.
@@ -162,6 +174,8 @@ class Slide:
     duration: str | None = None
     #: The time budget the slide's notes state, as written, or ``None`` where they state none.
     time: str | None = None
+    #: The exceptions the notes take, as (rule ID, reason) pairs; a reason may be empty.
+    exceptions: tuple[tuple[str, str], ...] = ()
 
 
 def read_deck(path: str | Path) -> tuple[Slide, ...]:
@@ -291,6 +305,10 @@ def _slide(number: int, frontmatter: Sequence[str], lines: Sequence[str]) -> Sli
         callouts=len(_CALLOUT.findall(markup)),
         duration=keys.get("duration") or None,
         time=time.group("budget") if time else None,
+        exceptions=tuple(
+            (match.group("rule"), match.group("reason"))
+            for match in _EXCEPTION.finditer(notes or "")
+        ),
     )
 
 
@@ -417,9 +435,27 @@ def _emphasis(markup: str) -> tuple[str, ...]:
     )
 
 
+def font_sizes(text: str, *, css: bool = False) -> tuple[str, ...]:
+    """Every size a deck's own component or stylesheet sets, as ``Slide.font_sizes`` writes them.
+
+    ``css`` reads the whole of ``text`` as a stylesheet; otherwise it is markup, a Vue component
+    with its ``<style>`` block, its style attributes, its classes and any SVG it draws.
+    """
+    if css:
+        return tuple(
+            f"font-size: {size.group('value').strip()}" for size in _FONT_SIZE.finditer(text)
+        )
+    return _font_sizes(text)
+
+
 def _font_sizes(body: str) -> tuple[str, ...]:
     """Every size the slide's markup sets, in the order it sets them."""
     found: list[tuple[int, str]] = []
+    for attribute in _SVG_FONT_SIZE.finditer(body):
+        value = (attribute.group("double") or attribute.group("single") or "").strip()
+        # A bare number is user units; spelled with px, it is the same size said the CSS way.
+        unit = "px" if re.fullmatch(r"\d*\.?\d+", value) else ""
+        found.append((attribute.start(), f"font-size: {value}{unit}"))
     for attribute in _STYLE_ATTRIBUTE.finditer(body):
         style = attribute.group("double") or attribute.group("single") or ""
         found.extend(

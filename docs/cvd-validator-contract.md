@@ -48,6 +48,10 @@ rather than ΔE, at two decimal places, and compared inclusively against the can
 pairing below it fails the palette and exits `1`, exactly like a pair below the floor; the canon
 owns the list and the number, so a pairing added there is checked with nothing edited here.
 
+`decorative-neutral-never-text` does the same for the roles the template sets as text, on the grounds
+they sit on, against its own minimum. Without it a palette could pass with captions and the footer
+painted in the ground colour, because nothing about its data colours would have moved.
+
 ## 2. Metric
 
 The canon names the simulation, the conditions, the severity and the distance space
@@ -135,6 +139,7 @@ there rather than carrying its own copy, and the same name is used throughout th
 Report:
   passed:       bool          # every CVD pair ≥ threshold in both groups (grayscale excluded),
                               # and every attention pairing ≥ contrast_threshold
+                              # and every text pairing ≥ text_contrast_threshold
   threshold:    float         # the canon's floor unless the caller overrides it
   groups:       {G1: {...}, G2: {...}}
   min_delta_e:  {normal, deuteranomaly, protanomaly, tritanomaly}
@@ -144,6 +149,9 @@ Report:
   contrast_threshold: float                              # the canon's `attention-contrast-min`
   contrast:     [(foreground, background, ratio)]        # every pairing the canon names
   contrast_failures: [(foreground, background, ratio)]   # pairings < contrast_threshold
+  text_contrast_threshold: float                         # the canon's `text-contrast-min`
+  text_contrast: [(foreground, background, ratio)]       # every text pairing the canon names
+  text_contrast_failures: [(foreground, background, ratio)]
 ```
 
 **CLI** — `cvd-validate themes/leuven-blue.json`:
