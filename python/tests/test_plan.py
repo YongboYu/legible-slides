@@ -32,8 +32,13 @@ CONTENT_LAYOUTS = frozenset({"assertion-evidence", "two-col-evidence"})
 EVERY_ENTRY = frozenset({"Layout", "Evidence", "Time"})
 CONTENT_ENTRY = frozenset({"Section", "Source"})
 EVIDENCE_KINDS = frozenset(
-    {"figure", "table", "equation", "callout", "subtitle", "questions", "answers"}
+    {"figure", "diagram", "table", "equation", "callout", "subtitle", "questions", "answers"}
 )
+
+#: Where a deck keeps the components build mode draws its concept diagrams with, and where the
+#: theme's tokens are defined: the only colours and sizes such a component may use.
+COMPONENTS = DECK / "components"
+THEME_STYLES = REPO / "theme" / "styles"
 
 #: What a backup entry carries, the question it answers among it, and what it leaves to the talk's
 #: entries.
@@ -64,6 +69,16 @@ _NOTES_PART = re.compile(r"^\s+- \*\*(?P<part>Question|In|Out|Q&A):\*\* (?P<text
 _CALLOUT = re.compile(r"<Callout\b[^>]*>(?P<text>.*?)</Callout>", re.DOTALL)
 #: One click step, as Slidev's directive or its element; `v-clicks` is not one.
 _CLICK = re.compile(r"\bv-click\b")
+#: A component on a slide, by its tag.
+_COMPONENT = re.compile(r"<(?P<name>[A-Z]\w*)\b")
+#: A custom property, where a stylesheet defines one and where a component reads one.
+_DEFINED = re.compile(r"^\s*--(?P<name>[\w-]+)\s*:", re.MULTILINE)
+_READ = re.compile(r"var\(--(?P<name>[\w-]+)")
+#: What a component may not carry: a style attribute, Vue's bound one included, and a colour or a
+#: type size stated as a literal rather than read from a token.
+_STYLE_ATTRIBUTE = re.compile(r"\s:?style\s*=")
+_COLOUR_LITERAL = re.compile(r"#[0-9a-fA-F]{3,8}\b|\b(?:rgb|hsl)a?\(")
+_SIZE_LITERAL = re.compile(r"font-size\s*:(?!\s*var\()")
 #: The slide a returning figure was first shown on, as **Returns** opens.
 _RETURNS = re.compile(r"^Slide (?P<number>\d+)\b")
 
@@ -511,6 +526,40 @@ def test_a_returning_figure_is_drawn_by_the_chart_its_first_slide_shows(figures,
         first = int(returned["number"])
         assert first < entry.number, entry.claim
         assert charts(markup) & charts(shown[first - 1]), entry.claim
+
+
+# The concept diagrams, against the theme.
+
+
+def test_the_example_draws_a_concept_diagram(entries):
+    """Build mode's other route to a visual: evidence that is a structure or a process, not data."""
+    assert any(entry.kind == "diagram" for entry in entries)
+
+
+def test_a_diagram_is_drawn_by_a_component_of_the_deck_s_own(entries, shown):
+    own = {path.stem for path in COMPONENTS.glob("*.vue")}
+
+    for entry, markup in zip(entries, shown, strict=True):
+        if entry.kind == "diagram":
+            assert {match["name"] for match in _COMPONENT.finditer(markup)} & own, entry.claim
+
+
+def test_a_deck_s_own_component_is_coloured_and_sized_by_the_theme_s_tokens_alone():
+    """So a recolour reaches the diagram as it reaches the charts, and its type is on the scale."""
+    defined = {
+        match["name"]
+        for sheet in THEME_STYLES.glob("*.css")
+        for match in _DEFINED.finditer(sheet.read_text(encoding="utf-8"))
+    }
+    components = sorted(COMPONENTS.glob("*.vue"))
+
+    assert components
+    for component in components:
+        text = component.read_text(encoding="utf-8")
+        assert not _STYLE_ATTRIBUTE.search(text), component.name
+        assert not _COLOUR_LITERAL.search(text), component.name
+        assert not _SIZE_LITERAL.search(text), component.name
+        assert {match["name"] for match in _READ.finditer(text)} <= defined, component.name
 
 
 # The review, against the linter.

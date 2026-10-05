@@ -123,5 +123,5 @@ build imports a stylesheet rather than running a Python toolchain.
   ([`cvd-validator-contract.md`](cvd-validator-contract.md)) and now lives in the canon as
   `separation-floor`. This contract fixes the *shape*; the canon owns the *number*.
 - Whether a **Python figure helper** is a third consumer in v1 was decided in **#10** (it is) and
-  built in **#18**: `legible.figures`, bounded to the two archetypes, drawing only from the roles
-  in §2 and only from the ones the validator measured against each other.
+  built in **#18**: `legible.figures`, bounded to the archetypes (two then, three since #41),
+  drawing only from the roles in §2 and only from the ones the validator measured against each other.

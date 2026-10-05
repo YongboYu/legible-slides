@@ -49,11 +49,17 @@ three questions in order, and the last slide answers them with the same numbers.
 -->
 
 ---
-layout: assertion-evidence
+layout: two-col-evidence
 section: Problem
 ---
 
 # How often one step follows another changes week to week, so last month's process model is already out of date.
+
+::left::
+
+<ForecastPipeline caption="Process model forecasting, from the log to next week's graph." :cite="1" />
+
+::right::
 
 <Figure
   src="/figures/bpi2017-weekly.png"
@@ -62,6 +68,7 @@ section: Problem
 />
 
 <Footnotes>
+  <Footnote :number="1">Yu et al. (2026), Section 1.</Footnote>
   <Footnote :number="2">BPI Challenge 2017, as processed for the paper's code.</Footnote>
 </Footnotes>
 
@@ -212,7 +219,7 @@ section: Findings
 
 <Figure
   src="/figures/against-the-baseline.png"
-  caption="The best model's error on each log, as a share of the best baseline's."
+  caption="Zero-shot mean absolute error on each log: both baselines, and the best of the twelve pre-trained models."
   :cite="1"
 />
 
@@ -325,7 +332,7 @@ layout: two-col-evidence
 <Figure
   v-click
   src="/figures/against-the-baseline-beside.png"
-  caption="From slide 8: the error of the same forecasts, as a share of the best baseline's."
+  caption="From slide 8: the error of the same forecasts, beside both baselines'."
   :cite="2"
 />
 
@@ -411,7 +418,7 @@ backup: true
 
 <Figure
   src="/figures/against-the-baseline-rmse.png"
-  caption="The best model's root mean squared error on each log, as a share of the best baseline's."
+  caption="Zero-shot root mean squared error on each log: both baselines, and the best pre-trained model."
   :cite="1"
 />
 

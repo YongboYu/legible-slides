@@ -19,7 +19,7 @@ save(two_group(palette, {'baseline': 0.51}, {'ours': 0.29}, y_label='MAE'), 'pub
 ```
 
 See [`python/README.md`](https://github.com/YongboYu/legible-slides/blob/main/python/README.md#the-figure-helper)
-for the two archetypes and what they refuse to draw. A figure drawn any other way is one a recolour
+for the archetypes and what they refuse to draw. A figure drawn any other way is one a recolour
 will leave behind, and one nothing has measured for separation.
 
 Your marks belong here too, beside the figures. Until you add them, the cover shows placeholders

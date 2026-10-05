@@ -181,7 +181,7 @@ a list of fields:
 | **Answers** | The number of the question the slide answers. | every slide of the findings |
 | **Load-bearing** | What the room gets wrong if this slide is cut, as the author put it. | the one slide the author says carries the talk |
 | **Layout** | The theme layout the slide uses: `cover`, `answer`, `assertion-evidence`, `two-col-evidence` or `conclusion`. | every slide |
-| **Evidence** | What proves the claim: a kind, then a full stop, then what it shows. The kinds are `figure`, `table`, `equation` and `callout`, plus `subtitle`, `questions` and `answers` on the cover, the answer and the conclusion. | every slide |
+| **Evidence** | What proves the claim: a kind, then a full stop, then what it shows. The kinds are `figure` (a chart, drawn from data), `diagram` (a structure or a process, with no data to draw from), `table`, `equation` and `callout`, plus `subtitle`, `questions` and `answers` on the cover, the answer and the conclusion. | every slide |
 | **Source** | Where the evidence comes from: a table or section of the paper, a file in the codebase, a dataset. Build mode turns these into footnotes and the references slide. | every slide that shows evidence |
 | **Time** | The slide's time budget, written the way a deck's `Time:` line is. Build mode copies it into the notes, and `pace-budget` adds them up. | every slide |
 

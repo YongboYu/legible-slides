@@ -76,6 +76,11 @@ question got with how much of the paper it takes up, and say in the hand-over wh
 For every entry, write it in the order `message-before-visual` asks for, and then say exactly where
 its evidence is: a table or section of the paper, a file in the codebase.
 
+Where the evidence for an entry is a structure or a process rather than numbers, such as a
+pipeline, a model or a before and an after, give it the format's `diagram` kind, and say what the
+diagram shows and in what order the room reads it. Where it is numbers, it's a `figure` or a
+`table`.
+
 Then the format's optional fields, where the evidence calls for them and nowhere else: a callout
 for the one number a figure or a table turns on, a reveal where the evidence arrives in steps, a
 figure that returns where a later slide adds to one the room has seen, the terms each slide
@@ -133,7 +138,7 @@ Replace the template's skeleton slides with one slide per entry:
 | its heading | the headline, word for word |
 | **Layout** | the slide's `layout` |
 | **Section** | the slide's `section`, set where it changes and left to carry forward otherwise |
-| **Evidence** | a figure through the figure script, a markdown table, an equation (`equation-worked-example`), or a `Callout`; the plan's questions and answers on the slides `answer-first` and `conclusion-stays-up` name |
+| **Evidence** | a figure through the figure script, a concept diagram (step 4), a markdown table, an equation (`equation-worked-example`), or a `Callout`; the plan's questions and answers on the slides `answer-first` and `conclusion-stays-up` name |
 | **Source** | a footnote on the slide, and an entry on the references slide |
 | **Time** | a `Time:` line in the speaker notes |
 | the paragraph under it | the speaker notes, with a `Signpost:` line where the section changes |
@@ -160,11 +165,45 @@ speaker can find it by what was asked and knows how long the answer takes.
 
 Delete the placeholder image and anything else the template stamped that no entry asked for.
 
-### 4. Draw the figures from data
+### 4. Draw the figures from data, and the diagrams from tokens
 
 A figure script beside the deck draws every chart an entry calls for, with the archetypes in
 `legible.figures` and the deck's own palette. Numbers typed in from the paper say which table they
 came from; data read from the codebase is committed beside the script. Commit the images it writes.
+Load what a visual is held to first:
+
+```bash
+legible rules evidence-is-visual figure-noise never-sole-channel accent-is-attention type-scale
+```
+
+Pick the archetype by what the evidence compares:
+
+| The evidence compares | Draw it with |
+|---|---|
+| a few series over one shared axis, like time | `multi_series` |
+| one highlighted group against a de-emphasised one, on one scale | `two_group` |
+| the same few series on several groups that don't share a scale, like one measure on four datasets | `small_multiples`, a panel per group, with the baseline as the `reference` series |
+
+Don't fold one kind of category into another to fit an archetype. A "best baseline" bar on an axis
+of datasets is two kinds of category on one axis, and it hides which baseline won where: that's
+small multiples.
+
+Where an entry's evidence is a comparison, draw it as a figure even if the plan's numbers came from
+a table (`evidence-is-visual`). Keep a markdown table for a lookup, where the room reads one value
+off it rather than comparing them, and for evidence that is words in rows.
+
+An entry whose evidence is `diagram` shows a structure or a process: a pipeline, a model, a before
+and an after. There is no data behind it for the figure script to draw from, so draw it by hand, as
+inline SVG on the slide or as a component of the deck's own in `components/`. Take a component
+when the diagram needs more than a few shapes, or comes back on a later slide.
+
+- Style it with classes, in the component's own stylesheet, the way the theme's components are
+  styled: colours read from the palette's roles and type sizes from the type scale, each with
+  `var(--…)`, and no `style` attribute. That's what lets a recolour reach the diagram as it reaches
+  the charts, and it's what `type-scale` already asks of type on a slide.
+- `never-sole-channel` and `accent-is-attention` decide what its colours may say. Load them before
+  drawing it, as review loads the first to judge it.
+- Give it a caption and a source, the way `Figure` does.
 
 ### 5. Build, review, and attach the report
 
@@ -262,6 +301,7 @@ Check an existing Slidev deck against the method, and report what breaks and how
 | The deck | The Slidev markdown the author named. Its headmatter is the block before the first slide. |
 | Its themes | The palette JSON the deck wears — `themes/*.json` beside the deck in a legible-slides layout, or whatever the deck's headmatter and README point at. Ask if nothing names one. |
 | Its generated figures | The deck's figure script — a Python file importing `legible.figures` — and the paths it writes to. |
+| Its hand-made diagrams | Inline SVG on a slide, and the components in the deck's `components/` that its slides use. |
 
 The last row is the only one the review changes shape over. `never-sole-channel` is judged over
 **hand-made visuals only** — pasted screenshots, hand-drawn diagrams, inline SVG and HTML — which is

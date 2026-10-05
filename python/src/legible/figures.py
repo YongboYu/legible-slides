@@ -1,10 +1,10 @@
-"""The two figure archetypes the method prescribes — and deliberately nothing else.
+"""The three figure archetypes the method prescribes — and deliberately nothing else.
 
 A result chart here is **regenerated from data, never redrawn**, which is what makes a palette swap
 actually propagate: change one theme file, rerun, and every figure is wearing the new colours.
 ``docs/design-provenance.md`` §4 records that practice; this module is where it becomes an API.
 
-Two shapes, because two is what the canon prescribes:
+Three shapes, because three is what the reference implementation prescribes:
 
 - ``multi_series`` — the per-series comparison. Every line gets its own dash *and* its own marker,
   assigned by position rather than offered as an option, so `never-sole-channel` holds by
@@ -12,9 +12,12 @@ Two shapes, because two is what the canon prescribes:
   demonstration two of the flagship's beats are built on.
 - ``two_group`` — the default headline chart: a de-emphasised comparison against one highlight,
   every bar labelled where it stands (`spend-colour-on-discrimination`).
+- ``small_multiples`` — the same few series measured on several groups that do not share a scale:
+  a panel per group, every series in each, in one order and named where its bars start, so that
+  colour only repeats what the name and the place already say.
 
 This is **not a charting library**, and ``docs/slidev-reference-impl.md`` §4 is where that scope is
-fixed. A third shape belongs in a ticket, not in a keyword argument.
+fixed. A fourth shape belongs in a ticket, not in a keyword argument.
 
 Three things are enforced rather than documented, because a rule a caller can forget is a rule the
 deck will eventually break:
@@ -32,14 +35,18 @@ the same height as the type around it.
 
 from __future__ import annotations
 
+import math
 from collections.abc import Mapping, Sequence
 from contextlib import contextmanager
 from dataclasses import dataclass, replace
 from pathlib import Path
 
 from matplotlib import rc_context, rcParams
+from matplotlib.axes import Axes
+from matplotlib.backends.backend_agg import FigureCanvasAgg
 from matplotlib.figure import Figure
 from matplotlib.text import Text
+from matplotlib.transforms import offset_copy
 
 from legible.cvd import NORMAL, hex_to_rgb1, rgb1_to_hex, simulate
 from legible.fonts import register
@@ -60,6 +67,7 @@ __all__ = [
     "Series",
     "multi_series",
     "save",
+    "small_multiples",
     "smallest_type_px",
     "two_group",
 ]
@@ -81,6 +89,9 @@ MARKERS = ("o", "s", "^", "D", "v", "P")
 #: How many legend entries sit on one row at most. Three at body size is what fits across an
 #: evidence pane without the labels running into each other; a narrower figure takes fewer.
 LEGEND_COLUMNS = 3
+
+#: The space between a line chart's axis label and the legend that hangs under it, in canvas px.
+LEGEND_GAP_PX = 6
 
 #: The attention roles, the fill and the text-and-stroke one. `accent-is-attention` reserves both
 #: for arrows and highlights, and this module is where "never a data series" stops being advice.
@@ -163,7 +174,8 @@ def multi_series(
                 f"x axis: every series is read off one axis, so they share it"
             )
 
-    with _pane(palette, condition, size_px, tight_panel) as (seen, axes):
+    with _pane(palette, condition, size_px, tight_panel) as (seen, figure):
+        axes = figure.subplots()
         for index, (line, role) in enumerate(zip(series, roles, strict=True)):
             axes.plot(
                 xs,
@@ -190,11 +202,22 @@ def multi_series(
         #
         # Three to a row where three fit, and fewer where they do not: a legend run off the edge of
         # a narrow pane has lost the entries that say which dash is which.
+        #
+        # It hangs from under the tick labels and the axis label, by however far down those reach,
+        # measured in points so the layout pass that resizes the axes cannot move it onto them. A
+        # legend wrapped onto three rows reaches far enough down to show the difference.
+        under = offset_copy(
+            axes.transAxes,
+            figure,
+            y=-_pt(_reach_below(axes) * CSS_PX_PER_INCH / figure.dpi + LEGEND_GAP_PX),
+            units="points",
+        )
         for columns in range(min(len(series), LEGEND_COLUMNS), 0, -1):
             legend = axes.legend(
                 frameon=False,
                 loc="upper center",
-                bbox_to_anchor=(0.5, -0.16),
+                bbox_to_anchor=(0.5, 0.0),
+                bbox_transform=under,
                 ncols=columns,
             )
             if legend.get_window_extent().width <= axes.figure.bbox.width:
@@ -238,7 +261,8 @@ def two_group(
         what="the highlighted group",
     )
 
-    with _pane(palette, condition, size_px, tight_panel) as (seen, axes):
+    with _pane(palette, condition, size_px, tight_panel) as (seen, figure):
+        axes = figure.subplots()
         positions = range(len(comparison) + len(highlight))
         groups = (
             (comparison, seen[COMPARISON_ROLE], "normal"),
@@ -275,6 +299,91 @@ def two_group(
             axes.set_ylabel(y_label)
 
     return axes.figure
+
+
+def small_multiples(
+    palette: Palette,
+    series: Sequence[Series],
+    groups: Sequence[str],
+    *,
+    columns: int = 2,
+    value_format: str | Sequence[str] = "{:.2f}",
+    condition: str = NORMAL,
+    size_px: tuple[int, int] = EVIDENCE_PANE_PX,
+    tight_panel: bool = False,
+) -> Figure:
+    """The same series on several groups: one panel of bars per group, every series in each.
+
+    ``series`` holds one value per group, in the order of ``groups``, the way a multi-series line
+    holds one per point on its axis. Each panel is titled with its group and runs the series top to
+    bottom in the order given, the same in every panel, so the eye compares like with like. Pin a
+    baseline to ``reference`` and a comparison to ``muted``; the rest take the ramp in order.
+
+    A series is told apart by its **name and its place**: the names run down the start of every row
+    of panels, and colour repeats them rather than standing in for them (`never-sole-channel`). So
+    there is no legend, and every bar carries its value where it ends, which leaves the value axis
+    nothing to say (`figure-noise`).
+
+    Each panel takes its own scale, from zero. That is what small multiples are for: groups whose
+    values differ by orders of magnitude, where one shared axis would flatten all but the largest.
+    The comparison a panel makes is within it, and its labels say what each bar is worth.
+
+    ``value_format`` is one format for every label, or one per group: a panel of 8.30s and a panel
+    of 0.117s need not share a precision any more than they share a scale. ``columns`` is how many
+    panels sit side by side; the rest wrap onto further rows. ``tight_panel`` sets the type at the
+    floor, as in ``multi_series``.
+    """
+    if not series or not groups:
+        raise FigureError("small multiples need at least one group and one series to compare in it")
+    for line in series:
+        if len(line.values) != len(groups):
+            raise FigureError(
+                f"series {line.label!r} has {len(line.values)} values against {len(groups)} "
+                f"groups: every series is measured once in every panel"
+            )
+    formats = [value_format] * len(groups) if isinstance(value_format, str) else list(value_format)
+    if len(formats) != len(groups):
+        raise FigureError(
+            f"{len(formats)} value formats for {len(groups)} groups: give one for all, or one each"
+        )
+    roles = _assign_roles(palette, series)
+    columns = max(1, min(columns, len(groups)))
+    rows = math.ceil(len(groups) / columns)
+    positions = range(len(series))
+
+    with _pane(palette, condition, size_px, tight_panel) as (seen, figure):
+        grid = figure.subplots(rows, columns, squeeze=False)
+        for index, axes in enumerate(grid.flat):
+            if index >= len(groups):
+                # A grid cell no group fills is taken out, not left as an empty frame.
+                figure.delaxes(axes)
+                continue
+            values = [line.values[index] for line in series]
+            bars = axes.barh(
+                positions,
+                values,
+                height=0.65,
+                color=[seen[role] for role in roles],
+            )
+            axes.bar_label(
+                bars,
+                labels=[formats[index].format(value) for value in values],
+                padding=4,
+                # `ink` for the same reason as in the two-group chart: text is held to contrast,
+                # which a data role was never measured for.
+                color=seen["ink"],
+            )
+            axes.set_title(groups[index])
+            axes.set_yticks(list(positions), [line.label for line in series])
+            # The first series on top, read in the order given.
+            axes.invert_yaxis()
+            _strip_chrome(axes, seen, keep=("left",))
+            axes.tick_params(axis="x", length=0, labelbottom=False)
+            axes.tick_params(axis="y", length=0, labelleft=index % columns == 0)
+            # Room past the longest bar for the label it carries.
+            axes.set_xlim(0, max(max(values), 0) * 1.35 or 1)
+
+    return figure
 
 
 def save(figure: Figure, path: str | Path, *, scale: int = DEFAULT_SCALE) -> Path:
@@ -399,12 +508,13 @@ def _seen_as(palette: Palette, condition: str) -> Palette:
 
 @contextmanager
 def _pane(palette: Palette, condition: str, size_px: tuple[int, int], tight_panel: bool):
-    """The setup both archetypes share, so neither can drift from the other.
+    """The setup every archetype shares, so none can drift from the others.
 
-    Yields the palette as ``condition`` receives it and the axes to draw on. Everything the two
-    charts have in common lives here — the simulation, the deck's type, the palette's own chrome
-    colours, the size in canvas pixels — which is what makes "the deficiency render is the same
-    chart, only simulated" a property of the code rather than a claim about it.
+    Yields the palette as ``condition`` receives it and the figure to draw on, which each archetype
+    divides into the panels it needs. Everything the charts have in common lives here — the
+    simulation, the deck's type, the palette's own chrome colours, the size in canvas pixels — which
+    is what makes "the deficiency render is the same chart, only simulated" a property of the code
+    rather than a claim about it.
 
     The figure is bare, as in built without pyplot: nothing registers with a global figure manager,
     so a caller drawing two hundred charts leaks none of them and a headless machine needs no
@@ -418,9 +528,18 @@ def _pane(palette: Palette, condition: str, size_px: tuple[int, int], tight_pane
             dpi=CSS_PX_PER_INCH,
             facecolor=seen["surface"],
         )
-        yield seen, figure.subplots()
+        # The raster canvas, chosen here rather than by a backend: it is headless, it is what a PNG
+        # is written through, and it can measure text before anything is saved.
+        FigureCanvasAgg(figure)
+        yield seen, figure
         # Inside the context, because laying out is what creates the tick labels.
         figure.tight_layout()
+
+
+def _reach_below(axes: Axes) -> float:
+    """How far below the axes its ticks and its label reach, in display pixels."""
+    renderer = axes.figure.canvas.get_renderer()
+    return axes.get_window_extent(renderer).y0 - axes.get_tightbbox(renderer).y0
 
 
 def _pt(px: float) -> float:

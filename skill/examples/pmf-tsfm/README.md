@@ -10,6 +10,7 @@ and [its codebase](https://github.com/YongboYu/pmf-tsfm).
 | [`deck/data/`](deck/data) | Two series read out of the codebase, and the script that read them | draft mode |
 | [`deck/slides.md`](deck/slides.md) | The deck, one slide per plan entry | build mode |
 | [`deck/figures.py`](deck/figures.py), [`deck/public/`](deck/public) | The figure script and the images it draws | build mode |
+| [`deck/components/`](deck/components) | The concept diagram on slide 3, drawn from the theme's tokens | build mode |
 | [`review.md`](review.md) | Review mode's report on the deck | build mode's last step |
 
 The plan was redrafted under [#38](https://github.com/YongboYu/legible-slides/issues/38), after a
@@ -41,6 +42,15 @@ the conclusion as slides 14 to 18, before the references, and the slot doesn't c
 stays cut is what the talk couldn't show: the drift figure, the LoRA equation, a reason for the
 seven-day horizon the paper doesn't give, and multivariate results the paper reports only in a
 footnote.
+
+Under [#41](https://github.com/YongboYu/legible-slides/issues/41), the figures. Build mode had two
+chart shapes to choose from, so slide 8 put a "Best baseline" bar beside the four logs. That mixed
+two kinds of category on one axis and hid which baseline won where. It's small multiples now, a
+panel per log with both baselines and the best pre-trained model, and slide 14's RMSE backup
+follows it, which shows XGBoost taking over as the best baseline on the two BPI logs. Slide 3 gains
+a concept diagram beside its chart: the log counted into a graph a day, each arrow read as a time
+series, and each series forecast into next week's graph. It's a component of the deck's own,
+colored and sized by the theme's tokens alone, and the review judges it under `never-sole-channel`.
 
 ## What is here, and what isn't
 

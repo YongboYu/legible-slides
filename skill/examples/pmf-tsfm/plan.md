@@ -39,9 +39,9 @@ three questions in order, and the last slide answers them with the same numbers.
 
 - **Section:** Problem
 - **Setup:** stakes
-- **Layout:** assertion-evidence
-- **Evidence:** figure. Weekly counts of three directly-follows relations in the BPI 2017 loan log, which rise and fall on their own schedules.
-- **Source:** Section 1 of the paper; the BPI Challenge 2017 log, as processed in `data/time_series/bpi2017.parquet` of the code.
+- **Layout:** two-col-evidence
+- **Evidence:** diagram. How a process model is forecast: the log counted into a directly-follows graph a day, each arrow's counts read as a time series, and every series forecast a week ahead into next week's graph. Beside it, a figure: weekly counts of three directly-follows relations in the BPI 2017 loan log, which rise and fall on their own schedules.
+- **Source:** Section 1 of the paper, for the diagram; the BPI Challenge 2017 log, as processed in `data/time_series/bpi2017.parquet` of the code.
 - **Terms:** directly-follows
 - **Time:** 1min
 - **Notes:**
@@ -135,7 +135,7 @@ but one. The error is the mean absolute error.
 - **Section:** Findings
 - **Answers:** 1
 - **Layout:** assertion-evidence
-- **Evidence:** figure. The best model's error on each log, as a share of the best baseline's, with the baseline at 1.
+- **Evidence:** figure. A panel per log, each with the mean absolute error of both baselines and of the best pre-trained model, so which baseline is the best on each log is there to read.
 - **Source:** Table 4 of the paper.
 - **Time:** 1min 15s
 - **Notes:**
@@ -195,7 +195,7 @@ that held XGBoost back.
 - **Layout:** two-col-evidence
 - **Evidence:** figure. Entropic relevance of the best pre-trained model's forecast graphs on BPI 2017, BPI 2019 and Hospital Billing, as a share of the best baseline's, with the baseline at 1. Lower is better. Beside it, slide 8's error figure, where lower is better too.
 - **Source:** Table 7 of the paper; Table 4 for slide 8's figure.
-- **Returns:** Slide 8, beside the relevance figure: the error of the same forecasts, each against its best baseline.
+- **Returns:** Slide 8, beside the relevance figure: the error of the same forecasts, beside both baselines'.
 - **Reveal:** slide 8's figure, after the relevance figure
 - **Terms:** entropic relevance
 - **Time:** 1min 15s
@@ -246,7 +246,7 @@ the data are all linked from the QR code. Thank you, and I'm happy to take quest
 
 - **Asked:** Does RMSE tell the same story?
 - **Layout:** assertion-evidence
-- **Evidence:** figure. The best model's root mean squared error on each log, as a share of the best baseline's, with the baseline at 1: slide 8's chart, on the other error measure.
+- **Evidence:** figure. A panel per log, each with the root mean squared error of both baselines and of the best pre-trained model: slide 8's chart, on the other error measure.
 - **Source:** Table 5 of the paper.
 - **Time:** 45s
 

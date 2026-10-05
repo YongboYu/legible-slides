@@ -25,13 +25,19 @@ against the rules as `legible rules` printed them: `one-message`, `assertion-hea
   and each of the five backups, slides 14 to 18, answers the one question its notes open on.
   Slides 4 and 10 join two clauses in their headlines, and each pair makes a single claim: that the
   data is hard, and that fine-tuning doesn't pay. The answer slide joins the result and its limit,
-  which is what an answer slide is for. Slide 11's two panes are one argument: the relevance that
-  proves its headline, and slide 8's error beside it, which is what makes "yet" true.
+  which is what an answer slide is for. Slide 3's two panes are one argument: the diagram says a
+  process model's arrows are counts, and the chart beside it shows those counts moving week to
+  week. Slide 11's two panes are one argument: the relevance that proves its headline, and slide
+  8's error beside it, which is what makes "yet" true.
 - `assertion-headline`: every headline is a full claim, written in the plan before its slide,
   including the five setup slides and the five backups, none of which is a section label.
-- `never-sole-channel`: the deck has no hand-made visuals. All eight images come from `figures.py`
-  through the shipped archetypes, slide 11's returning figure and slide 14's RMSE chart included,
-  and the eight tables carry no color. Slide 10's callout is the theme's component, and its text
+- `never-sole-channel`: the deck has one hand-made visual, slide 3's diagram, drawn by
+  `deck/components/ForecastPipeline.vue`. Its one use of color sets the forecast graph, the last
+  step, apart from the observed one, and the forecast's arrows are also dashed where the observed
+  graph's are solid, and its label says "forecast". In grayscale it still reads. The other steps
+  differ by shape and by their labels, and the arrows between them are labeled in words. All eight
+  images come from `figures.py` through the shipped archetypes, slide 11's returning figure and
+  slides 8 and 14's small multiples included, and the eight tables carry no color. Slide 10's callout is the theme's component, and its text
   says what its fill marks.
 - `no-script-on-slide`: the words on the slides are labels, numbers and short captions. Slides 6
   and 18 have the wordiest tables, and their cells are labels rather than sentences. Slide 10's

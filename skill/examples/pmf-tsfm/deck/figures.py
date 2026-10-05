@@ -20,7 +20,7 @@ from functools import partial
 from pathlib import Path
 
 from legible import load_palette
-from legible.figures import Series, multi_series, save, two_group
+from legible.figures import Series, multi_series, save, small_multiples, two_group
 
 HERE = Path(__file__).resolve().parent
 
@@ -34,18 +34,24 @@ FIGURES = "figures"
 #: the body size, because a pane this narrow has no room for body type on an axis (`type-scale`).
 COLUMN = {"size_px": (540, 350), "tight_panel": True}
 
-#: Zero-shot mean absolute error, Table 4 of the paper. The best baseline on every log is the
-#: seasonal naive forecast, and the best model is the lowest error in that log's column.
-BEST_BASELINE = {"BPI 2017": 8.30, "BPI 2019": 14.47, "Sepsis": 0.117, "Billing": 1.77}
+#: The four logs, as a panel of small multiples is titled. The tables below key them shorter, for
+#: the axis of a two-group chart.
+LOGS = ["BPI 2017", "BPI 2019", "Sepsis", "Hospital Billing"]
+
+#: Each panel's precision: Sepsis's errors are a hundredth of the others', and need a third digit.
+LOG_FORMATS = ["{:.2f}", "{:.2f}", "{:.3f}", "{:.2f}"]
+
+#: Zero-shot mean absolute error, Table 4 of the paper. The seasonal naive forecast is the best
+#: baseline on every log, and the best model is the lowest error in that log's column.
+SEASONAL_NAIVE = {"BPI 2017": 8.30, "BPI 2019": 14.47, "Sepsis": 0.117, "Billing": 1.77}
+XGBOOST = {"BPI 2017": 8.50, "BPI 2019": 14.70, "Sepsis": 0.169, "Billing": 2.67}
 BEST_MODEL = {"BPI 2017": 6.87, "BPI 2019": 10.75, "Sepsis": 0.084, "Billing": 1.39}
 
 #: Zero-shot root mean squared error, Table 5. The best baseline is XGBoost on the two BPI logs and
 #: the seasonal naive forecast on the other two; the best model is again the lowest in each column.
-BEST_BASELINE_RMSE = {"BPI 2017": 11.91, "BPI 2019": 23.87, "Sepsis": 0.187, "Billing": 2.21}
+SEASONAL_NAIVE_RMSE = {"BPI 2017": 12.43, "BPI 2019": 25.58, "Sepsis": 0.187, "Billing": 2.21}
+XGBOOST_RMSE = {"BPI 2017": 11.91, "BPI 2019": 23.87, "Sepsis": 0.209, "Billing": 3.03}
 BEST_MODEL_RMSE = {"BPI 2017": 9.32, "BPI 2019": 18.12, "Sepsis": 0.125, "Billing": 1.70}
-
-#: The tuned XGBoost baseline's mean absolute error, Table 4, beside the seasonal naive's above.
-XGBOOST = {"BPI 2017": 8.50, "BPI 2019": 14.70, "Sepsis": 0.169, "Billing": 2.67}
 
 #: Entropic relevance of the forecast graphs, Table 7, on the three logs where every model fits at
 #: least 98% of traces: the best baseline (XGBoost on all three) and the best pre-trained model.
@@ -62,7 +68,7 @@ SEPSIS_BASELINES = {"Seasonal\nnaive": 39.4, "XGBoost": 74.6}
 SEPSIS_MODELS = {"Chronos-2": 13.2, "MOIRAI\n2.0": 4.1, "TimesFM\n2.5": 17.5}
 
 
-def weekly_series(palette):
+def weekly_series(palette, **pane):
     with (HERE / "data" / "bpi2017-weekly.csv").open(encoding="utf-8") as source:
         rows = list(csv.DictReader(source))
     labels = [key for key in rows[0] if key != "week"]
@@ -72,6 +78,7 @@ def weekly_series(palette):
         x=[int(row["week"]) for row in rows],
         x_label="Week of the log",
         y_label="Times per week",
+        **pane,
     )
 
 
@@ -81,26 +88,27 @@ def relative_to(palette, reference, values, baseline, y_label, **pane):
     return two_group(palette, {reference: 1.0}, relative, y_label=y_label, **pane)
 
 
+def per_log(palette, naive, xgboost, best, **pane):
+    """A panel per log, each with both baselines and the best pre-trained model, in that order.
+
+    The logs' errors differ a hundredfold, so each takes its own panel and scale. Both baselines are
+    in every panel, so which one is the best on a log is there to read, not folded into one bar.
+    """
+    series = [
+        Series("Seasonal naive", list(naive.values()), role="reference"),
+        Series("XGBoost", list(xgboost.values()), role="muted"),
+        Series("Best pre-trained", list(best.values())),
+    ]
+    return small_multiples(palette, series, LOGS, value_format=LOG_FORMATS, **pane)
+
+
 def against_the_baseline(palette, **pane):
-    return relative_to(
-        palette,
-        "Best\nbaseline",
-        BEST_MODEL,
-        BEST_BASELINE,
-        y_label="Error, relative to the best baseline",
-        **pane,
-    )
+    return per_log(palette, SEASONAL_NAIVE, XGBOOST, BEST_MODEL, **pane)
 
 
 def against_the_baseline_rmse(palette):
     """Slide 8's chart on the other error measure, for the backup that answers whether it agrees."""
-    return relative_to(
-        palette,
-        "Best\nbaseline",
-        BEST_MODEL_RMSE,
-        BEST_BASELINE_RMSE,
-        y_label="RMSE, relative to the best baseline",
-    )
+    return per_log(palette, SEASONAL_NAIVE_RMSE, XGBOOST_RMSE, BEST_MODEL_RMSE)
 
 
 def xgboost_against_naive(palette):
@@ -109,7 +117,7 @@ def xgboost_against_naive(palette):
         palette,
         "Seasonal\nnaive",
         XGBOOST,
-        BEST_BASELINE,
+        SEASONAL_NAIVE,
         y_label="XGBoost's error, relative to seasonal naive",
     )
 
@@ -143,7 +151,7 @@ def sepsis_fit(palette):
 #: Each figure the deck shows, by the path it is served at. A figure that returns on a later slide
 #: is the same chart, drawn again for the pane it returns to.
 CHARTS = {
-    "bpi2017-weekly.png": weekly_series,
+    "bpi2017-weekly.png": partial(weekly_series, **COLUMN),
     "xgboost-against-naive.png": xgboost_against_naive,
     "against-the-baseline.png": against_the_baseline,
     "moirai-generations.png": moirai_generations,

@@ -80,6 +80,10 @@ It is deliberately **not a charting library**. Scope = the archetypes the method
    render. This is the workhorse *and* the beat-3/10 demo.
 2. **2-group labeled bar / line** — `muted` vs one highlight (`brand` or `series-1`), with direct
    labels (`spend-colour-on-discrimination`).
+3. **Small-multiple bars** — one labeled panel per group, every series in each in one shared order,
+   the baseline in `reference`, value labels on every bar, and each panel on its own scale. Added
+   under [#41](https://github.com/YongboYu/legible-slides/issues/41), when the worked example forced a
+   per-dataset comparison into the two-group chart and mixed two kinds of category on one axis.
 
 - Consumes `palette.json` + the **bundled Inter** (registered in matplotlib per `fonts`, so figure
   type matches the deck).

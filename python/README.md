@@ -233,9 +233,9 @@ review, and one that loaded no rule would find no fault and read as a pass.
 ## The figure helper
 
 Result charts are **regenerated from data, never redrawn** — which is the whole reason a palette
-swap propagates. Two archetypes, because two is what the method prescribes
+swap propagates. Three archetypes, because three is what the reference implementation prescribes
 ([`docs/slidev-reference-impl.md`](../docs/slidev-reference-impl.md) §4). This is not a charting
-library, and a third shape belongs in a ticket rather than a keyword argument.
+library, and a fourth shape belongs in a ticket rather than a keyword argument.
 
 ```python
 from legible import load_palette
@@ -272,14 +272,34 @@ highlight, every bar labelled where it stands, so it needs no legend and no valu
 two_group(palette, {"ARIMA": 0.51, "XGBoost": 0.44}, {"Ours": 0.29}, y_label="MAE")
 ```
 
+The small-multiples archetype is the same few series measured on groups that don't share a scale,
+such as one error measure on four datasets. Each group gets a panel of bars, titled with its name,
+and every series appears in every panel in the order given. The names run down the start of each
+row of panels and every bar carries its value, so colour only repeats what the name and the place
+already say. Each panel takes its own scale from zero, and `value_format` can give each its own
+precision:
+
+```python
+small_multiples(
+    palette,
+    [
+        Series("Seasonal naive", [8.30, 0.117], role="reference"),
+        Series("XGBoost", [8.50, 0.169], role="muted"),
+        Series("Best pre-trained", [6.87, 0.084]),
+    ],
+    ["BPI 2017", "Sepsis"],
+    value_format=["{:.2f}", "{:.3f}"],
+)
+```
+
 ### What the archetypes will not draw
 
 - **Colour comes only from palette roles.** Nothing here takes a hex, which is what keeps the theme
   file the single authority the deck's CSS and the validator already read.
 - **Only roles the validator measured may encode data** — the anchors and the ramp for a
-  multi-series chart, the de-emphasised role plus one highlight for a two-group one. That puts the
-  attention roles out of reach (`accent-is-attention`) along with every structural neutral, because
-  a pair nobody checked is a pair nobody can vouch for.
+  multi-series chart or small multiples, the de-emphasised role plus one highlight for a two-group
+  one. That puts the attention roles out of reach (`accent-is-attention`) along with every
+  structural neutral, because a pair nobody checked is a pair nobody can vouch for.
 - **The deck's typeface is registered before anything is drawn**, and a resolution landing outside
   the bundle is an error. See [`theme/assets/fonts/`](../theme/assets/fonts/).
 

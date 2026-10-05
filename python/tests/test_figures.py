@@ -1,4 +1,4 @@
-"""The two archetypes, and the rules they hold by construction.
+"""The three archetypes, and the rules they hold by construction.
 
 Nothing here compares pixels. What the method actually asks of a generated figure is *structural*
 — a distinct dash and marker for every series, colour drawn only from palette roles, the attention
@@ -6,7 +6,7 @@ role kept off the data — and structure is readable straight off the figure the
 The one exception is the reproducibility claim, which is about bytes and is therefore checked as
 bytes.
 
-The archetypes are the scope. A test that wanted a third chart shape would be asking for a
+The archetypes are the scope. A test that wanted a fourth chart shape would be asking for a
 charting library, which `docs/slidev-reference-impl.md` §4 says this is not.
 """
 
@@ -29,6 +29,7 @@ from legible.figures import (
     Series,
     multi_series,
     save,
+    small_multiples,
     smallest_type_px,
     two_group,
 )
@@ -41,6 +42,15 @@ FIVE_SERIES = [
     Series("TimesFM", [2.0, 3.0, 4.0]),
     Series("Ground truth", [0.5, 1.5, 2.5], role="reference"),
     Series("Baseline", [3.0, 2.0, 1.0], role="muted"),
+]
+
+
+#: Four groups, a panel each, and the same three series in every one of them.
+LOGS = ["BPI 2017", "BPI 2019", "Sepsis", "Billing"]
+THREE_SERIES = [
+    Series("Seasonal naive", [8.30, 14.47, 0.117, 1.77], role="reference"),
+    Series("XGBoost", [8.50, 14.70, 0.169, 2.67], role="muted"),
+    Series("Best pre-trained", [6.87, 10.75, 0.084, 1.39]),
 ]
 
 
@@ -223,7 +233,125 @@ def test_both_groups_have_to_be_there_for_it_to_be_a_comparison(palette):
         two_group(palette, {"ARIMA": 0.51}, {})
 
 
-# ── what colour may say, in either archetype ──────────────────────────────────
+# ── the small-multiples archetype ─────────────────────────────────────────────
+
+
+def bars_in(axes) -> list:
+    return [patch for patch in axes.patches if patch.get_visible()]
+
+
+def test_small_multiples_draw_one_panel_per_group_titled_with_its_name_in_order(palette):
+    figure = small_multiples(palette, THREE_SERIES, LOGS)
+
+    assert [axes.get_title() for axes in figure.axes] == LOGS
+
+
+def test_every_panel_carries_every_series_in_one_shared_order(palette):
+    """The same series in the same place in every panel, so the eye compares like with like."""
+    figure = small_multiples(palette, THREE_SERIES, LOGS)
+
+    orders = [[to_hex(bar.get_facecolor()) for bar in bars_in(axes)] for axes in figure.axes]
+    assert all(len(order) == len(THREE_SERIES) for order in orders)
+    assert all(order == orders[0] for order in orders)
+
+
+def test_each_bar_stands_where_its_series_does_and_holds_its_value(palette):
+    figure = small_multiples(palette, THREE_SERIES, LOGS)
+
+    for index, axes in enumerate(figure.axes):
+        assert [bar.get_width() for bar in bars_in(axes)] == [
+            line.values[index] for line in THREE_SERIES
+        ]
+
+
+def test_the_reference_series_wears_the_reference_role_and_the_rest_come_off_the_ramp(
+    palette, base_palette
+):
+    figure = small_multiples(palette, THREE_SERIES, LOGS)
+
+    assert [to_hex(bar.get_facecolor()) for bar in bars_in(figure.axes[0])] == [
+        base_palette["reference"],
+        base_palette["muted"],
+        base_palette["series"][0],
+    ]
+
+
+def test_every_series_is_named_beside_its_bars_rather_than_in_a_colour_key(palette):
+    """`never-sole-channel`: a series is told apart by its name and its place, and colour only
+    repeats them. The names sit at the start of each row of panels, where the eye starts reading."""
+    figure = small_multiples(palette, THREE_SERIES, LOGS, columns=2)
+
+    first_column = [figure.axes[0], figure.axes[2]]
+    for axes in first_column:
+        assert [label.get_text() for label in axes.get_yticklabels()] == [
+            line.label for line in THREE_SERIES
+        ]
+    assert all(axes.get_legend() is None for axes in figure.axes)
+
+
+def test_every_bar_is_labelled_with_its_value(palette):
+    figure = small_multiples(palette, THREE_SERIES, LOGS, value_format="{:.3g}")
+
+    for index, axes in enumerate(figure.axes):
+        labelled = {text.get_text() for text in axes.texts}
+        assert {f"{line.values[index]:.3g}" for line in THREE_SERIES} <= labelled
+
+
+def test_each_panel_may_format_its_values_its_own_way(palette):
+    """Groups that do not share a scale need not share a precision: 8.30 and 0.117 both read."""
+    formats = ["{:.2f}", "{:.2f}", "{:.3f}", "{:.2f}"]
+    figure = small_multiples(palette, THREE_SERIES, LOGS, value_format=formats)
+
+    assert {text.get_text() for text in figure.axes[0].texts} == {"8.30", "8.50", "6.87"}
+    assert {text.get_text() for text in figure.axes[2].texts} == {"0.117", "0.169", "0.084"}
+
+
+def test_one_format_per_group_or_one_for_all(palette):
+    with pytest.raises(FigureError):
+        small_multiples(palette, THREE_SERIES, LOGS, value_format=["{:.2f}"])
+
+
+def test_the_panels_fill_a_grid_of_the_columns_asked_for_and_nothing_more(palette):
+    three_groups = [Series(line.label, line.values[:3], line.role) for line in THREE_SERIES]
+    figure = small_multiples(palette, three_groups, LOGS[:3], columns=2)
+
+    assert len(figure.axes) == 3
+    assert [axes.get_subplotspec().colspan.start for axes in figure.axes] == [0, 1, 0]
+
+
+def test_small_multiples_need_a_group_and_a_series(palette):
+    with pytest.raises(FigureError):
+        small_multiples(palette, [], LOGS)
+
+    with pytest.raises(FigureError):
+        small_multiples(palette, THREE_SERIES, [])
+
+
+def test_a_series_needs_one_value_per_group(palette):
+    with pytest.raises(FigureError) as error:
+        small_multiples(palette, [Series("a", [1.0, 2.0])], LOGS)
+
+    assert "'a'" in str(error.value)
+
+
+def test_small_multiples_refuse_more_series_than_the_palette_validated(palette):
+    too_many = [Series(f"s{i}", [1.0]) for i in range(len(palette.series_roles) + 1)]
+
+    with pytest.raises(FigureError):
+        small_multiples(palette, too_many, ["one"])
+
+
+@pytest.mark.parametrize("condition", ["deuteranomaly", "protanomaly", "tritanomaly", GRAYSCALE])
+def test_small_multiples_render_as_a_deficiency_sees_them(palette, base_palette, condition):
+    figure = small_multiples(palette, THREE_SERIES, LOGS, condition=condition)
+
+    roles = [base_palette["reference"], base_palette["muted"], base_palette["series"][0]]
+    seen = [rgb1_to_hex(c) for c in simulate([hex_to_rgb1(c) for c in roles], condition)]
+    for axes in figure.axes:
+        assert [to_hex(bar.get_facecolor()) for bar in bars_in(axes)] == seen
+
+
+# ── what colour may say, in every archetype ───────────────────────────────────
 
 
 def test_nothing_in_a_multi_series_chart_is_a_colour_the_palette_does_not_have(palette):
@@ -241,6 +369,18 @@ def test_the_attention_roles_cannot_colour_a_data_series(palette, role):
     """`accent-is-attention`, enforced rather than reviewed, for both of its jobs."""
     with pytest.raises(FigureError) as error:
         multi_series(palette, [Series("a", [1.0, 2.0], role=role)])
+
+    assert "accent-is-attention" in str(error.value)
+
+
+def test_nothing_in_small_multiples_is_a_colour_the_palette_does_not_have(palette):
+    assert colours_in(small_multiples(palette, THREE_SERIES, LOGS)) <= set(palette.roles.values())
+
+
+@pytest.mark.parametrize("role", ["accent", "accent-strong"])
+def test_the_attention_roles_cannot_colour_a_series_in_small_multiples(palette, role):
+    with pytest.raises(FigureError) as error:
+        small_multiples(palette, [Series("a", [1.0], role=role)], ["one"])
 
     assert "accent-is-attention" in str(error.value)
 
@@ -325,6 +465,7 @@ def test_every_label_holds_the_floor_where_the_figure_lands(palette, tight_panel
     charts = [
         multi_series(palette, FIVE_SERIES, x_label="w", y_label="MAE", tight_panel=tight_panel),
         two_group(palette, {"ARIMA": 0.51}, {"Ours": 0.29}, tight_panel=tight_panel),
+        small_multiples(palette, THREE_SERIES, LOGS, tight_panel=tight_panel),
     ]
 
     assert all(smallest_type_px(figure) >= FLOOR_PX for figure in charts)
@@ -353,12 +494,21 @@ def test_the_two_group_chart_is_set_at_the_body_size_too(palette):
     assert {text.get_fontsize() for text in type_in(figure)} == {points(BODY_PX)}
 
 
+@pytest.mark.parametrize(("tight_panel", "size"), [(False, BODY_PX), (True, FLOOR_PX)])
+def test_small_multiples_set_every_name_title_and_value_at_one_size(palette, tight_panel, size):
+    figure = small_multiples(palette, THREE_SERIES, LOGS, tight_panel=tight_panel)
+
+    type_ = type_in(figure) + [axes.title for axes in figure.axes]
+    assert {text.get_fontsize() for text in type_} == {points(size)}
+
+
 def test_every_piece_of_type_resolves_to_a_file_this_repo_ships(palette):
     """One step past the family name: the file behind it. Weights included — the highlighted
     group's labels are set semibold, and a weight the bundle lacks is a substitution too."""
     charts = [
         multi_series(palette, FIVE_SERIES, x_label="window", y_label="MAE"),
         two_group(palette, {"ARIMA": 0.51}, {"Ours": 0.29}, y_label="MAE"),
+        small_multiples(palette, THREE_SERIES, LOGS),
     ]
 
     for figure in charts:
@@ -380,6 +530,13 @@ def test_regenerating_from_an_unchanged_palette_and_data_reproduces_the_same_fig
     """The claim that makes a palette swap propagate: rerunning rewrites, it does not churn."""
     first = save(multi_series(palette, FIVE_SERIES), tmp_path / "first.png")
     second = save(multi_series(palette, FIVE_SERIES), tmp_path / "second.png")
+
+    assert first.read_bytes() == second.read_bytes()
+
+
+def test_small_multiples_regenerate_to_the_same_bytes(palette, tmp_path):
+    first = save(small_multiples(palette, THREE_SERIES, LOGS), tmp_path / "first.png")
+    second = save(small_multiples(palette, THREE_SERIES, LOGS), tmp_path / "second.png")
 
     assert first.read_bytes() == second.read_bytes()
 
@@ -416,6 +573,25 @@ def test_the_legend_wraps_to_fewer_columns_rather_than_run_off_the_figure(palett
 
     legend = figure.axes[0].get_legend().get_window_extent()
     assert 0 <= legend.x0 and legend.x1 <= figure.bbox.width
+
+
+def test_the_legend_sits_below_the_x_label_rather_than_over_it(palette):
+    """A legend wrapped onto more rows in a narrow pane reaches down; it starts under the axis'
+    own label, so neither is printed over the other."""
+    series = [
+        Series("Offer created", [1.0, 2.0]),
+        Series("Offer sent, then canceled", [2.0, 1.0]),
+        Series("Offer sent, then returned", [1.5, 1.5]),
+    ]
+    figure = multi_series(
+        palette, series, x_label="Week of the log", size_px=(540, 350), tight_panel=True
+    )
+    figure.canvas.draw()
+
+    axes = figure.axes[0]
+    legend = axes.get_legend().get_window_extent()
+    label = axes.xaxis.label.get_window_extent()
+    assert legend.y1 <= label.y0
 
 
 def test_a_legend_that_fits_keeps_three_to_a_row(palette):
