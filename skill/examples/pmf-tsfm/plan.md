@@ -248,6 +248,7 @@ the data are all linked from the QR code. Thank you, and I'm happy to take quest
 - **Layout:** assertion-evidence
 - **Evidence:** figure. The best model's root mean squared error on each log, as a share of the best baseline's, with the baseline at 1: slide 8's chart, on the other error measure.
 - **Source:** Table 5 of the paper.
+- **Time:** 45s
 
 The best baseline changes under this measure: XGBoost on the two BPI logs, seasonal naive on Sepsis
 and Hospital Billing. Against whichever is better, the best pre-trained model still wins on all
@@ -259,6 +260,7 @@ four, by about as much as it does on the mean absolute error.
 - **Layout:** assertion-evidence
 - **Evidence:** table. Zero-shot mean absolute error of the four Chronos-Bolt sizes, on BPI 2017 and Hospital Billing.
 - **Source:** Table 4 of the paper, with the sizes from Table 1.
+- **Time:** 45s
 
 Size helps where there's a regular pattern to learn. BPI 2017 has the strongest seasonality of the
 four logs, and the error falls from 11.64 to 7.62 as the model grows. On Hospital Billing all four
@@ -270,6 +272,7 @@ sizes land within a hundredth of each other.
 - **Layout:** assertion-evidence
 - **Evidence:** table. Zero-shot mean absolute error of Chronos-2, MOIRAI 2.0 and TimesFM 2.5 on each log.
 - **Source:** Table 4 of the paper.
+- **Time:** 1min
 
 MOIRAI 2.0 is best or tied for it on three logs, TimesFM 2.5 on two, and Chronos-2 ties on Hospital
 Billing. If you can run only one, start with the newest model of any family: within each family,
@@ -281,6 +284,7 @@ the newest generation is best or tied for best on every log.
 - **Layout:** assertion-evidence
 - **Evidence:** table. Three of the paper's seven characteristics of the directly-follows series, for each log.
 - **Source:** Table 3 of the paper; Table 2 for how its cases spread over days.
+- **Time:** 1min
 
 Sepsis has about two new cases a day over more than a year, so most relations are zero on most
 days. What's left has little trend and little regularity to forecast a week ahead, and a graph
@@ -292,6 +296,7 @@ rebuilt from those forecasts misses most of the traces.
 - **Layout:** assertion-evidence
 - **Evidence:** table. What each kind of fine-tuning trained, and with which settings.
 - **Source:** Section 4.1 of the paper.
+- **Time:** 45s
 
 We kept LoRA small on purpose: with logs this size, a larger add-on has more room to overfit. Both
 kinds used the same patch size and batch size, so the two can be compared with each other fairly.

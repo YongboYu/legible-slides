@@ -35,10 +35,10 @@ EVIDENCE_KINDS = frozenset(
     {"figure", "table", "equation", "callout", "subtitle", "questions", "answers"}
 )
 
-#: What a backup entry carries, with a question in place of a time budget, and what it leaves to the
-#: talk's entries.
-BACKUP_ENTRY = frozenset({"Layout", "Evidence", "Source", "Asked"})
-NOT_ON_A_BACKUP = frozenset({"Time", "Section", "Setup", "Answers", "Load-bearing", "Terms"})
+#: What a backup entry carries, the question it answers among it, and what it leaves to the talk's
+#: entries.
+BACKUP_ENTRY = frozenset({"Layout", "Evidence", "Source", "Asked", "Time"})
+NOT_ON_A_BACKUP = frozenset({"Section", "Setup", "Answers", "Load-bearing", "Terms"})
 
 #: The section build mode opens the backups with, declared once on the first of them.
 BACKUP_SECTION = "Backup"
@@ -267,9 +267,10 @@ def test_the_backups_follow_the_slides_and_continue_their_numbers(
     )
 
 
-def test_every_backup_names_the_question_it_answers_and_takes_no_time(backup_entries):
-    """A backup is held for a question from the room, so it says which one, and it is shown only
-    if asked, so it has no place in the slot (`pace-budget`)."""
+def test_every_backup_names_the_question_it_answers_and_how_long_it_takes(backup_entries):
+    """A backup is held for a question from the room, so it says which one, and how long the answer
+    takes, so the speaker knows what a question costs. It is shown only if asked, so its time is
+    outside the slot (`pace-budget`)."""
     for entry in backup_entries:
         assert BACKUP_ENTRY <= entry.fields.keys(), entry.claim
         assert not NOT_ON_A_BACKUP & entry.fields.keys(), entry.claim
@@ -359,13 +360,14 @@ def test_the_plan_s_backups_come_after_the_conclusion_and_before_the_references(
         assert slide.layout == entry.layout, slide.number
 
 
-def test_a_backup_s_notes_open_on_the_question_it_answers_and_budget_no_time(
+def test_a_backup_s_notes_give_its_time_and_then_the_question_it_answers(
     after_the_talk, backup_entries
 ):
-    """The speaker finds a backup by the question asked, and `pace-budget` never counts it."""
+    """The speaker finds a backup by the question asked, and sees what answering it costs."""
     for slide, entry in zip(after_the_talk[: len(backup_entries)], backup_entries, strict=True):
-        assert slide.time is None, slide.number
-        assert slide.notes.strip().startswith(f"Question: {entry.fields['Asked']}"), slide.number
+        assert slide.time == entry.fields["Time"], slide.number
+        lines = [line for line in slide.notes.strip().split("\n\n") if line.strip()]
+        assert lines[1] == f"Question: {entry.fields['Asked']}", slide.number
 
 
 def test_every_headline_is_its_entry_s_claim_word_for_word(talk, entries):

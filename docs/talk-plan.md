@@ -129,6 +129,7 @@ What to say while it is up. This becomes the slide's speaker notes.
 - **Layout:** assertion-evidence
 - **Evidence:** table. …
 - **Source:** Table 5 of the paper.
+- **Time:** 45s
 
 ## Challenges
 
@@ -265,10 +266,11 @@ wrong, and exactly one entry does.
 
 The slides held for questions after the talk, shown only if someone asks. Each is an entry like the
 talk's, numbered on from the conclusion, because that is where the deck puts it: its headline is a
-claim, and it carries **Layout**, **Evidence** and **Source**, and any of the optional fields but
-**Terms**, since a term the talk leans on is introduced in the talk. It does not carry **Time**,
-because a backup is not part of the slot (`pace-budget`), nor **Section**, **Setup**, **Answers** or
-**Load-bearing**, because it is not part of the argument. In their place, one field:
+claim, and it carries **Layout**, **Evidence**, **Source** and **Time**, and any of the optional
+fields but **Terms**, since a term the talk leans on is introduced in the talk. Its **Time** is how
+long the answer takes, so the speaker knows what a question costs before taking it; it is not part
+of the slot, and `pace-budget` leaves it out. It does not carry **Section**, **Setup**, **Answers**
+or **Load-bearing**, because it is not part of the argument. In their place, one field:
 
 | Field | What |
 |---|---|
@@ -302,6 +304,6 @@ answer slide and its answers on the conclusion. Where an entry carries an option
 shows it: the callout's text in its one callout, one click per step of the reveal, the returning
 figure drawn by the chart its first slide shows, every term on the slide, and the notes' parts in
 its speaker notes, in order. After the conclusion come the plan's backups, one slide per entry, in
-order, under a backup section the first of them declares, each with its question at the head of its
-notes and no time budget; then the references, which no entry plans. `python/tests/test_plan.py`
+order, under a backup section the first of them declares, each with its time and then its question
+at the head of its notes; then the references, which no entry plans. `python/tests/test_plan.py`
 holds the worked example to all of that, so the format and the example cannot drift apart.

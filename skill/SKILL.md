@@ -94,7 +94,7 @@ sort everything the talk leaves out, one item at a time, into the format's two p
 
 | Goes under | When |
 |---|---|
-| the backups | its evidence held up when you checked it, and the room is likely to ask for it. Write it as an entry, with the question it answers as **Asked**. |
+| the backups | its evidence held up when you checked it, and the room is likely to ask for it. Write it as an entry, with the question it answers as **Asked** and how long the answer takes as **Time**. |
 | the cuts | it is off the argument, or its evidence could not be found or did not hold up. Write the reason. |
 
 The challenges the author named in step 1 are where the likely questions come from: a challenge the
@@ -155,8 +155,8 @@ legible rules signal-budget accent-is-attention motion-purpose established-termi
 Then the backups, after the conclusion and before the references, one slide per entry in the
 plan's order, filled the same way. The first declares `section: Backup` and `backup: true`, and the
 rest carry it forward, so the footer labels them and `pace-budget` leaves them out. Each slide's
-notes open on its **Asked** as a `Question:` line, so the speaker can find it by what was asked, and
-carry no `Time:` line.
+notes open on its **Time** as a `Time:` line and then its **Asked** as a `Question:` line, so the
+speaker can find it by what was asked and knows how long the answer takes.
 
 Delete the placeholder image and anything else the template stamped that no entry asked for.
 

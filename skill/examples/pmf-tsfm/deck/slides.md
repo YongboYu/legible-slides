@@ -420,6 +420,8 @@ backup: true
 </Footnotes>
 
 <!--
+Time: 45s
+
 Question: Does RMSE tell the same story?
 
 The best baseline changes under this measure: XGBoost on the two BPI logs, seasonal naive on Sepsis
@@ -443,6 +445,8 @@ layout: assertion-evidence
 </Footnotes>
 
 <!--
+Time: 45s
+
 Question: Within one family, do larger models do better?
 
 Size helps where there's a regular pattern to learn. BPI 2017 has the strongest seasonality of the
@@ -468,6 +472,8 @@ layout: assertion-evidence
 </Footnotes>
 
 <!--
+Time: 1min
+
 Question: Which model should I use?
 
 MOIRAI 2.0 is best or tied for it on three logs, TimesFM 2.5 on two, and Chronos-2 ties on Hospital
@@ -493,6 +499,8 @@ layout: assertion-evidence
 </Footnotes>
 
 <!--
+Time: 1min
+
 Question: Why do the process models fail on Sepsis?
 
 Sepsis has about two new cases a day over more than a year, so most relations are zero on most
@@ -517,6 +525,8 @@ layout: assertion-evidence
 </Footnotes>
 
 <!--
+Time: 45s
+
 Question: How exactly did you fine-tune them?
 
 We kept LoRA small on purpose: with logs this size, a larger add-on has more room to overfit. Both
