@@ -5,7 +5,8 @@ deck to the method. It turns the rules from prose an author has to remember into
 runs, and reports what breaks, per slide, with a fix for each. It can also take a talk from a paper
 to a deck, by way of a plan the author edits.
 
-Four modes, and review is the acceptance bar for the other three:
+Four modes, and review is the acceptance bar for the other three. `SKILL.md` routes to one file per
+mode in [`modes/`](modes), so a run loads only the mode it takes:
 
 - **draft** — read a paper and its codebase, and write a [talk plan](../docs/talk-plan.md): one
   entry per slide, with its section, its headline claim, and its evidence and where that comes from.
@@ -78,10 +79,13 @@ review attached, and `python/tests/test_plan.py` holds the deck to its plan.
 
 ## What review does
 
-Four steps, in order: find the deck, its palette and its generated figures; run `legible lint` for
-everything a script settles; load the rules that need judgment with `legible rules`; read the deck
-against them. The result is one report, grouped per slide, each finding tagged and named by the
-rule it enforces.
+Six steps, in order: find the deck, its palette and its figures; run `legible lint` for everything a
+script settles; render every page and every click step, and the PDF, and look at them; load the
+rules that need judgment with `legible rules`; read the deck against them; merge one report,
+grouped per slide, each finding named by the rule it enforces.
+
+**It gives two verdicts.** The gate is the linter's exit code. Readiness is the review's judgment of
+whether the rendered deck shows what it should, which no build or lint can settle.
 
 **The two halves carry different authority.** The mechanical half has an exit code, runs in CI, and
 blocks. The judgments are advisory, because a reading of a slide is fallible in a way a bullet count
@@ -102,7 +106,7 @@ legible rules --section voice --decided-by judgment
 
 Editing a rule there changes what a review finds, with nothing edited here — and the second command
 asks the canon which rules a section holds rather than naming them, so a rule added to it is
-reviewed from the moment it is written. `python/tests/test_skill.py` holds `SKILL.md` to that: a
+reviewed from the moment it is written. `python/tests/test_skill.py` holds the skill to that: a
 rule's statement, a threshold's name or one of the canon's numbers, copied into it, fails the suite.
 
 The template says no rule either. It names them by ID where an author needs to look one up, the way
