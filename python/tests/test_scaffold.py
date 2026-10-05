@@ -50,11 +50,12 @@ CHECKS = ("cvd-validate", "legible lint")
 
 #: The review procedure's steps, which scaffold mode points at rather than repeats.
 REVIEW_STEPS = (
-    "### 1. Find what is under review",
-    "### 2. Run the mechanical checks",
-    "### 3. Load the rules that need judgment",
-    "### 4. Judge, slide by slide",
-    "### 5. Merge into one report",
+    "## 1. Find what is under review",
+    "## 2. Run the mechanical checks",
+    "## 3. Render the deck, and look at every page",
+    "## 4. Load the rules that need judgment",
+    "## 5. Judge, slide by slide",
+    "## 6. Merge into one report",
 )
 
 
@@ -97,7 +98,9 @@ def _shipped_layouts() -> set[str]:
 
 @pytest.fixture(scope="module")
 def skill() -> str:
-    return _read(SKILL)
+    """The router and every mode file it points at, read as one."""
+    modes = sorted((SKILL.parent / "modes").glob("*.md"))
+    return "\n".join(_read(path) for path in (SKILL, *modes))
 
 
 @pytest.fixture(scope="module")
@@ -273,8 +276,8 @@ def test_both_checks_are_hooked_in_the_stamped_deck(check):
 
 def test_the_skill_carries_both_modes(skill):
     """One skill definition, two modes — the shape ``docs/agent-skill-contract.md`` §1 fixes."""
-    assert "## Mode: scaffold" in skill
-    assert "## Mode: review" in skill
+    assert "# Mode: scaffold" in skill
+    assert "# Mode: review" in skill
 
 
 def test_the_scaffold_does_not_restate_the_review_procedure(skill):

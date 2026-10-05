@@ -36,6 +36,10 @@ venue: Where, and when
 duration: 15min
 paper: Where the paper is, a path or a link
 code: Where its codebase is, a path or a link
+audience: Who is in the room, and what they already know
+takeaway: What the room should leave with, or do afterwards
+language: English
+room: About 80 seats, one screen; questions after the slot
 ---
 
 # The talk's title, as the cover shows it
@@ -148,6 +152,7 @@ What to say while it is up. This becomes the slide's speaker notes.
 | `speaker`, `venue` | Who gives it, where and when. They go on the cover. |
 | `duration` | The slot, written the way `pace-budget` reads a deck's own `duration`. The deck's headmatter gets the same value. |
 | `paper`, `code` | Where the plan was drafted from. A plan written by hand can leave them out. |
+| `audience`, `takeaway`, `language`, `room` | The brief: who the talk is for and what it is for. The audience decides how much setup the talk builds and which terms it can leave undefined; the takeaway is what the answer slide and the conclusion are written toward; the room says how far the back row is (`type-scale`) and whether questions come out of the slot. Draft mode asks for each, and marks one it had to guess **(assumed)** until the author confirms it. |
 
 ### Questions
 
@@ -203,6 +208,7 @@ ones decided by script, and review mode reads the slide for the rest.
 | **Returns** | The figure brought back from an earlier slide, as `Slide N`, then what is added to it here. The figure is the same chart the room saw, redrawn for its pane at most. | `one-message` |
 | **Terms** | The terms the slide introduces and later slides lean on, separated by commas. Each is spelled the way the field spells it, shown on the slide, and introduced on one entry only. | `established-terminology`, `acronym-budget` |
 | **Notes** | Speaker notes as a rehearsal script, in parts indented under it (below). | `no-script-on-slide` |
+| **Exception** | A default of the method this slide departs from, by its rule ID, then the reason the argument needs it. Never a rule the canon marks **Floor**. | the rule it names, and the canon's "Departing from a default" |
 
 A callout takes its height from the pane it sits in, so under a figure that fills the pane it
 shrinks the figure, and the figure's type with it (`type-scale`). It fits beside a table, or in a
