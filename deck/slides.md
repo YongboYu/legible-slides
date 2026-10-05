@@ -301,25 +301,32 @@ are no slide transitions anywhere in this deck.
 -->
 
 ---
+layout: two-col-evidence
 section: Legibility
 ---
 
 # Body text is sized for the back of the room, not for your laptop screen.
 
-<Callout title="Working it out">
+::left::
 
-Body text is fixed at 23 px on this deck's 1280 × 720 canvas. The canvas scales to fill the screen,
-so what matters is the text's share of the image height: 23 ÷ 720 = 3.2%, on any projector. By the
-AV industry's sizing guideline, that reads to about 4.5 image heights, so on a screen 2 m tall it
-reaches about 2 × 4.5 = 9 m: roughly a seminar room or a conference session room.
+<ViewingDistance reach="4.5" caption="Body type reads to about 4.5 image heights, by the AV industry's sizing guideline." />
 
-</Callout>
+::right::
 
-Nothing goes below 18 px, including captions, legends and page numbers. For a larger room, the
-better fix is a bigger body size and less on each slide.
+1. Body text is fixed at 23 px on a 1280 × 720 canvas
+2. 23 ÷ 720 = 3.2% of the height, on any screen
+3. A screen 2 m tall: 2 × 4.5 = 9 m, a session room
+
+Nothing goes below 18 px, anywhere.
 
 <!--
 Signpost: So far we've looked at what goes on a slide. Next is whether people can actually see it.
+
+Walk the three lines in order. The canvas is 1280 by 720 and scales to fill whatever screen it's on,
+so a size is really a share of the image height, and that share is the same on a projector and on a
+laptop. The AV industry's sizing rule says body text at that share reads to about four and a half
+image heights. On a screen two meters tall, that's nine meters: a seminar room or a conference
+session room. Captions, legends and page numbers all sit at or above eighteen pixels too.
 
 The method sets the type size once, rather than leaving it to the palette or to each slide. When
 text size can change per slide, it's tempting to shrink whatever runs long, and the people at the
