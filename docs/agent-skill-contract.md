@@ -182,7 +182,10 @@ comes from, its time budget), plus the talk's slot and its research questions. T
 [`talk-plan.md`](talk-plan.md). The plan is where `message-before-visual` is done: every claim is
 written before anything is drawn.
 
-- **draft** reads a paper and its codebase and writes a plan. It checks each number against its
+- **draft** reads a paper and its codebase, asks the author for the slide the talk rests on and the
+  challenges they expect, and writes a plan: the paper's own questions, quoted from where it states
+  them, a setup part before the findings, and the findings question by question
+  ([#38](https://github.com/YongboYu/legible-slides/issues/38)). It checks each number against its
   source, records what it cut and why, and then stops: the author edits the plan, and the argument
   is settled there.
 - **build** runs scaffold, fills each slide from its entry, draws the figures with the figure

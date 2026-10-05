@@ -53,9 +53,12 @@ institution's mark ships, so the author points the cover at their own.
 
 ## What draft and build do
 
-Draft reads the paper for the argument and the codebase for the numbers, and writes a plan: the
-questions the talk answers, then one entry per slide, each headline written before its evidence is
-picked (`message-before-visual`). Every number is checked against its source as it goes in, and
+Draft reads the paper for the argument and the codebase for the numbers, and asks the author for
+what neither says: the slide the talk rests on, and the challenges they expect. It writes a plan: the
+questions the talk answers, taken from the paper's stated research questions or contributions and
+quoting where; a setup that makes the case for the problem and the approach; then the findings,
+question by question. Every entry is one slide, its headline written before its evidence is picked
+(`message-before-visual`). Every number is checked against its source as it goes in, and
 whatever didn't fit the slot, or didn't hold up, is listed under the plan's cuts with the reason.
 Then it stops. The author edits the plan, and that's where the argument gets settled, because
 changing a line is cheaper than redrawing a slide.

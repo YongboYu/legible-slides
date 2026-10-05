@@ -34,9 +34,14 @@ FIGURES = "figures"
 BEST_BASELINE = {"BPI 2017": 8.30, "BPI 2019": 14.47, "Sepsis": 0.117, "Billing": 1.77}
 BEST_MODEL = {"BPI 2017": 6.87, "BPI 2019": 10.75, "Sepsis": 0.084, "Billing": 1.39}
 
-#: Chronos-Bolt on BPI 2017, Table 4, by size (Table 1).
-CHRONOS_BOLT = {"tiny\n9M": 11.64, "mini\n21M": 9.70, "small\n48M": 7.72}
-CHRONOS_BOLT_LARGEST = {"base\n205M": 7.62}
+#: The tuned XGBoost baseline's mean absolute error, Table 4, beside the seasonal naive's above.
+XGBOOST = {"BPI 2017": 8.50, "BPI 2019": 14.70, "Sepsis": 0.169, "Billing": 2.67}
+
+#: Entropic relevance of the forecast graphs, Table 7, on the three logs where every model fits at
+#: least 98% of traces: the best baseline (XGBoost on all three) and the best pre-trained model.
+#: Lower is better.
+RELEVANCE_BASELINE = {"BPI 2017": 1.01, "BPI 2019": 2.39, "Billing": 2.12}
+RELEVANCE_MODEL = {"BPI 2017": 1.09, "BPI 2019": 2.54, "Billing": 2.39}
 
 #: MOIRAI on BPI 2017, Table 4, by generation and size (Table 1).
 MOIRAI_PREVIOUS = {"1.1 small\n14M": 10.24, "1.1 large\n311M": 9.29}
@@ -60,18 +65,41 @@ def weekly_series(palette):
     )
 
 
+def relative_to(palette, reference, values, baseline, y_label):
+    """Each log's value as a share of its baseline's, beside the baseline itself at 1."""
+    relative = {log: values[log] / baseline[log] for log in values}
+    return two_group(palette, {reference: 1.0}, relative, y_label=y_label)
+
+
 def against_the_baseline(palette):
-    relative = {log: BEST_MODEL[log] / BEST_BASELINE[log] for log in BEST_MODEL}
-    return two_group(
+    return relative_to(
         palette,
-        {"Best\nbaseline": 1.0},
-        relative,
+        "Best\nbaseline",
+        BEST_MODEL,
+        BEST_BASELINE,
         y_label="Error, relative to the best baseline",
     )
 
 
-def chronos_bolt_sizes(palette):
-    return two_group(palette, CHRONOS_BOLT, CHRONOS_BOLT_LARGEST, y_label="Mean absolute error")
+def xgboost_against_naive(palette):
+    """The best baseline on every log is the seasonal naive, so it is the reference here."""
+    return relative_to(
+        palette,
+        "Seasonal\nnaive",
+        XGBOOST,
+        BEST_BASELINE,
+        y_label="XGBoost's error, relative to seasonal naive",
+    )
+
+
+def process_model_relevance(palette):
+    return relative_to(
+        palette,
+        "Best\nbaseline",
+        RELEVANCE_MODEL,
+        RELEVANCE_BASELINE,
+        y_label="Entropic relevance, relative to the baseline",
+    )
 
 
 def moirai_generations(palette):
@@ -91,9 +119,10 @@ def sepsis_fit(palette):
 #: Each figure the deck shows, by the path it is served at.
 CHARTS = {
     "bpi2017-weekly.png": weekly_series,
+    "xgboost-against-naive.png": xgboost_against_naive,
     "against-the-baseline.png": against_the_baseline,
-    "chronos-bolt-sizes.png": chronos_bolt_sizes,
     "moirai-generations.png": moirai_generations,
+    "process-model-relevance.png": process_model_relevance,
     "sepsis-fit.png": sepsis_fit,
 }
 

@@ -33,20 +33,19 @@ Time: 30s
 layout: answer
 ---
 
-# Used as they are, pre-trained forecasters predict directly-follows counts with 17 to 28% less error than the best baseline.
+# Used as they are, pre-trained forecasters cut the error by 17 to 28%, but the process models they forecast are no better.
 
 ::questions::
 
-1. Does a larger model forecast better?
-2. Does a newer model forecast better?
-3. Does fine-tuning help?
-4. Is there one model family to pick?
+1. Can a pre-trained forecaster, used as it is, beat the best methods?
+2. Does fine-tuning make it better still?
+3. Does a better forecast give a better process model?
 
 <!--
-Time: 1min 30s
+Time: 1min
 
-This is the whole talk in one slide. The rest goes through the four questions in order, and the
-last slide answers them with the same numbers.
+This is the whole talk in one slide. First, why the problem is worth a new kind of model. Then the
+three questions in order, and the last slide answers them with the same numbers.
 -->
 
 ---
@@ -54,7 +53,7 @@ layout: assertion-evidence
 section: Problem
 ---
 
-# Forecasting a process model means forecasting how often each pair of activities follows one another.
+# How often one step follows another changes week to week, so last month's process model is already out of date.
 
 <Figure
   src="/figures/bpi2017-weekly.png"
@@ -67,22 +66,22 @@ section: Problem
 </Footnotes>
 
 <!--
-Time: 1min 15s
+Time: 1min
 
-Signpost: first the problem, then the setup, then what we found, and last where it falls short.
+Signpost: first the problem, then our approach, then three findings.
 
 A process model here is a directly-follows graph: how often one activity is followed straight away
-by another. Count that per day, and each arrow in the graph becomes a time series. Forecast every
-series and you have the graph for next week. These three are from a loan application process, and
-each one moves on its own schedule.
+by another. Discover it from last month's events and it describes last month. These three counts
+come from a loan application process, and each one moves on its own schedule. Count each arrow per
+day, and it becomes a time series. Forecast every series, and you have next week's graph. That's
+process model forecasting.
 -->
 
 ---
 layout: assertion-evidence
-section: Setup
 ---
 
-# Twelve pre-trained models forecast four public event logs a week ahead, with no training on them.
+# Each log is short and sparse: at most two years of days, and about two new Sepsis cases a day.
 
 | Event log | Cases | Relations forecast | Days |
 |---|---:|---:|---:|
@@ -98,11 +97,92 @@ section: Setup
 <!--
 Time: 1min
 
-Signpost: that's the problem. Here is how we tested it.
+These are the four public logs we forecast. A forecaster gets a few hundred days per series to learn
+from, and in Sepsis most relations are zero on most days. The same log also mixes weekly patterns,
+slow trends and sudden drops, so one setting rarely suits every series in it.
+-->
 
-The twelve models come from three families: Chronos, MOIRAI and TimesFM. We compare them with the
-two strongest baselines from our earlier benchmark, a seasonal naive forecast and a tuned XGBoost
-model. Errors are mean absolute errors over the last fifth of each series.
+---
+layout: assertion-evidence
+---
+
+# A tuned XGBoost model, trained on each log, forecasts no better than repeating last week.
+
+<Figure
+  src="/figures/xgboost-against-naive.png"
+  caption="XGBoost's error on each log, as a share of the seasonal naive forecast's."
+  :cite="1"
+/>
+
+<Footnotes>
+  <Footnote :number="1">Yu et al. (2026), Table 4: mean absolute error.</Footnote>
+</Footnotes>
+
+<!--
+Time: 1min
+
+In our earlier benchmark, machine learning and deep learning models gave only modest gains over
+simple statistical ones. These are two of the strongest from it: a seasonal naive forecast, which says
+next week looks like this week, and an XGBoost model with its hyperparameters tuned. XGBoost loses
+on all four logs, by 2% on the two BPI logs and by about half on Sepsis and Hospital Billing. On
+data this small, a model trained from scratch mostly learns the noise.
+-->
+
+---
+layout: assertion-evidence
+section: Approach
+---
+
+# A time series foundation model is pre-trained the way a language model is, on series instead of text.
+
+| | Language model | Time series foundation model |
+|---|---|---|
+| Pre-trained on | Text | Series from many domains |
+| Reads and writes | Words | Numbers over time |
+| On data it has never seen | Used with no training | Used with no training: zero-shot |
+
+<Footnotes>
+  <Footnote :number="1">Yu et al. (2026), Section 3.2 and Table 1.</Footnote>
+</Footnotes>
+
+<!--
+Time: 1min
+
+Signpost: that's the problem. Here is what we tried.
+
+The current direction in forecasting is foundation models. A language model learns from a huge
+amount of text and then works on text it has never seen. A time series foundation model does the
+same with numbers over time. So we're not using a language model here. We use these forecasters
+zero-shot: we run the pre-trained model on a new log, with no training at all. Fine-tuning means
+training it further on the log.
+-->
+
+---
+layout: assertion-evidence
+---
+
+# Every pre-training corpus the paper states holds over 400,000 times more observations than our largest log.
+
+| Data | Observations |
+|---|---:|
+| MOIRAI 1.1's pre-training, the smallest stated | 27 billion |
+| MOIRAI 2.0's pre-training, the largest | 296 billion |
+| Sepsis, our largest log | 62 thousand |
+
+<Footnotes>
+  <Footnote :number="1">Yu et al. (2026), Tables 1 and 2. Sepsis is 135 series over 459 days.</Footnote>
+</Footnotes>
+
+<!--
+Time: 1min
+
+Why should that help? A model trained from scratch has only the log to learn from. A pre-trained one
+brings patterns it learned elsewhere, like weekly cycles and trends, and used zero-shot, it never
+sees our small log in training, so it has nothing to overfit.
+
+We tested twelve of them, from three families: Chronos, MOIRAI and TimesFM. Each forecasts every
+series a week ahead, over the last fifth of each log, against the two baselines from the last slide
+but one. The error is the mean absolute error.
 -->
 
 ---
@@ -125,34 +205,12 @@ section: Findings
 <!--
 Time: 1min 15s
 
-Signpost: now the findings, one question at a time.
+Signpost: now the three findings, one question at a time.
 
-For each log, the baseline is whichever of the two did better, and that was the seasonal naive
-forecast every time. Sepsis and BPI 2019 have the most irregular series, and that's where the gap
-is largest.
--->
-
----
-layout: assertion-evidence
----
-
-# Within Chronos-Bolt, the larger models cut the error on BPI 2017 by a third.
-
-<Figure
-  src="/figures/chronos-bolt-sizes.png"
-  caption="Zero-shot error on BPI 2017, for the four sizes of Chronos-Bolt."
-  :cite="1"
-/>
-
-<Footnotes>
-  <Footnote :number="1">Yu et al. (2026), Table 4.</Footnote>
-</Footnotes>
-
-<!--
-Time: 1min
-
-That answers the first question with a yes, but a careful one. On Hospital Billing, all four sizes
-land within a hundredth of each other, so size helps most where there is a regular pattern to learn.
+The first question, and the answer is yes. For each log, the baseline is whichever of the two did
+better, and that was the seasonal naive forecast every time. Sepsis and BPI 2019 have the most
+irregular series, and that's where the gap is largest. The best result on every log comes from one
+of the three newest models: Chronos-2, MOIRAI 2.0 or TimesFM 2.5.
 -->
 
 ---
@@ -172,10 +230,11 @@ layout: assertion-evidence
 </Footnotes>
 
 <!--
-Time: 1min
+Time: 45s
 
-The second question. A newer generation helped more than a bigger model did. MOIRAI 2.0 was
-trained on about ten times as many observations as 1.1, which is our best guess at why.
+So which one to pick? A newer generation helped more than a bigger model did. MOIRAI 2.0 was
+trained on about ten times as many observations as 1.1, which is our best guess at why. Within a
+generation, larger models do help, but most on logs with a regular pattern to learn.
 -->
 
 ---
@@ -195,41 +254,44 @@ layout: assertion-evidence
 </Footnotes>
 
 <!--
-Time: 1min 15s
+Time: 1min
 
-The third question. LoRA trains a small add-on and leaves the model itself alone, and it moved the
+The second question. LoRA trains a small add-on and leaves the model itself alone, and it moved the
 error by up to about a tenth, in either direction. Full fine-tuning retrains everything, and on BPI
-2019 it took one model from 12.3 to 23.1. With logs this small, the model mostly learns the noise.
+2019 it took one model from 12.3 to 23.1. With logs this small, the model mostly learns the noise,
+the same thing that held XGBoost back.
 -->
 
 ---
 layout: assertion-evidence
 ---
 
-# No single family wins every log, but the newest generation is best on all four.
+# Yet on three logs, the process models they forecast score 6 to 13% worse than the baselines' on entropic relevance.
 
-| Event log | Best zero-shot model | Error |
-|---|---|---:|
-| BPI 2017 | MOIRAI 2.0, TimesFM 2.5 | 6.87 |
-| BPI 2019 | TimesFM 2.5 | 10.75 |
-| Sepsis | MOIRAI 2.0 | 0.084 |
-| Hospital Billing | Chronos-2, MOIRAI 2.0 | 1.39 |
+<Figure
+  src="/figures/process-model-relevance.png"
+  caption="Entropic relevance of the best model's forecast graphs, as a share of the best baseline's. Lower is better."
+  :cite="1"
+/>
 
 <Footnotes>
-  <Footnote :number="1">Yu et al. (2026), Table 4: mean absolute error. Chronos-Bolt tiny ties on Hospital Billing.</Footnote>
+  <Footnote :number="1">Yu et al. (2026), Table 7.</Footnote>
 </Footnotes>
 
 <!--
-Time: 1min
+Time: 1min 15s
 
-The fourth question. Chronos-2, MOIRAI 2.0 and TimesFM 2.5 all came out in the second half of
-2025, and between them they hold the best result on every log. Which family you pick seems to matter
-less than picking a recent one.
+The third question, and the one we find most interesting. We rebuild the forecast counts into a
+directly-follows graph for each week and replay the real traces on it. Entropic relevance is how
+many bits that graph needs to describe them, so lower is better. The pre-trained models' graphs come
+out slightly worse than the baselines', even though their counts were more accurate. All of them do
+better than reusing the graph from the training data, which scores 1.15, 3.89 and 5.83 on these
+three logs. So forecasting the graph is worth it, but a lower error per series doesn't add up to a
+better graph.
 -->
 
 ---
 layout: assertion-evidence
-section: Limits
 ---
 
 # On the sparse Sepsis log, process models forecast by pre-trained models fit fewer than one trace in five.
@@ -245,33 +307,29 @@ section: Limits
 </Footnotes>
 
 <!--
-Time: 1min 15s
+Time: 45s
 
-Signpost: last, where this falls short.
-
-Lower error per series doesn't always give a better process model. We replay the test traces on
-each forecast graph. On the other three logs, at least 98% of traces fit for every model. Sepsis
-has few cases spread over many days, and there the pre-trained models' graphs miss most traces.
+On the other three logs, at least 98% of traces fit for every model. Sepsis has few cases spread
+over many days, and there the pre-trained models' graphs miss most traces.
 -->
 
 ---
 layout: conclusion
 ---
 
-# Pre-trained forecasters, used as they are, make a strong default for process model forecasting.
+# Used as they are, pre-trained forecasters beat both baselines on all four logs, so they make a strong default to build on.
 
 ::answers::
 
-1. Somewhat: larger helps most on regular logs
-2. Yes: the newest models are best, or tied, on every log
-3. Only a little: full fine-tuning can nearly double the error
-4. No single family: pick a recent one
+1. Yes: 17 to 28% less error than the best baseline
+2. Barely: full fine-tuning can nearly double the error
+3. Not yet: no better process models, and much worse on Sepsis
 
 <!--
-Time: 1min 30s
+Time: 1min
 
-The slides, the code and the data are all linked from the QR code. Thank you, and I'm happy to take
-questions.
+The next step is to make a better forecast give a better process model. The slides, the code and
+the data are all linked from the QR code. Thank you, and I'm happy to take questions.
 -->
 
 ---

@@ -1,10 +1,12 @@
 # The talk plan
 
-_Resolves part of [#36](https://github.com/YongboYu/legible-slides/issues/36)._
+_Resolves part of [#36](https://github.com/YongboYu/legible-slides/issues/36); the questions'
+sources, the setup part and the author's answers are
+[#38](https://github.com/YongboYu/legible-slides/issues/38)'s._
 
 A talk plan is a markdown file with one entry per slide: the slide's section, its headline claim,
-the evidence that proves it and where that evidence comes from, plus the talk's slot and the
-questions it answers. It is where `message-before-visual` gets done: every claim is written down,
+the evidence that proves it and where that evidence comes from, plus the talk's slot, the
+questions it answers and where the paper states them, and the challenges the author expects. It is where `message-before-visual` gets done: every claim is written down,
 and argued over, before anything is drawn.
 
 It sits between the paper and the deck, and the skill works on both sides of it
@@ -37,8 +39,10 @@ code: Where its codebase is, a path or a link
 
 ## Questions
 
-1. The first question the talk answers?
+1. The first question the talk answers, the way the room would ask it?
+   - **Stated in:** Section 1, the contributions: "the paper's own sentence that states it".
 2. The second?
+   - **Stated in:** Section 4.1: "…".
 
 ## Slides
 
@@ -54,15 +58,51 @@ code: Where its codebase is, a path or a link
 - **Evidence:** questions. The numbered questions above.
 - **Time:** 1min 30s
 
-### 3. The claim this slide proves, written as a sentence.
+### 3. Why the problem matters, written as a claim.
+
+- **Section:** Problem
+- **Setup:** stakes
+- **Layout:** assertion-evidence
+- **Evidence:** figure. What it shows, and what the reader should see in it.
+- **Source:** Section 1 of the paper; `data/…` in the code.
+- **Time:** 1min
+
+What to say while it is up. This becomes the slide's speaker notes.
+
+### 4. What makes the problem hard, written as a claim.
+
+- **Section:** Problem
+- **Setup:** difficulty
+- …
+
+### 5. Where existing work falls short, written as a claim.
+
+- **Section:** Problem
+- **Setup:** gap
+- …
+
+### 6. Why the approach should close the gap, written as a claim.
+
+- **Section:** Approach
+- **Setup:** approach
+- **Load-bearing:** What the room gets wrong if this slide is cut, in the author's words.
+- **Layout:** assertion-evidence
+- **Evidence:** table. …
+- **Source:** Table 1 of the paper.
+- **Time:** 1min
+
+### 7. The claim this slide proves, written as a sentence.
 
 - **Section:** Findings
+- **Answers:** 1
 - **Layout:** assertion-evidence
 - **Evidence:** figure. What it shows, and what the reader should see in it.
 - **Source:** Table 4 of the paper; `outputs/zero_shot/…` in the code.
 - **Time:** 1min
 
-What to say while it is up. This becomes the slide's speaker notes.
+## Challenges
+
+- **The pushback the author expects.** Where the talk meets it: Slide 6, or in Q&A from Table 5.
 
 ## Cut
 
@@ -84,6 +124,18 @@ The research questions the talk answers, numbered. The answer slide asks them an
 answers them, by the same numbers (`answer-first`, `conclusion-stays-up`), so they are written once,
 here, and both slides are built from this list.
 
+They are the paper's questions, not ones read off its tables. Each is phrased the way the room
+would ask it, and carries one field, indented under it:
+
+| Field | What |
+|---|---|
+| **Stated in** | The section of the paper that states the question, as `Section N`, and the paper's own sentence, quoted. |
+
+A paper may state its questions at two levels: the contributions its introduction claims, and the
+narrower questions its experiments are designed around. The talk's questions are the level the
+abstract argues at, and the narrower ones become the evidence under them. A question no section of
+the paper states is one the paper does not answer, so it does not belong here.
+
 ### One entry per slide
 
 Each slide of the talk is a `###` heading, numbered in the order the deck runs, whose text is the
@@ -94,6 +146,9 @@ a list of fields:
 | Field | What | When |
 |---|---|---|
 | **Section** | The part of the talk the slide belongs to, the label the footer shows (`section-locator`). Write it on every entry; the deck only sets it where it changes. | every content slide |
+| **Setup** | The beat of the setup the slide makes: `stakes`, `difficulty`, `gap` or `approach`. | every slide of the setup |
+| **Answers** | The number of the question the slide answers. | every slide of the findings |
+| **Load-bearing** | What the room gets wrong if this slide is cut, as the author put it. | the one slide the author says carries the talk |
 | **Layout** | The theme layout the slide uses: `cover`, `answer`, `assertion-evidence`, `two-col-evidence` or `conclusion`. | every slide |
 | **Evidence** | What proves the claim: a kind, then a full stop, then what it shows. The kinds are `figure`, `table`, `equation` and `callout`, plus `subtitle`, `questions` and `answers` on the cover, the answer and the conclusion. | every slide |
 | **Source** | Where the evidence comes from: a table or section of the paper, a file in the codebase, a dataset. Build mode turns these into footnotes and the references slide. | every slide that shows evidence |
@@ -103,6 +158,33 @@ Any paragraph after the fields is what to say while the slide is up. Build mode 
 speaker notes, so a plan that has it is also a first draft of the script, kept off the slide
 (`no-script-on-slide`).
 
+### The setup, then the findings
+
+The content slides fall in two parts, in this order, and the slides that are neither, like how the
+experiment was run, sit between them or among the findings.
+
+**The setup** makes the case that the question is worth asking and the approach worth trying,
+before any result is shown. It is what makes the results land: a finding the room has no stake in
+is a number. It makes four beats, each on one slide or more, in this order:
+
+| Beat | What its slides claim |
+|---|---|
+| `stakes` | why the problem matters, and to whom |
+| `difficulty` | what makes it hard: the data, the scale, the shape of the problem |
+| `gap` | where existing work falls short of it, with evidence rather than a citation alone |
+| `approach` | why the approach should close that gap, before the room sees whether it does |
+
+The setup comes after the answer slide, because the answer comes first (`answer-first`), and every
+setup slide is a claim with its evidence like any other (`assertion-headline`), not a section
+divider (`no-section-dividers`).
+
+**The findings** answer the questions, in their order. Each slide names the question it answers,
+every question has at least one, and the conclusion then answers them by the same numbers. A
+question the plan gives one slide is a question the talk treats as minor; that is a choice to make
+in the plan, where it shows.
+
+### The conclusion
+
 The conclusion's evidence lists one answer per question, by number, under the field:
 
 ```markdown
@@ -110,6 +192,19 @@ The conclusion's evidence lists one answer per question, by number, under the fi
   1. The answer to the first question
   2. The answer to the second
 ```
+
+### The slide the talk rests on
+
+Two things in a plan only the author knows, and draft mode asks for both rather than guess. The
+first is the slide that, cut, would most weaken the talk, usually because the room would get
+something basic wrong without it. Its entry carries **Load-bearing**, with what the room would get
+wrong, and exactly one entry does.
+
+### Challenges
+
+The second is what the author expects the room to push back on. One line each: the challenge in
+bold, then where the talk meets it, by slide number, or the source the answer comes from in Q&A. A
+challenge no slide and no source meets is one to settle before the talk, not during it.
 
 ### Cut
 

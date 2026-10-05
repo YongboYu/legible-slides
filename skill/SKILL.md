@@ -31,33 +31,49 @@ built from it, and the review of that deck.
 Write a talk plan from a paper and its codebase. The plan is where the argument gets settled, one
 line of text per slide, so it is the cheapest place for the author to change it.
 
-### 1. Find the sources, and the four things they do not say
+### 1. Find the sources, and ask for what they do not say
 
 | What | Where |
 |---|---|
 | The paper | The LaTeX source or the PDF the author named. The source is better: its tables are text. |
 | The codebase | The checkout the author named. Its outputs are where a number can be checked, and where data the paper only summarizes lives. |
 | The slot, the venue, the speaker | Ask. A plan without a slot cannot be budgeted. |
+| The slide the talk rests on | Ask: which one slide, cut, would most weaken the talk, and what would the room get wrong without it? It goes on that entry as **Load-bearing**. |
+| The challenges they expect | Ask: what will the room push back on? Each goes under the plan's challenges, with where the talk meets it. |
+
+The last two are the author's to answer, and no paper says them. If the author has a deck, notes or
+a rehearsal from an earlier version of the talk, those may already say; quote them, and say where
+you read them.
 
 ### 2. Load the rules a plan is shaped by
 
 ```bash
 legible rules message-before-visual answer-first conclusion-stays-up one-message assertion-headline
-legible rules section-locator pace-budget acronym-budget
+legible rules no-section-dividers section-locator pace-budget acronym-budget
 ```
 
 As in review mode: work from what these print, not from memory of them, and stop if one exits 2.
 
 ### 3. Write the questions, then the answer
 
-The questions are the ones the paper sets out to answer, phrased the way the room would ask them.
+Take the questions from what the paper says it answers: its stated research questions, or the
+contributions its introduction claims, at the level the plan's format sets out.
+
+Phrase each the way the room would ask it, and under it quote the sentence the paper states it in,
+with its section, as the format's **Stated in**. A question you cannot quote is one the paper does
+not ask; leave it out, or say why under the cuts.
+
 Then the answer slide's entry, held to `answer-first` as step 2 printed it.
 
-### 4. Write one entry per slide, the claim first
+### 4. Write the setup, then the findings, one entry per slide and the claim first
 
-For each claim the talk has to make, in the order the argument needs, write the entry in the order
-`message-before-visual` asks for, and then say exactly where its evidence is: a table or section of
-the paper, a file in the codebase.
+Write the format's setup part first, beat by beat, from the paper's introduction, background and
+method, and put the author's load-bearing slide where its beat is. Then the findings, question by
+question, each entry naming the question it answers. Before going on, compare how many slides each
+question got with how much of the paper it takes up, and say in the hand-over where they differ.
+
+For every entry, write it in the order `message-before-visual` asks for, and then say exactly where
+its evidence is: a table or section of the paper, a file in the codebase.
 
 Check every number in a claim against its source as you write it. Where the codebase holds the data
 behind a figure, extract it into the plan's data directory with a script that says where it read
@@ -66,8 +82,10 @@ from, so the figure can be drawn again without the codebase.
 ### 5. Fit the slot, and write down the cuts
 
 Give every entry a time budget and add them up against the slot, the way `pace-budget` does. What
-does not fit, and every claim from the paper whose evidence you could not find or that did not hold
-up when you checked it, goes under the plan's cuts, with the reason.
+does not fit, and every claim from the paper whose evidence you could not find or that
+did not hold up when you checked it, goes under the plan's cuts, with the reason.
+
+Then the challenges the author named in step 1: say where each is met, as the format asks.
 
 ### 6. Hand the plan over, and stop
 
@@ -102,6 +120,7 @@ Replace the template's skeleton slides with one slide per entry:
 | **Source** | a footnote on the slide, and an entry on the references slide |
 | **Time** | a `Time:` line in the speaker notes |
 | the paragraph under it | the speaker notes, with a `Signpost:` line where the section changes |
+| **Setup**, **Answers**, **Load-bearing** | nothing: they shape the argument in the plan, and the slide shows only what proves its claim |
 
 Delete the placeholder image and anything else the template stamped that no entry asked for.
 

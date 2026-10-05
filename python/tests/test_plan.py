@@ -35,10 +35,15 @@ EVIDENCE_KINDS = frozenset(
     {"figure", "table", "equation", "callout", "subtitle", "questions", "answers"}
 )
 
+#: The setup part's beats, in the order the talk makes its case before the findings.
+SETUP_BEATS = ("stakes", "difficulty", "gap", "approach")
+
 _ENTRY = re.compile(r"^### (?P<number>\d+)\. (?P<claim>.+)$", re.MULTILINE)
-_FIELD = re.compile(r"^- \*\*(?P<key>\w+):\*\* ?(?P<value>.*)$", re.MULTILINE)
+_FIELD = re.compile(r"^- \*\*(?P<key>[\w-]+):\*\* ?(?P<value>.*)$", re.MULTILINE)
 _NUMBERED = re.compile(r"^\s*(?P<number>\d+)\. (?P<text>.+)$", re.MULTILINE)
 _IMAGE = re.compile(r'src="/(?P<path>[^"]+)"')
+_STATED_IN = re.compile(r"^\s+- \*\*Stated in:\*\* (?P<where>.+)$", re.MULTILINE)
+_SLIDE_REFERENCE = re.compile(r"\bslides? (?P<number>\d+)", re.IGNORECASE)
 
 
 class Entry:
@@ -57,6 +62,18 @@ class Entry:
     @property
     def kind(self) -> str:
         return self.fields["Evidence"].split(".", 1)[0]
+
+    @property
+    def beat(self) -> str | None:
+        """The setup beat the entry makes, if it is one of the setup part's."""
+        setup = self.fields.get("Setup")
+        return setup.rstrip(".") if setup else None
+
+    @property
+    def answers(self) -> int | None:
+        """The question the entry answers, if it is one of the findings."""
+        answers = self.fields.get("Answers")
+        return int(answers.rstrip(".")) if answers else None
 
 
 def _headmatter(text: str) -> dict[str, str]:
@@ -157,11 +174,58 @@ def test_the_plan_says_what_it_cut(plan_text):
     assert _part(plan_text, "Cut").strip()
 
 
+def test_every_question_says_where_the_paper_states_it(plan_text, questions):
+    """The talk's questions are the paper's own, so each names the section that states it and
+    quotes it, rather than being read off the tables."""
+    stated = [match["where"] for match in _STATED_IN.finditer(_part(plan_text, "Questions"))]
+
+    assert len(stated) == len(questions)
+    for where in stated:
+        assert re.search(r"\bSection \d", where), where
+        assert re.search(r'"[^"]+"', where), where
+
+
+def test_the_setup_makes_every_beat_in_order_before_the_findings(entries):
+    setup = [entry for entry in entries if entry.beat]
+    findings = [entry for entry in entries if entry.answers]
+
+    assert {entry.beat for entry in setup} <= set(SETUP_BEATS)
+    assert [entry.beat for entry in setup] == sorted(
+        (entry.beat for entry in setup), key=SETUP_BEATS.index
+    )
+    assert set(SETUP_BEATS) <= {entry.beat for entry in setup}
+    answer = next(entry for entry in entries if entry.layout == "answer")
+    assert setup[0].number > answer.number, "the setup comes after the answer slide (answer-first)"
+    assert findings and setup[-1].number < findings[0].number
+
+
+def test_the_findings_answer_every_question_in_its_order(entries, questions):
+    answered = [entry.answers for entry in entries if entry.answers]
+
+    assert answered == sorted(answered)
+    assert set(answered) == set(range(1, len(questions) + 1))
+
+
+def test_one_entry_is_marked_as_the_slide_the_talk_rests_on(entries):
+    """Which slide carries the talk is the author's to say, so the plan records their answer."""
+    assert len([entry for entry in entries if "Load-bearing" in entry.fields]) == 1
+
+
+def test_the_plan_says_where_it_meets_each_challenge_it_expects(plan_text, entries):
+    challenges = _part(plan_text, "Challenges")
+
+    assert re.findall(r"^- \*\*", challenges, re.MULTILINE)
+    for match in _SLIDE_REFERENCE.finditer(challenges):
+        assert 1 <= int(match["number"]) <= len(entries), match[0]
+
+
 def test_the_format_names_every_field_the_example_uses(entries):
     documented = FORMAT.read_text(encoding="utf-8")
 
-    for key in {key for entry in entries for key in entry.fields}:
+    for key in {key for entry in entries for key in entry.fields} | {"Stated in"}:
         assert f"**{key}**" in documented, key
+    for part in ("Questions", "Challenges", "Cut"):
+        assert f"### {part}" in documented, part
 
 
 # The deck, against the plan it was built from.

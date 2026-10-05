@@ -100,8 +100,8 @@ and judgment stays with a reader, or with the coding-agent skill that reviews on
 [`skill/`](skill) is that skill, and it has four modes.
 
 **draft** reads a paper and its codebase and writes a [talk plan](docs/talk-plan.md): the
-questions the talk answers, then one entry per slide with its headline claim, its evidence and
-where that comes from. You edit the plan, which is the cheap place to change an argument. **build**
+questions the paper says it answers, a setup that makes the case for them, then one entry per
+slide with its headline claim, its evidence and where that comes from. You edit the plan, which is the cheap place to change an argument. **build**
 turns the plan into a deck on the template, draws its figures from data, and hands it over with a
 review. [`skill/examples/pmf-tsfm/`](skill/examples/pmf-tsfm) is both, run on a real paper.
 

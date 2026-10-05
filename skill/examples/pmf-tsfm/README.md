@@ -12,6 +12,15 @@ and [its codebase](https://github.com/YongboYu/pmf-tsfm).
 | [`deck/figures.py`](deck/figures.py), [`deck/public/`](deck/public) | The figure script and the images it draws | build mode |
 | [`review.md`](review.md) | Review mode's report on the deck | build mode's last step |
 
+The plan was redrafted under [#38](https://github.com/YongboYu/legible-slides/issues/38), after a
+comparison with the author's own CAiSE deck showed the first draft had the right shape and the wrong
+story. Its questions now come from the paper's stated contributions (Section 1), each quoting the
+sentence it's taken from, rather than from the axes of its tables. Five setup slides make the case
+for the problem and the approach before any result, and the third question, whether a better forecast
+gives a better process model, gets two slides instead of one. The slide the talk rests on and the
+challenges the author expects were taken from the speaker notes and backup slides of that CAiSE deck,
+which stand in for asking the author; the plan says so.
+
 The plan's cuts are worth a look. The paper's drift figure didn't make it into the talk: the
 codebase has no per-day XGBoost forecasts to redraw it from, and against the baseline that can be
 rebuilt, the figure doesn't show what the paper's caption says. Draft mode is where that came up,
