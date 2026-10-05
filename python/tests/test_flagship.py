@@ -62,7 +62,7 @@ def test_the_deck_carries_every_beat_and_its_sources():
 def test_beat_ten_is_set_in_the_canon_s_type_scale(deck):
     """The two sizes the slide names as fixed are the canon's body size and its logical canvas."""
     type_scale = rule_thresholds("type-scale")
-    stated = re.search(r"fixed at (\d+) px on this deck's (\d+) × (\d+) canvas", deck)
+    stated = re.search(r"fixed at (\d+) px on a (\d+) × (\d+) canvas", deck)
     assert stated, "beat 10 no longer states the body size and the canvas it is written against"
 
     assert stated.group(1) == type_scale["body-px"]
@@ -225,7 +225,6 @@ OVERRIDDEN = {
     (4, "on-slide-words"): "the two type samples are the evidence, set at the sizes they compare",
     (5, "on-slide-words"): "the table is the evidence: what the method decides, and what holds it",
     (7, "signal-budget"): "the label and the claim are compared side by side, and one is accented",
-    (10, "on-slide-words"): "the arithmetic is `equation-worked-example`'s worked example",
     (13, "on-slide-words"): "the table is the evidence: one file, and each output it is shipped as",
 }
 
