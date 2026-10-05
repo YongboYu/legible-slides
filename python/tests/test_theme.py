@@ -17,7 +17,7 @@ from pathlib import Path
 
 import pytest
 
-from legible import load_palette
+from legible import headline, load_palette
 from legible.contrast import contrast_ratio
 from legible.method import TEXT_CONTRAST_MIN, rule, rule_thresholds
 
@@ -437,3 +437,16 @@ def test_the_qr_code_says_where_it_goes(share):
     its alt text names it."""
     assert "legible-share-caption" in share
     assert re.search(r":alt=\"[^\"]*url", share)
+
+
+def test_the_linter_wraps_a_headline_in_the_box_the_theme_sets_it_in(stylesheet):
+    """`headline-shape` is measured in rendered lines, so the linter sets each headline in the
+    theme's own box: its width, its weight and its tracking. A stylesheet cannot be read the way
+    the canon is, so `legible.headline` writes them down, and this holds the copy to the theme."""
+    h1 = re.search(r"^\.slidev-layout h1 \{(?P<body>[^}]*)\}", stylesheet, re.MULTILINE)
+    assert h1, "the theme sets no headline"
+
+    assert declared(stylesheet, "--edge-x") == f"{headline.EDGE_X_PX}px"
+    assert declared(h1.group("body"), "font-weight") == str(headline.HEADLINE_WEIGHT)
+    assert declared(h1.group("body"), "letter-spacing") == f"{headline.HEADLINE_TRACKING_EM}em"
+    assert declared(h1.group("body"), "font-size") == "var(--headline-px)"

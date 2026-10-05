@@ -59,8 +59,10 @@ is the sweet spot, offered as **guidance rather than a gate**: a shorter line th
 fine, and the operative ceiling is the two rendered lines, because that is what governs whether the
 room reads it.
 
-**Decided by** judgment (that it reads as a claim, per `assertion-headline`, and that it fits) ·
-script where the build can measure rendered lines · **Threshold** `headline-lines-max = 2`
+**Decided by** judgment (that it reads as a claim, per `assertion-headline`) · script (how many
+lines it renders in, set in the deck's face at the headline's size and width; the cover's title is
+not a headline) · **Threshold** `headline-lines-max = 2` (violation when a headline renders in more
+than 2 lines)
 
 ### `ae-skeleton`: four zones on a content slide, and nothing else
 
@@ -167,9 +169,17 @@ for a chart first and invent a caption for it afterwards.
 ### `established-terminology`: use the standard term as-is
 
 If a term is already well established in the field, use it and do not rephrase it. An audience
-should never have to guess what you mean, and a fresh synonym for a standard term buys nothing. This
-rule **wins over** `no-inflated-register`: a listed word that is genuinely the field's term is not a
-violation.
+should never have to guess what you mean, and a fresh synonym for a standard term buys nothing.
+Define the term once, where the talk first leans on it, and use it from then on. A plain-words
+gloss goes beside the term, never in its place: a room that hears the gloss and then reads the
+paper meets the term cold.
+
+The key terms are the paper's own, as its abstract and its title use them, or as a talk plan lists
+them. A paraphrase standing in for one of them is the violation, however plain it reads.
+
+This rule **wins over every rule in [§7](#7-voice)**. Plain words are for what the field has no
+word for: a listed word that is genuinely the field's term is not a `no-inflated-register`
+violation, and a standard term is not the abstraction `concrete-over-abstract` asks you to replace.
 
 **Decided by** judgment
 
@@ -465,7 +475,8 @@ revealed, so a slide has to read on its own once everything is showing.
 **Say it the way you would say it out loud.** Slides and prose written to sound impressive read as
 machine-written, and they date fast. The durable tells are structural and rhythmic rather than a
 word blacklist, so the rules below are split by who can decide them. This set is a **seed**,
-deliberately extensible.
+deliberately extensible. Every rule in it gives way to `established-terminology`: saying it out
+loud means saying the field's term, not a paraphrase of it.
 
 ### 7a. Script-decided
 

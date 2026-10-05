@@ -144,13 +144,18 @@ FAIL  deck/slides.md — 2 errors, 1 warning
 ```
 
 Findings are grouped by slide and named by the rule they enforce, so a finding is something you can
-look up in [`docs/method.md`](../docs/method.md) and disagree with. Six rules are decided per
-slide — `bullet-ceiling`, `word-ceiling`, `no-em-dash-headline`, `no-inflated-register`,
-`opener-variety` and `type-scale`, which flags a font size the slide's markup sets inline in px or
-below the floor — `section-locator` over the sections the deck declares, reported on the slide
-that declares the one at fault, `conclusion-stays-up` on the last slide outside the backups, and
-`separation-floor` per theme, for each `--theme` named. A deck
-does not record which palette it wears, so naming none checks the slides alone.
+look up in [`docs/method.md`](../docs/method.md) and disagree with. Seven rules are decided per
+slide — `bullet-ceiling`, `word-ceiling`, `headline-shape`, `no-em-dash-headline`,
+`no-inflated-register`, `opener-variety` and `type-scale`, which flags a font size the slide's
+markup sets inline in px or below the floor — `section-locator` over the sections the deck
+declares, reported on the slide that declares the one at fault, `conclusion-stays-up` on the last
+slide outside the backups, and `separation-floor` per theme, for each `--theme` named. A deck does
+not record which palette it wears, so naming none checks the slides alone.
+
+`headline-shape` counts lines, not words. It sets each headline, the cover's title aside, the way
+the slide does: in the bundled Inter at the headline's size, weight and tracking, kerned as the face
+kerns it, and wrapped greedily in the theme's headline width, breaking at a space or after a hyphen.
+`legible.headline` does the setting, and its tests hold its widths to Chromium's.
 
 Five more are the canon's **advisories**, reported as warnings and never gating: `element-ceiling`,
 `on-slide-words` and `signal-budget` per slide, `acronym-budget` on the slide where the talk's

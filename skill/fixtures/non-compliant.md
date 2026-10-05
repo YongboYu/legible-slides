@@ -94,3 +94,25 @@ layout: default
 - the raw logs ship with the release
 
 Both are in the repository the paper links to.
+
+---
+layout: default
+---
+
+# Looking passages up before the model answers cuts wrong answers by a third
+
+- wrong answers without the lookup: 31%
+- wrong answers with it: 21%
+
+<!--
+Retrieval-augmented generation cut wrong answers from 31 to 21 percent on our test set.
+-->
+
+---
+layout: default
+---
+
+# Retrieval-augmented generation answers more of the questions correctly on every one of the four test sets we ran, and it gets there at half the cost of fine-tuning a model on each set
+
+- fine-tuning: 18 hours a set
+- retrieval: 9 hours a set

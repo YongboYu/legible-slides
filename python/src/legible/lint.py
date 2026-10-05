@@ -1,13 +1,14 @@
 """The method's objective rules, as findings.
 
 A rule the canon marks **decided by script** is a rule nobody should have to remember, so this
-module decides them: the bullet and word ceilings, em-dashes in a headline, the inflated-register
-wordlist, the sentence-opener share, whether the footer's section map still fits, a font size a
-slide sets inline or below the type floor, whether the talk closes on a conclusion rather than a
-thank-you, and whether the deck's palette clears the separation floor. It also counts what the
-review advisories budget — visual groups and words on a slide, emphasis and callouts, new
-abbreviations over the talk, and the notes' time budgets against the slot — and reports each at the
-severity the canon gives it, which is a warning: an advisory is the review's to weigh, never a gate.
+module decides them: the bullet and word ceilings, how many lines a headline takes on the slide,
+em-dashes in a headline, the inflated-register wordlist, the sentence-opener share, whether the
+footer's section map still fits, a font size a slide sets inline or below the type floor, whether
+the talk closes on a conclusion rather than a thank-you, and whether the deck's palette clears the
+separation floor. It also counts what the review advisories budget — visual groups and words on a
+slide, emphasis and callouts, new abbreviations over the talk, and the notes' time budgets against
+the slot — and reports each at the severity the canon gives it, which is a warning: an advisory is
+the review's to weigh, never a gate.
 ``docs/agent-skill-contract.md`` §4a fixes the set; the canon fixes every number in it, and this
 module quotes those numbers through ``legible.method`` rather than keeping a second copy.
 
@@ -35,6 +36,7 @@ from pathlib import Path
 from typing import NamedTuple
 
 from legible.deck import Slide, read_deck
+from legible.headline import HEADLINE_WIDTH_PX, wrap
 from legible.method import (
     ACRONYM_BUDGET_SEVERITY,
     BULLETS_PER_SLIDE,
@@ -46,6 +48,8 @@ from legible.method import (
     EM_DASHES_PER_HEADLINE,
     EMPHASISED_SPANS_PER_SLIDE,
     FLOOR_PX,
+    HEADLINE_LINES_MAX,
+    HEADLINE_PX,
     INFLATED_REGISTER_SEVERITY,
     INFLATED_REGISTER_WORDS,
     NEW_ACRONYMS_PER_TALK,
@@ -77,6 +81,10 @@ VALIDATOR = "cvd-validate"
 #: The exit codes ``cvd-validate`` publishes. 1 is a palette measured below the floor; anything
 #: else non-zero is a theme that was never measured, which is a different thing to report.
 _FLOOR_FAILED = 1
+
+#: The layout whose ``#`` is the talk's title rather than a headline: set heavier, and with no
+#: headline zone under it for a third line to run into.
+_COVER = "cover"
 
 #: The mark the rule names, and no other. An en-dash is a different character with a different job.
 _EM_DASH = "—"
@@ -194,6 +202,16 @@ def _slide_findings(slide: Slide) -> Iterator[Finding]:
                 "word-ceiling",
                 slide,
                 f"{words} words, ceiling {WORDS_PER_BULLET}: {bullet!r}",
+            )
+
+    if slide.headline and slide.layout != _COVER:
+        lines = wrap(slide.headline)
+        if len(lines) > HEADLINE_LINES_MAX:
+            yield _finding(
+                "headline-shape",
+                slide,
+                f"{len(lines)} lines at {HEADLINE_PX} px across {HEADLINE_WIDTH_PX} px, ceiling "
+                f"{HEADLINE_LINES_MAX}; past it: {' '.join(lines[HEADLINE_LINES_MAX:])!r}",
             )
 
     em_dashes = (slide.headline or "").count(_EM_DASH)

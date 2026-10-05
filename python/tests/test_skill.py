@@ -50,7 +50,13 @@ EXIT_CODES = frozenset({"0", "1", "2"})
 
 #: The rules the v1 review judges by ID, fixed by ``docs/agent-skill-contract.md`` §4b. Its voice
 #: check is a set the canon names rather than a rule, so it is asked for the way the skill asks.
-SEMANTIC = ("one-message", "assertion-headline", "never-sole-channel", "no-script-on-slide")
+SEMANTIC = (
+    "one-message",
+    "assertion-headline",
+    "never-sole-channel",
+    "no-script-on-slide",
+    "established-terminology",
+)
 
 
 @pytest.fixture(scope="module")

@@ -115,6 +115,52 @@ def test_an_em_dash_in_a_headline_is_a_finding(write_deck):
     assert rules(report) == ["no-em-dash-headline"]
 
 
+#: A claim that fills most of two rendered lines, and one grown past them. Their line counts are
+#: Chromium's, in ``test_headline.py``.
+TWO_LINE_HEADLINE = (
+    "Used as they are, pre-trained forecasters cut the error by 17 to 28%, but the process models "
+    "they forecast are no better."
+)
+THREE_LINE_HEADLINE = f"{TWO_LINE_HEADLINE[:-1]}, and on Sepsis they are much worse than last week."
+
+
+def test_a_headline_past_two_rendered_lines_is_a_finding(write_deck):
+    """The canon's ceiling, measured as the slide sets the headline. It carries no severity of its
+    own, so it gates."""
+    report = lint(write_deck(f"# {THREE_LINE_HEADLINE}\n"))
+
+    assert rules(report) == ["headline-shape"]
+    (finding,) = report.findings
+    assert finding.severity == "error"
+    assert "3 lines" in finding.message
+    # What runs past the ceiling, so the author can see what has to go.
+    assert "'Sepsis they are much worse than last week.'" in finding.message
+
+
+def test_a_headline_that_fills_two_lines_is_not(write_deck):
+    """Twenty-two words, and still two lines: the ceiling is lines, not words."""
+    report = lint(write_deck(f"# {TWO_LINE_HEADLINE}\n"))
+
+    assert report.findings == ()
+
+
+def test_the_cover_s_title_is_not_a_headline(write_deck):
+    """The cover is set heavier and has no headline zone for a third line to run into."""
+    report = lint(
+        write_deck(
+            f"""\
+            ---
+            layout: cover
+            ---
+
+            # {THREE_LINE_HEADLINE}
+            """
+        )
+    )
+
+    assert report.findings == ()
+
+
 def test_an_em_dash_below_the_headline_is_not(write_deck):
     """The rule is about headlines. Prose may use one where it is genuinely the right mark."""
     report = lint(

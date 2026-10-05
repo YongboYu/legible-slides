@@ -52,6 +52,14 @@ a concept diagram beside its chart: the log counted into a graph a day, each arr
 series, and each series forecast into next week's graph. It's a component of the deck's own,
 colored and sized by the theme's tokens alone, and the review judges it under `never-sole-channel`.
 
+Under [#42](https://github.com/YongboYu/legible-slides/issues/42), two things the review used to
+pass. The deck says "pre-trained forecasters, used as they are" where the paper says "zero-shot,
+time series foundation models", which is what `established-terminology` is for, and review mode
+now judges it: the review flags the paraphrase on six slides, with the term as each fix. The deck
+and the plan are left as built, so the review has something to find. And the linter now counts a
+headline in the lines it renders in, not in words. Every headline here takes two lines or one, so
+it finds none past the ceiling, however long they read.
+
 ## What is here, and what isn't
 
 `deck/` holds only the files build mode wrote. Everything else in a built deck, like the palette,

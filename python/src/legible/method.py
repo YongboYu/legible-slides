@@ -297,6 +297,10 @@ CANVAS_HEIGHT_PX = CANVAS_WIDTH_PX * _ASPECT_H // _ASPECT_W
 BODY_PX = int(_TYPE_SCALE["body-px"])
 FLOOR_PX = int(_TYPE_SCALE["floor-px"])
 
+#: The one size a headline is set at, and how many lines of it the room reads in a glance.
+HEADLINE_PX = int(_TYPE_SCALE["headline-px"])
+HEADLINE_LINES_MAX = int(rule_thresholds("headline-shape")["headline-lines-max"])
+
 #: How far, in image heights, body type reads: the room the scale is stated for.
 BODY_REACH_IMAGE_HEIGHTS = float(_TYPE_SCALE["body-reach-image-heights"])
 

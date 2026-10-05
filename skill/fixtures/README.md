@@ -27,9 +27,12 @@ can be tried against a known answer.
 | 5 | `no-hedging-or-boilerplate` | reading | warning | The notes open by announcing what the slide is about to show. |
 | 5 | `rhythm-variety` | reading | warning | Three notes sentences of the same shape and length in a row. |
 | 5 | `concrete-over-abstract` | reading | warning | "demonstrates strong performance characteristics" where a number belongs. |
+| 7 | `established-terminology` | reading | warning | "Looking passages up before the model answers" on the slide, for the retrieval-augmented generation the notes name. With no plan and no paper beside the deck, the notes are where the review reads the term from. |
+| 8 | `headline-shape` | linter | error | A headline that runs to a third line at the theme's headline size and width. |
 
 Slide 6 breaks nothing. A fixture that fired on every slide would not tell you whether the review
-reads a deck or merely dislikes it.
+reads a deck or merely dislikes it. Slide 8 uses the term slide 7 paraphrases, which is the fix
+for slide 7, and it is the length of its headline that breaks a rule there.
 
 **Found by** is the seam, not the canon's `**Decided by**`, and the two part company on one row.
 `never-sole-channel` is marked both in the canon, because a generated figure carries the redundancy

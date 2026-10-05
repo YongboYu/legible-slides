@@ -23,6 +23,9 @@ dependencies = [
     # floor because the archetypes build a bare `Figure` and save it without
     # pyplot, which needs no backend and leaks no global state.
     "matplotlib>=3.8,<4",
+    # The headline wrap reads the bundled face's advances and kerning. matplotlib already pulls
+    # fontTools in, so this names a dependency rather than adding one.
+    "fonttools>=4.22",
 ]
 
 [project.optional-dependencies]

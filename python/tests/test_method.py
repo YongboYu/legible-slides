@@ -7,6 +7,7 @@ from legible.method import (
     ATTENTION_CONTRAST_MIN,
     ATTENTION_CONTRAST_PAIRS,
     BULLETS_PER_SLIDE,
+    CANON,
     EM_DASHES_PER_HEADLINE,
     INFLATED_REGISTER_SEVERITY,
     INFLATED_REGISTER_WORDS,
@@ -218,6 +219,17 @@ def test_the_canon_decides_how_loudly_an_inflated_word_is_reported():
     """`established-terminology` wins over the wordlist, which is why the canon sets this to
     `warning` — and why the severity is quoted rather than chosen here."""
     assert INFLATED_REGISTER_SEVERITY == "warning"
+
+
+def test_the_canon_says_the_field_s_term_wins_over_the_voice_rules():
+    """A plain-words rule pulls a writer toward paraphrase, and `established-terminology` pulls
+    back. Where they meet, the review follows the canon's precedence, so the canon has to state one,
+    and the voice section has to point back at it before its first rule."""
+    voice = CANON.read_text(encoding="utf-8").split("## 7. Voice", 1)[1]
+    voice_lead = voice.split("###", 1)[0]
+
+    assert "wins over every rule in [§7](#7-voice)" in rule("established-terminology").text
+    assert "`established-terminology`" in voice_lead
 
 
 def test_the_canon_decides_how_far_the_section_map_stretches_and_how_loudly():

@@ -302,8 +302,9 @@ Check an existing Slidev deck against the method, and report what breaks and how
 | Its themes | The palette JSON the deck wears — `themes/*.json` beside the deck in a legible-slides layout, or whatever the deck's headmatter and README point at. Ask if nothing names one. |
 | Its generated figures | The deck's figure script — a Python file importing `legible.figures` — and the paths it writes to. |
 | Its hand-made diagrams | Inline SVG on a slide, and the components in the deck's `components/` that its slides use. |
+| Its key terms | The plan's **Terms** fields, where the deck was built from a plan. Otherwise the paper's title and abstract. With neither, the terms the speaker notes use, and ask for the paper. |
 
-The last row is the only one the review changes shape over. `never-sole-channel` is judged over
+The hand-made diagrams are the one row the review changes shape over. `never-sole-channel` is judged over
 **hand-made visuals only** — pasted screenshots, hand-drawn diagrams, inline SVG and HTML — which is
 the scope `docs/agent-skill-contract.md` §4b fixes, and the canon's own `**Decided by**` line for
 that rule says which half is which when you load it in step 3. Every image the deck does not
@@ -338,6 +339,7 @@ say so in the report where a verdict would go — silence there reads as a pass.
 
 ```bash
 legible rules one-message assertion-headline never-sole-channel no-script-on-slide
+legible rules established-terminology
 legible rules --section voice --decided-by judgment
 ```
 
@@ -361,7 +363,7 @@ and stop: a review that quietly loaded fewer rules finds fewer faults and reads 
 ### 4. Judge, slide by slide
 
 Read each slide as the room receives it — the headline, the evidence, and the speaker notes — and
-apply the five checks, in this order:
+apply the six checks, in this order:
 
 | Check | Applied to |
 |---|---|
@@ -369,7 +371,12 @@ apply the five checks, in this order:
 | `assertion-headline` | every slide carrying a headline |
 | `never-sole-channel` | the hand-made visuals identified in step 1, and nothing else |
 | `no-script-on-slide` | the words on the slide, read beside its speaker notes |
+| `established-terminology` | the words on the slide, against the key terms from step 1; a finding's fix is the term |
 | the canon's judgment voice rules, loaded above | the headline, the prose and the speaker notes |
+
+Read for the key terms on every slide, not only where the deck defines them, and the cover and the
+answer slide first: that's where the room meets them. The voice rules won't find a paraphrase,
+since it reads as plain, and may well have put it there.
 
 Four things hold a judgment to something:
 

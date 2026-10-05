@@ -81,6 +81,7 @@ grouped by slide and names each finding's rule; see
 |---|---|---|
 | Bullet ceiling | `bullet-ceiling` | count list items per slide, against the rule's threshold |
 | Word ceiling | `word-ceiling` | word count per list item, against the rule's threshold |
+| Headline fits two lines | `headline-shape` | set each headline outside the cover in the bundled face, at the canon's headline size and the theme's headline width, with the face's kerning, and count the lines against the rule's ceiling |
 | No em-dashes in headlines | `no-em-dash-headline` | scan headline text |
 | No inflated-register words | `no-inflated-register` | the rule's wordlist, at the severity the rule assigns |
 | Sentence-opener distribution | `opener-variety` | opener share per passage, against the rule's ceiling |
@@ -99,8 +100,8 @@ none of its own.
 
 ### 4b. Semantic — LLM judgment
 
-The five calls that need understanding, applied by the agent against the rules loaded from
-`method.md`. The canon marks many more rules `judgment`; these are the five the v1 review covers:
+The six calls that need understanding, applied by the agent against the rules loaded from
+`method.md`. The canon marks many more rules `judgment`; these are the six the review covers:
 
 - **`one-message`** — is this one slide or two?
 - **`assertion-headline`** — claim, or bare label?
@@ -108,6 +109,9 @@ The five calls that need understanding, applied by the agent against the rules l
   construction (#10), so this targets pasted-in images.
 - **`no-script-on-slide`** — script on the slide, or the key terms
   ([#35](https://github.com/YongboYu/legible-slides/issues/35))?
+- **`established-terminology`** — the paper's key terms, or a paraphrase standing in for one
+  ([#42](https://github.com/YongboYu/legible-slides/issues/42))? Judged on its own rather than left
+  to the voice rules below, because the canon states its precedence over them.
 - **The canon's judgment anti-slop rules** (`no-contrast-for-emphasis`, `no-reflexive-tricolon`,
   `no-hedging-or-boilerplate`, `rhythm-variety`, `concrete-over-abstract`) — the structural tells a
   wordlist cannot catch.
