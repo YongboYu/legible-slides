@@ -11,6 +11,10 @@ through `legible rules <rule-id>`, which prints the canon's own words. Work from
 If it exits 2, the ID has moved in the canon: say so and stop, because a run that quietly loaded
 fewer rules finds fewer faults.
 
+A deck stamped by scaffold carries its own `bin/legible` and `bin/cvd-validate`, pinned to the
+commit it was built from. In such a deck, run every command this skill names through them, and
+never the `legible` on PATH: two decks pinned to different commits are held to different rules.
+
 ## Pick the mode, then read its file
 
 | The author has | Mode | Read |
@@ -30,8 +34,10 @@ Every review reports two, and keeps them apart:
 
 - The **gate** is `legible lint`'s exit code: whether anything a script checks is broken. Errors
   come only from it, and only it blocks.
-- **Readiness** is the review's judgment: whether the deck, rendered, shows what it should and every
-  finding has been weighed. It never blocks, and it is never written as PASS.
+- **Readiness** is the review's judgment: whether the deck, rendered, shows what it should. It is
+  **not ready**, **review complete** while a material finding is still the author's to settle, or
+  **ready** once each is fixed or accepted with a reason. It never blocks, and it is never written
+  as PASS. `modes/review.md` defines all three, under its report.
 
 `docs/agent-skill-contract.md` §4c lists, rule by rule, which of the two covers it.
 

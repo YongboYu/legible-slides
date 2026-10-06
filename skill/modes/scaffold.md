@@ -28,16 +28,17 @@ git -C "$CHECKOUT" status --short                  # clean, so the commit is wha
 git -C "$CHECKOUT" branch -r --contains HEAD       # on GitHub, so the pin can be fetched
 REV=$(git -C "$CHECKOUT" rev-parse HEAD)
 git -C "$CHECKOUT" archive "$REV" theme | tar -x -C path/to/new-deck
-sed -i.bak "s|legible-slides@main|legible-slides@$REV|" \
-  path/to/new-deck/.github/workflows/method.yml path/to/new-deck/.pre-commit-config.yaml
-rm path/to/new-deck/.github/workflows/method.yml.bak path/to/new-deck/.pre-commit-config.yaml.bak
+sed -i.bak "s|^REV=main$|REV=$REV|" path/to/new-deck/bin/legible
+rm path/to/new-deck/bin/legible.bak
 ```
 
 The trailing `/.` copies the dotfiles, which are the checks. `git archive` copies what the commit
-holds and nothing a local build left beside it.
+holds and nothing a local build left beside it. `bin/legible` is the one place the pin lives: the
+hooks, the workflow and every command below run the checks through it, so the deck is checked
+against the rules it was built to, whatever `legible` is on the machine's PATH.
 
-**Done when** `.github/workflows/method.yml`, `.pre-commit-config.yaml` and `theme/` are in the new
-deck, and both files name `legible-slides@` followed by the commit rather than `main`.
+**Done when** `.github/workflows/method.yml`, `.pre-commit-config.yaml`, `bin/` and `theme/` are in
+the new deck, and `bin/legible` reads `REV=` followed by the commit rather than `main`.
 
 ## 3. Fill in what the author named
 
@@ -57,13 +58,13 @@ The palette reaches the slides as a committed stylesheet, so the build never run
 changed in step 3 leaves it stale:
 
 ```bash
-cvd-validate themes/palette.json
-legible gen-css themes/palette.json --output styles/tokens.css
+bin/cvd-validate themes/palette.json
+bin/legible gen-css themes/palette.json --output styles/tokens.css
 ```
 
 The floor first: the validator names the pair or pairing to move.
 
-**Done when** `cvd-validate` exits 0 and `styles/tokens.css` is regenerated from the palette.
+**Done when** `bin/cvd-validate` exits 0 and `styles/tokens.css` is regenerated from the palette.
 
 ## 5. Hand it over green
 

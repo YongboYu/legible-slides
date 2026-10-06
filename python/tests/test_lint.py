@@ -349,6 +349,44 @@ def test_a_theme_below_the_floor_is_a_finding_against_the_deck(
     assert not report.passed
 
 
+def test_a_palette_finding_names_the_pair_and_what_it_measured(
+    write_deck, write_theme, colliding_palette
+):
+    """The validator's diagnosis survives the merge into one report: a finding that only said the
+    palette failed would send the author to run the validator again to learn which pair to move."""
+    report = lint(write_deck("# A claim\n"), themes=[write_theme(colliding_palette)])
+
+    (finding,) = report.findings
+    assert "series-1 ↔ series-2" in finding.message
+    assert "deuteranomaly" in finding.message
+    assert "floor 15.0" in finding.message
+
+
+@pytest.mark.parametrize(
+    ("role", "colour", "rule", "pairing"),
+    [
+        ("neutral", "#ffffff", "decorative-neutral-never-text", "neutral on surface"),
+        ("accent-strong", "#ffffff", "accent-is-attention", "accent-strong on surface"),
+    ],
+)
+def test_a_contrast_failure_is_reported_under_its_own_rule(
+    write_deck, write_theme, base_palette, role, colour, rule, pairing
+):
+    """Unreadable text is not a separation failure, and reporting it as one sends the author to
+    the data colours, which may all be fine. Each pairing that falls short is its own finding,
+    under the rule that names it, with the ratio it reached."""
+    base_palette[role] = colour
+
+    report = lint(write_deck("# A claim\n"), themes=[write_theme(base_palette)])
+
+    assert set(rules(report)) == {rule}
+    assert not report.passed
+    assert all(finding.severity == "error" for finding in report.findings)
+    (named,) = [finding for finding in report.findings if f"{pairing} contrasts" in finding.message]
+    assert "1.00" in named.message
+    assert "min 4.50" in named.message
+
+
 def test_a_theme_that_clears_the_floor_is_not(write_deck, themes_dir):
     report = lint(write_deck("# A claim\n"), themes=[themes_dir / "leuven-blue.json"])
 
