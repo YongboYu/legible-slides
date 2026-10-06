@@ -148,8 +148,17 @@ jobs:
   scaffold:
     name: the scaffold's template builds
     runs-on: ubuntu-latest
+    # The stamped deck's checks install this commit through its own bin/legible. They fetch it from
+    # this checkout rather than from GitHub: the commit under test may not be fetchable there yet (a
+    # pull request's merge commit, a private repository), and the pin under test is the commit, not
+    # the URL — which is what LEGIBLE_REPO overrides, and all it overrides.
+    env:
+      LEGIBLE_REPO: file://${{ github.workspace }}
     steps:
+      # The whole history, so the pinned commit is one this checkout can hand to uv's git fetch.
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: pnpm/action-setup@v4
         with:
           version: 10
@@ -165,9 +174,11 @@ jobs:
           # The theme, vendored from this commit the way the skill's scaffold step vendors it, so
           # the build below proves a stamped deck needs nothing outside itself.
           git archive HEAD theme | tar -x -C "$RUNNER_TEMP/stamped"
-          sed -i "s|legible-slides@main|legible-slides@$GITHUB_SHA|" \
-            "$RUNNER_TEMP/stamped/.github/workflows/method.yml" "$RUNNER_TEMP/stamped/.pre-commit-config.yaml"
-          ! grep -rq "legible-slides@main" "$RUNNER_TEMP/stamped/.github" "$RUNNER_TEMP/stamped/.pre-commit-config.yaml"
+          # The pin, written the way the skill's scaffold step writes it, then read back: the line
+          # has to name this exact commit, which a sed that matched nothing would leave as main.
+          sed -i "s|^REV=main$|REV=$GITHUB_SHA|" "$RUNNER_TEMP/stamped/bin/legible"
+          test "$(grep -c "^REV=" "$RUNNER_TEMP/stamped/bin/legible")" = 1
+          grep -qx "REV=$GITHUB_SHA" "$RUNNER_TEMP/stamped/bin/legible"
       # The template arrives holding the theme's own palette, so a deck that wore the checkout's
       # colours instead would pass the check below by coincidence. Recolour it first, the way the
       # skill's step 4 does, so the two differ and the check can tell them apart. Any hex other than
@@ -179,9 +190,21 @@ jobs:
         working-directory: ${{ runner.temp }}/stamped
         run: |
           jq '.brand = "#1f4e79"' themes/palette.json > palette.tmp && mv palette.tmp themes/palette.json
-          uv run --project "$GITHUB_WORKSPACE/python" \
-            legible gen-css themes/palette.json --output styles/tokens.css
+          bin/legible gen-css themes/palette.json --output styles/tokens.css
           test "$(jq -r .brand themes/palette.json)" != "$(jq -r .brand "$GITHUB_WORKSPACE/themes/leuven-blue.json")"
+      # The stamped deck's own checks, run the way its workflow and hooks run them: through bin/,
+      # with no legible installed on this runner, so a launcher that fell back to PATH would fail
+      # here rather than pass on a copy nobody pinned. The guard at the top proves that copy is absent.
+      - name: The stamped checks run at the pinned commit
+        working-directory: ${{ runner.temp }}/stamped
+        run: |
+          if command -v legible || command -v cvd-validate; then
+            echo "a legible install is on PATH, so this would not prove the launcher" >&2
+            exit 1
+          fi
+          bin/cvd-validate themes/palette.json
+          bin/legible gen-css themes/palette.json --output styles/tokens.css --check
+          bin/legible lint slides.md --theme themes/palette.json
       # No lockfile is stamped: a deck resolves its own, and pinning one here would pin every deck
       # scaffolded from it to whatever this repo last resolved.
       - run: pnpm install
