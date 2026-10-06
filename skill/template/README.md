@@ -11,7 +11,7 @@ the only place any of them is stated, and this deck names them by ID — `one-me
 `no-section-dividers`, `no-script-on-slide` — so you can read one and disagree with it:
 
 ```bash
-legible rules one-message
+bin/legible rules one-message
 ```
 
 ## Running it
@@ -26,10 +26,11 @@ pnpm render   # a PNG per click step, into render/, to look at before you presen
 ```
 
 The theme lives in `theme/`, a copy of `slidev-theme-legible` taken from one commit of
-legible-slides, and `slides.md` names it as `./theme`. The checks in `.github/workflows/method.yml`
-and `.pre-commit-config.yaml` install the `legible` tooling from that same commit, so this deck
-builds from a clean clone and is always checked against the rules it was built to. Updating is a
-choice you make: copy the theme again from a later commit and change both pins to it. Nothing else
+legible-slides, and `slides.md` names it as `./theme`. Every check runs through `bin/legible`, which
+installs the `legible` tooling from that same commit, so this deck builds from a clean clone and is
+always checked against the rules it was built to — by the hooks, the workflow and you alike. Updating
+is a choice you make: copy the theme again from a later commit and change `REV` in `bin/legible` to
+it. Nothing else
 is configured here, because everything the method fixes — the canvas, the type scale, the bundled
 typefaces, the light ground — arrives with the theme.
 
@@ -59,7 +60,7 @@ recolours.
 Whatever you change it to has to clear the floor, and that is a command rather than a promise:
 
 ```bash
-cvd-validate themes/palette.json
+bin/cvd-validate themes/palette.json
 ```
 
 The palette reaches the slides as `styles/tokens.css`, generated from that file and **committed like
@@ -67,7 +68,7 @@ a lockfile** — which is what lets the build import a stylesheet instead of run
 Regenerate it whenever the palette changes:
 
 ```bash
-legible gen-css themes/palette.json --output styles/tokens.css
+bin/legible gen-css themes/palette.json --output styles/tokens.css
 ```
 
 Charts read the same file, so a swap reaches them too — see [`public/README.md`](public/README.md).
@@ -75,16 +76,13 @@ Charts read the same file, so a swap reaches them too — see [`public/README.md
 ## Held to the method
 
 ```bash
-legible lint slides.md --theme themes/palette.json
+bin/legible lint slides.md --theme themes/palette.json
 ```
 
 Every rule the canon marks *decided by script*, with an exit code. `.pre-commit-config.yaml` runs it
 locally and is opt-in; `.github/workflows/method.yml` runs it where nobody can skip it, and is the
-gate. Both need the `legible` package:
-
-```bash
-uv tool install "git+https://github.com/YongboYu/legible-slides@<the pinned commit>#subdirectory=python"
-```
+gate. Both run it through `bin/legible`, and all that needs is
+[uv](https://docs.astral.sh/uv/): the first run fetches the pinned commit and caches it.
 
 A green run is the gate and nothing more: the deck has none of the faults a script can find. What is
 left is judgment, and what the rendered pages show — whether a slide carries one message, whether its headline is a claim.
@@ -96,6 +94,7 @@ both halves as one review with a proposed fix on every finding.
 
 | | |
 |---|---|
+| `bin/` | the checks, at the commit the theme was copied from. `bin/legible` holds the pin; run every `legible` command through it. |
 | `theme/` | the vendored theme. Not edited here: a change to it belongs upstream, or it drifts from the commit the checks are pinned to. |
 | `slides.md` | the deck. The first frontmatter block is the headmatter *and* the cover's own frontmatter, which is why the cover's props sit up there. |
 | `themes/palette.json` | the palette. One file, and the only place a colour is written. |

@@ -20,7 +20,7 @@ import pytest
 
 from legible.css import gen_css
 from legible.deck import read_deck
-from legible.lint import lint
+from legible.lint import TYPESET_SOURCES, lint
 from legible.method import rules
 from legible.palette import load_palette
 
@@ -272,6 +272,52 @@ def test_both_checks_are_hooked_in_the_stamped_deck(check):
 
     assert check in hooks
     assert check in workflow
+
+
+def _hook(hook_id: str) -> str:
+    """One hook's block of the stamped pre-commit config, as text: enough to read its entry and its
+    file filter without a YAML parser the package does not otherwise need."""
+    hooks = _read(TEMPLATE / ".pre-commit-config.yaml")
+    match = re.search(rf"- id: {re.escape(hook_id)}\n(?P<body>(?:(?!\s*- id:).*\n?)*)", hooks)
+    assert match, hook_id
+    return match.group("body")
+
+
+def _example(pattern: str) -> str:
+    """A path a glob matches, nested where the glob allows it, so the filter is tested at depth."""
+    return pattern.replace("**/", "nested/deeper/").replace("*", "example")
+
+
+def test_every_check_runs_at_the_decks_pinned_commit():
+    """A deck pinned to one commit is checked against that commit's rules everywhere, which only
+    holds when nothing reaches for whatever `legible` is on PATH. The pin lives in one file, and the
+    hooks and the workflow both go through it."""
+    pinned = TEMPLATE / "bin" / "legible"
+    assert re.search(r"^REV=main$", _read(pinned), re.MULTILINE)
+    for script in (pinned, TEMPLATE / "bin" / "cvd-validate"):
+        assert script.stat().st_mode & 0o111, f"{script.name} is not executable"
+
+    hooks = _read(TEMPLATE / ".pre-commit-config.yaml")
+    workflow = _read(TEMPLATE / ".github" / "workflows" / "method.yml")
+    entries = re.findall(r"^\s*entry:\s*(\S+)", hooks, re.MULTILINE)
+    runs = re.findall(r"^\s*- run:\s*(\S+)", workflow, re.MULTILINE)
+
+    assert entries and all(entry.startswith("bin/") for entry in entries)
+    assert {"bin/legible", "bin/cvd-validate"} <= set(runs)
+    assert not any(run in {"legible", "cvd-validate", "uv"} for run in runs)
+
+
+@pytest.mark.parametrize(
+    "path",
+    ["slides.md", "themes/palette.json", *(_example(pattern) for pattern in TYPESET_SOURCES)],
+)
+def test_the_lint_hook_runs_on_every_file_the_linter_reads(path):
+    """A component edited alone is still a deck edited: the linter reads it for type below the
+    floor, so the hook has to fire on it, or a commit that broke `type-scale` reports nothing."""
+    files = re.search(r"^\s*files:\s*(\S+)", _hook("legible-lint"), re.MULTILINE)
+    assert files
+
+    assert re.search(files.group(1), path), path
 
 
 def test_the_skill_carries_both_modes(skill):

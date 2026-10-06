@@ -1,0 +1,28 @@
+#!/bin/sh
+# The checks this deck is held to, at the one commit of legible-slides its theme was copied from.
+#
+# Run every check through here: the hooks, the workflow, and an agent reviewing the deck. A deck
+# pinned to one release is then never checked against another's rules by whatever `legible`
+# happens to be on PATH, and `bin/legible rules` prints the rules the deck was built to.
+#
+#     bin/legible lint slides.md --theme themes/palette.json
+#     bin/legible rules one-message
+#     bin/cvd-validate themes/palette.json
+#
+# The scaffold writes the commit in place of `main`. Taking a later release is something you do on
+# purpose: change it here and copy the theme again. The first run fetches and builds that commit;
+# uv caches it, so every run after is immediate.
+#
+# The pin is the commit. Where the repository cannot be fetched over HTTPS, a private clone for
+# one, point LEGIBLE_REPO at one that can be, an SSH or file URL, and the commit stays the same.
+set -eu
+
+REV=main
+REPO=${LEGIBLE_REPO:-https://github.com/YongboYu/legible-slides}
+
+if ! command -v uvx >/dev/null 2>&1; then
+  echo "bin/legible: needs uv, which installs the pinned checks — https://docs.astral.sh/uv/" >&2
+  exit 2
+fi
+
+exec uvx --quiet --from "git+$REPO@$REV#subdirectory=python" "${LEGIBLE_TOOL:-legible}" "$@"

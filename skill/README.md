@@ -34,7 +34,8 @@ uv tool install "git+https://github.com/YongboYu/legible-slides#subdirectory=pyt
 ```
 
 That install carries the canon with it, so the skill reads the rules it reviews against on a machine
-with no checkout of this repo.
+with no checkout of this repo. A deck the skill stamped needs none of it: its own `bin/legible` installs the
+checks from the commit the deck is pinned to, and the skill runs them through that instead.
 
 ## What scaffold does
 
@@ -85,7 +86,9 @@ rules that need judgment with `legible rules`; read the deck against them; merge
 grouped per slide, each finding named by the rule it enforces.
 
 **It gives two verdicts.** The gate is the linter's exit code. Readiness is the review's judgment of
-whether the rendered deck shows what it should, which no build or lint can settle.
+whether the rendered deck shows what it should, which no build or lint can settle. A finished review
+is not yet a ready deck: a finding that would leave the room with the wrong message waits on you,
+to fix or to accept with a reason, before the deck is called ready.
 
 **The two halves carry different authority.** The mechanical half has an exit code, runs in CI, and
 blocks. The judgments are advisory, because a reading of a slide is fallible in a way a bullet count

@@ -23,6 +23,10 @@ verdicts: the gate and readiness.
 legible lint DECK --theme THEME --json          # --theme is repeatable, once per palette
 ```
 
+In a deck with a `bin/legible`, a stamped one, run this and every `legible` and `cvd-validate`
+command below through `bin/legible` and `bin/cvd-validate`. They install the checks from the commit
+the deck is pinned to, so its review applies the rules it was built to, whatever is on PATH.
+
 Each finding names its rule, its slide and its severity. Take them **verbatim**: the linter's count
 is the count. An **error** is the gate tier. A **warning** is the advisory tier: the canon's
 advisory budgets, and any finding a slide's exception turned into one, carrying its reason. The
@@ -137,6 +141,7 @@ the deck as a whole, the palette usually, go in a final group.
 
 **Gate: FAIL** — 2 errors, 2 warnings.
 **Readiness: not ready** — slide 4's figure did not load in the export.
+**Material, still the author's:** none; the warnings below are advisory.
 Errors are the gate tier and block. Warnings are the advisory tier, the linter's advisories and the
 judgments alike, and never block. Palette: checked against themes/leuven-blue.json. Rendered: every
 page, every reveal step, and the PDF. Read any rule below with `legible rules <rule-id>`.
@@ -152,15 +157,30 @@ page, every reveal step, and the PDF. Read any rule below with `legible rules <r
 
 ## Deck
 
-- **error** · `separation-floor` — FAIL themes/mine.json — min ΔE … (floor …); `cvd-validate themes/mine.json` names the pairs
-  **Fix:** move `series-2` away from `series-1` in lightness, then re-run the validator.
+- **error** · `decorative-neutral-never-text` — themes/mine.json: neutral on surface contrasts …:1 (min …)
+  **Fix:** darken `neutral` until it clears the ratio on both grounds; the data colours are not the problem.
 ```
 
-The elisions are this file's: a report carries the linter's message word for word, numbers
+Each palette finding sits under the rule it breaks: two data colours too close are
+`separation-floor`, naming the pair and each condition it fails under, and text or attention
+colours too faint are their own rules, naming the pairing and its ratio. The elisions are this
+file's: a report carries the linter's message word for word, numbers
 included. This file carries none of the canon's numbers, so none can go stale here.
 
 - The **gate** is the exit code from step 2. Judgments leave it as it is, PASS or FAIL.
-- **Readiness** is **ready** when the gate passes, every page rendered as intended, and every
-  judgment is one the author can weigh; otherwise **not ready**, with the first reason.
+- **Readiness** is the first of these that applies, with its reason:
+  - **not ready**: the gate fails, a page did not render as intended, or a finding on a rule the
+    canon marks **Floor** is open. No reason clears a floor, so only its fix does.
+  - **review complete**: the review is finished, and a **material** finding is still the author's
+    to settle. Name each one.
+  - **ready**: none of the above. Every material finding is fixed, or the author accepted it with a
+    reason the report quotes. What is left is advisory, and the author may present with it.
+- A finding is **material** when the room would leave with the wrong message: on `one-message`,
+  `evidence-is-visual`, `answer-first`, `conclusion-stays-up` or `established-terminology`, or an
+  exception whose reason does not hold. The rest (voice, layout, the budgets) is listed and never
+  waited on.
+- An author **accepts** a material finding by writing the slide an `Exception:` line for its rule,
+  so the next review sees the decision and weighs the reason. A reason that holds settles the
+  finding, and one that does not stays material.
 - Each finding names its **rule by ID**, so a reader can look it up and disagree with it.
 - The tally counts both halves; within a slide, the gate tier comes first.

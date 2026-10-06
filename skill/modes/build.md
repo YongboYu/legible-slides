@@ -105,4 +105,5 @@ the plan too, so the plan stays the deck's source. A warning is the author's to 
 its fix, and leave the slide as the plan wrote it.
 
 **Done when** the gate passes, and the report's readiness verdict names whatever is left for the
-author.
+author. Build never accepts a material finding on the author's behalf: while one is open, the deck is at
+**review complete**, not **ready**.

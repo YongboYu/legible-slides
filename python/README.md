@@ -190,9 +190,12 @@ the report verbatim.
 - **The rules the canon marks `judgment`.** Whether a slide carries one message, whether a headline
   is a claim. Those are the review skill's, and they are advisory because they are fallible; this is
   a gate, and a gate may only hold what is decidable.
-- **Colour.** `separation-floor` is checked by **running `cvd-validate` and reading its exit code**
-  — which is what that exit code is for. There is one implementation of Machado (2009) in this
+- **Colour.** The palette is checked by **running `cvd-validate` and reading its exit code** —
+  which is what that exit code is for. There is one implementation of Machado (2009) in this
   package, so a linter saying a palette collapses and a report saying it holds cannot disagree.
+  What it measured comes back in its JSON report and is carried over as it stands, each failing
+  pair under the rule that names it: `separation-floor`, `accent-is-attention` or
+  `decorative-neutral-never-text`.
 - **Its own thresholds.** Every number and wordlist above is quoted from the rule that owns it in
   the canon. Change `bullets-per-slide` there and this command enforces the new one.
 

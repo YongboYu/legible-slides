@@ -5,19 +5,16 @@
 # The gate is .github/workflows/method.yml, which runs the same three checks on push and pull
 # request. A hook any author can skip with `--no-verify` is convenience, never enforcement.
 #
-# All three commands come from the `legible` package:
-#
-#     uv tool install "git+https://github.com/YongboYu/legible-slides@main#subdirectory=python"
-#
-# The scaffold writes the commit the theme was copied from in place of `main`, here and in the
-# workflow, so the hooks and the gate check against the same rules.
+# Every hook runs through bin/, which installs the checks from the one commit of legible-slides
+# the theme was copied from — the same commit the workflow uses, so the hooks and the gate apply
+# the same rules, whatever `legible` is on PATH. It needs uv, and nothing else.
 repos:
   - repo: local
     hooks:
       - id: cvd-validate
         name: data colours clear the separation floor
-        entry: cvd-validate
-        language: system
+        entry: bin/cvd-validate
+        language: script
         files: ^themes/.*\.json$
         # Only the staged palettes, so editing one does not re-check the others.
         pass_filenames: true
@@ -27,16 +24,18 @@ repos:
       # leaves you staging the regenerated file — exactly what the workflow is about to check for.
       - id: gen-css
         name: the token stylesheet follows its palette
-        entry: legible gen-css themes/palette.json --output styles/tokens.css
-        language: system
+        entry: bin/legible gen-css themes/palette.json --output styles/tokens.css
+        language: script
         files: ^themes/palette\.json$
         pass_filenames: false
 
       # Every rule docs/method.md marks decided by script, over the deck and the palette it wears.
       # The rules it leaves alone are the ones a reader settles — see the review mode of the skill.
+      # The files are every one the linter reads: the deck, its palette, and the components,
+      # layouts and stylesheets that set type on its slides.
       - id: legible-lint
         name: the deck holds to the method
-        entry: legible lint slides.md --theme themes/palette.json
-        language: system
-        files: ^(slides\.md|themes/palette\.json)$
+        entry: bin/legible lint slides.md --theme themes/palette.json
+        language: script
+        files: ^(slides\.md|themes/palette\.json|(components|layouts)/.*\.vue|styles/.*\.css|style\.css)$
         pass_filenames: false

@@ -5,10 +5,10 @@ module decides them: the bullet and word ceilings, how many lines a headline tak
 em-dashes in a headline, the inflated-register wordlist, the sentence-opener share, whether the
 footer's section map still fits, a font size a slide sets inline or below the type floor, whether
 the talk closes on a conclusion rather than a thank-you, and whether the deck's palette clears the
-separation floor. It also counts what the review advisories budget — visual groups and words on a
-slide, emphasis and callouts, new abbreviations over the talk, and the notes' time budgets against
-the slot — and reports each at the severity the canon gives it, which is a warning: an advisory is
-the review's to weigh, never a gate.
+separation floor and the attention and text contrast pairings. It also counts what the review
+advisories budget — visual groups and words on a slide, emphasis and callouts, new abbreviations
+over the talk, and the notes' time budgets against the slot — and reports each at the severity the
+canon gives it, which is a warning: an advisory is the review's to weigh, never a gate.
 ``docs/agent-skill-contract.md`` §4a fixes the set; the canon fixes every number in it, and this
 module quotes those numbers through ``legible.method`` rather than keeping a second copy.
 
@@ -18,14 +18,17 @@ It does not decide the rules the canon marks **judgment** — whether a slide ca
 whether a headline is a claim. Those belong to the review skill, which is fallible and advisory;
 what is here is a gate, and a gate may only hold things that are decidable.
 
-It does not measure colour. `separation-floor` is checked by running ``cvd-validate`` and reading
-its exit code, which is what that exit code is for: one implementation of Machado (2009) in this
-package means a linter that says a palette collapses and a report that says it holds cannot
-disagree, because there is only ever one of them speaking.
+It does not measure colour. The palette is checked by running ``cvd-validate`` and reading its exit
+code, which is what that exit code is for: one implementation of Machado (2009) in this package
+means a linter that says a palette collapses and a report that says it holds cannot disagree,
+because there is only ever one of them speaking. What the validator measured comes back in its JSON
+report and is carried over as it stands, each failing pair under the rule that names it, so the
+diagnosis reaches the author rather than only the verdict.
 """
 
 from __future__ import annotations
 
+import json
 import re
 import shutil
 import subprocess
@@ -67,6 +70,7 @@ from legible.method import (
     WORDS_PER_SLIDE,
 )
 from legible.method import rules as canon_rules
+from legible.validate import CONTRAST_PRECISION, PRECISION
 
 __all__ = ["ERROR", "WARNING", "Finding", "LintReport", "Unchecked", "lint"]
 
@@ -76,8 +80,22 @@ __all__ = ["ERROR", "WARNING", "Finding", "LintReport", "Unchecked", "lint"]
 #: legitimately overrides it.
 ERROR, WARNING = "error", "warning"
 
-#: The command the palette check runs. Never imported, always run: the exit code is the interface.
+#: The command the palette check runs. Never imported, always run: the exit code is the verdict,
+#: and the JSON report beside it is the diagnosis.
 VALIDATOR = "cvd-validate"
+
+#: Where, beside the deck, it sets type outside its slides: the files `type-scale` is checked in.
+#: Named here because a stamped deck's commit hook has to watch the same files, and does.
+TYPESET_SOURCES = ("components/**/*.vue", "layouts/**/*.vue", "styles/**/*.css", "style.css")
+
+#: Which rule each list of failures in the validator's report enforces, and how to read one entry.
+#: The validator checks three rules at once; a finding filed under the wrong one sends the author
+#: to fix colours that were never the problem.
+_SEPARATION, _ATTENTION, _TEXT = (
+    "separation-floor",
+    "accent-is-attention",
+    "decorative-neutral-never-text",
+)
 
 #: The exit codes ``cvd-validate`` publishes. 1 is a palette measured below the floor; anything
 #: else non-zero is a theme that was never measured, which is a different thing to report.
@@ -359,14 +377,7 @@ def _component_findings(deck_dir: Path) -> Iterator[Finding]:
     own template, so sizing in px there is how a template works, and a size written relative to the
     page (``em``, ``calc()``, a custom property) is one only the rendered slide can measure.
     """
-    sources = sorted(
-        {
-            *deck_dir.glob("components/**/*.vue"),
-            *deck_dir.glob("layouts/**/*.vue"),
-            *deck_dir.glob("styles/**/*.css"),
-            *deck_dir.glob("style.css"),
-        }
-    )
+    sources = sorted({path for pattern in TYPESET_SOURCES for path in deck_dir.glob(pattern)})
     for source in sources:
         text = source.read_text(encoding="utf-8")
         for size in font_sizes(text, css=source.suffix == ".css"):
@@ -617,7 +628,7 @@ def _opens_with(sentence: str, opener: str) -> bool:
 def _palette_findings(
     themes: Iterable[str | Path],
 ) -> tuple[list[Finding], list[Unchecked]]:
-    """Run the validator over each theme and read its verdict off the exit code."""
+    """Run the validator over each theme: its exit code is the verdict, its report the diagnosis."""
     findings: list[Finding] = []
     unchecked: list[Unchecked] = []
 
@@ -630,24 +641,70 @@ def _palette_findings(
         ]
 
     for theme in paths:
-        result = subprocess.run([str(command), theme], capture_output=True, text=True, check=False)
+        result = subprocess.run(
+            [str(command), "--json", theme], capture_output=True, text=True, check=False
+        )
         if result.returncode == 0:
             continue
         if result.returncode == _FLOOR_FAILED:
-            findings.append(
-                Finding(
-                    rule="separation-floor",
-                    severity=ERROR,
-                    slide=None,
-                    message=(
-                        f"{_verdict(result.stdout, theme)}; `{VALIDATOR} {theme}` names the pairs"
-                    ),
-                )
-            )
+            findings.extend(_failures(result.stdout, theme))
         else:
             unchecked.append(Unchecked(theme, _verdict(result.stderr, theme)))
 
     return findings, unchecked
+
+
+def _failures(output: str, theme: str) -> list[Finding]:
+    """One finding per failing pair in the validator's report, under the rule it breaks.
+
+    The exit code already said the palette failed, so a report that cannot be read, or that names
+    nothing, still fails the gate: it fails it under `separation-floor`, pointing at the command
+    that prints the full report, rather than passing a palette the validator rejected.
+    """
+    try:
+        report = json.loads(output)
+        found = [*_separation(report, theme), *_contrast(report, theme)]
+    except (ValueError, KeyError, TypeError):
+        found = []
+    if found:
+        return found
+    return [
+        _deck_finding(_SEPARATION, f"{theme}: failed; `{VALIDATOR} {theme}` prints the full report")
+    ]
+
+
+def _separation(report: dict, theme: str) -> Iterator[Finding]:
+    """Each pair of data colours below the floor, with every condition it falls under."""
+    pairs: dict[tuple[str, str], list[str]] = {}
+    for failure in report["failures"]:
+        pairs.setdefault((failure["role_a"], failure["role_b"]), []).append(
+            f"{failure['delta_e']:.{PRECISION}f} under {failure['condition']}"
+        )
+    floor = f"{report['threshold']:.{PRECISION}f}"
+    for (role_a, role_b), measured in pairs.items():
+        yield _deck_finding(
+            _SEPARATION, f"{theme}: {role_a} ↔ {role_b} ΔE {', '.join(measured)} (floor {floor})"
+        )
+
+
+def _contrast(report: dict, theme: str) -> Iterator[Finding]:
+    """Each attention and text pairing below its ratio, under the rule that lists the pairing."""
+    for rule, failures, threshold in (
+        (_ATTENTION, "contrast_failures", "contrast_threshold"),
+        (_TEXT, "text_contrast_failures", "text_contrast_threshold"),
+    ):
+        minimum = f"{report[threshold]:.{CONTRAST_PRECISION}f}"
+        for pair in report[failures]:
+            yield _deck_finding(
+                rule,
+                f"{theme}: {pair['foreground']} on {pair['background']} contrasts "
+                f"{pair['ratio']:.{CONTRAST_PRECISION}f}:1 (min {minimum})",
+            )
+
+
+def _deck_finding(rule: str, message: str) -> Finding:
+    """A palette finding: against the whole deck, and gating, since all three rules are floors."""
+    return Finding(rule=rule, severity=ERROR, slide=None, message=message)
 
 
 def _validator() -> str | None:
