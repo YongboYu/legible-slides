@@ -48,50 +48,13 @@ jobs:
           uv run --project python
           legible gen-css themes/leuven-blue.json --output theme/styles/tokens.css --check
 
-  # The theme's own build, over the example deck that exercises every layout it ships. A theme is
-  # declarative — layouts, chrome and one stylesheet — so a build that renders every layout is the
-  # test worth having, and there is no JavaScript unit suite behind it.
+  # The flagship deck, built the way it is presented: a deck that names the theme by path, and
+  # therefore the whole thin path from the palette to something that renders. It is held to the
+  # method it teaches, so the linter runs over it here.
   #
-  # It also asserts the two things about the built output that are easy to break and invisible in a
-  # screenshot: that no font is fetched from a provider, and that the bundled ones actually shipped.
-  # A deck whose typeface arrives over the network is a deck that renders in a fallback in a
-  # lecture room with no wifi, and nothing else in this pipeline would notice.
-  theme:
-    name: theme example builds
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: theme
-    steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 10
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: pnpm
-          cache-dependency-path: theme/pnpm-lock.yaml
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm run build
-      - name: The deck asks no font provider for anything
-        run: '! grep -rq "fonts.googleapis.com\|fonts.gstatic.com\|api.fonts.coollabs.io" dist'
-      - name: Both bundled families shipped with it
-        run: ls dist/assets/Inter-*.woff2 dist/assets/JetBrainsMono-*.woff2
-      # The example is shipped as an exemplar, so it is held to the method like any other deck. The
-      # linter runs beside the build rather than inside it: what must never depend on Python is the
-      # build, and this is a separate command.
-      - uses: astral-sh/setup-uv@v5
-        with:
-          enable-cache: true
-      - run: uv run --project ../python legible lint example.md
-
-  # The flagship deck, built the way it is presented. The theme job above proves the machinery on
-  # its own example; this one is the only place the two halves meet — a deck that names the theme by
-  # path, and therefore the whole thin path from the palette to something that renders.
-  #
-  # It is held to the method it teaches, so the linter runs over it here rather than over the
-  # example alone. A flagship that breaks its own rules is worse than no flagship.
+  # The build also asserts two things that are easy to break and invisible in a screenshot: that no
+  # font is fetched from a provider, and that the bundled ones shipped. A deck whose typeface arrives
+  # over the network renders in a fallback in a lecture room with no wifi.
   deck:
     name: flagship deck builds
     runs-on: ubuntu-latest
@@ -211,6 +174,13 @@ jobs:
         working-directory: ${{ runner.temp }}/stamped
       - run: pnpm run build
         working-directory: ${{ runner.temp }}/stamped
+      # The starter has one slide per layout the theme ships, so this build is also the theme's.
+      - name: The deck asks no font provider for anything
+        working-directory: ${{ runner.temp }}/stamped
+        run: '! grep -rq "fonts.googleapis.com\|fonts.gstatic.com\|api.fonts.coollabs.io" dist'
+      - name: Both bundled families shipped with it
+        working-directory: ${{ runner.temp }}/stamped
+        run: ls dist/assets/Inter-*.woff2 dist/assets/JetBrainsMono-*.woff2
       - name: The deck wears its own palette, not the theme checkout's
         working-directory: ${{ runner.temp }}/stamped
         run: |

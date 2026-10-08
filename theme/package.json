@@ -24,10 +24,6 @@
     "styles",
     "slide-top.vue"
   ],
-  "scripts": {
-    "dev": "slidev example.md --open",
-    "build": "slidev build example.md --base ./ --out dist"
-  },
   "slidev": {
     "colorSchema": "light",
     "defaults": {

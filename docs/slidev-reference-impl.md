@@ -24,7 +24,7 @@ The reference impl is **two things**, not one monolith:
   `--slidev-theme-primary` alias, and the theme files the validator gates.
 - **The flagship deck** — a *separate* deck (the 13-beat outline from #3) that consumes the theme.
   It is the **primary teaching artifact** (it teaches the method by being the method), not merely a
-  demo — academic's `example.md` pattern, promoted to the real deliverable.
+  demo.
 
 The split draws the seam the project promises — *"the palette is one file," "present in the tool you
 already use."* You cannot ship a reusable **template** if the machinery is welded into one

@@ -10,8 +10,8 @@ so that a rule can change in one place. What gets built and why is
 [`docs/slidev-reference-impl.md`](../docs/slidev-reference-impl.md).
 
 > **v1 is in-repo.** The package is structured to be published and is not published: a deck consumes
-> it by local path. `example.md` beside it is the theme's own build target, exercising every layout
-> once. The teaching artifact is the flagship deck, not that file.
+> it by local path. The starter in [`skill/template/`](../skill/template) uses every layout once, and
+> CI builds it as the theme's own test.
 
 ## Using it
 
@@ -222,26 +222,6 @@ may ask for a fifth, and no italic ships at all: `*emphasis*` comes out upright 
 heavier rather than in the skewed shapes a browser would synthesise. A code block inherits the mono
 family because that is what Slidev's `mono` setting is for; `fonts` reserves it from *display* use,
 not from code.
-
-## The example's figure
-
-`public/example-figure.png` is generated from the same palette the slides are coloured from, using
-the archetypes in the `legible` package — figures are regenerated, never redrawn:
-
-```bash
-uv run --project ../python python -c "
-from legible import load_palette
-from legible.figures import save, two_group
-palette = load_palette('../themes/leuven-blue.json')
-save(two_group(palette,
-               {'protanomaly': 16.5, 'tritanomaly': 20.8},
-               {'deuteranomaly': 15.0},
-               value_format='{:.1f}', y_label='min ΔE', size_px=(650, 370)),
-     'public/example-figure.png')
-"
-```
-
-Its numbers are the achieved minima for `themes/leuven-blue.json`, which the package's tests pin.
 
 ## Borrowed from
 
