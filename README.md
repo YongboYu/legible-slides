@@ -8,8 +8,8 @@ under colour-vision deficiency](docs/images/flagship.png)
 
 ## Quickstart
 
-You need [Node](https://nodejs.org) 20 or later with [pnpm](https://pnpm.io), and
-[uv](https://docs.astral.sh/uv/) for the checks. No coding agent is required.
+You need [Node](https://nodejs.org) 22.12 or later with [pnpm](https://pnpm.io) 10, which is what
+CI runs, and [uv](https://docs.astral.sh/uv/) for the checks. No coding agent is required.
 
 **See the flagship**, the deck that teaches the method by following it:
 
