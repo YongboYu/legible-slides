@@ -18,6 +18,7 @@
     "assets/fonts/*.woff2",
     "assets/fonts/*.txt",
     "assets/fonts/README.md",
+    "assets/placeholders",
     "components",
     "layouts",
     "styles",
