@@ -59,7 +59,7 @@ layout: assertion-evidence
 section: Findings
 ---
 
-# The claim this slide proves, written as a sentence.
+# The claim this slide proves.
 
 <!-- Point src at a figure of your own and delete public/placeholder.svg. `legible.figures`
      draws charts from data in this deck's palette, so changing the palette recolors them too.
@@ -88,7 +88,7 @@ layout: two-col-evidence
 ratio: 3fr 2fr
 ---
 
-# The claim whose evidence needs two panes, written as a sentence.
+# The claim whose evidence needs two panes.
 
 ::left::
 
@@ -117,7 +117,7 @@ layout: conclusion
 # on it, and why: `legible rules conclusion-stays-up`.
 ---
 
-# The claim the whole talk proved, written as a sentence.
+# The claim the whole talk proved.
 
 ::answers::
 
@@ -130,7 +130,9 @@ What you say out loud while this slide is up.
 
 ---
 layout: references
-# After the talk, so outside its sections: the footer names this one alone, with no position.
+# Optional. In a talk the room rarely has time to read this slide, so delete it if the footnotes
+# and your shared slides are enough. After the talk, so outside its sections: the footer names this
+# one alone, with no position.
 section: Sources
 backup: true
 # Numbered in this order, so a Footnote marker earlier in the deck lines up with an entry here.
@@ -139,4 +141,4 @@ indexEntries:
     uri: https://example.org/where-to-find-it
 ---
 
-# Where every claim above came from.
+# Optional: references for the claims above.
