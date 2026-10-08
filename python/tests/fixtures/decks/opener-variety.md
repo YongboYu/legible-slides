@@ -5,7 +5,7 @@ title: One passage opening the same way twice
 
 # Vary how a sentence starts, deliberately
 
-Evidence sits beside the claim rather than under it.
+Evidence sits beside the claim.
 
 ---
 layout: assertion-evidence

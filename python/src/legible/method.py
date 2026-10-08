@@ -361,6 +361,29 @@ OPENER_WORDS = _listed(_OPENER_VARIETY["opener-words"])
 OPENER_SHARE_MAX = float(_OPENER_VARIETY["opener-share-max"])
 
 
+_FILLER = rule_thresholds("no-filler-words")
+
+#: Words that add emphasis and no information, and how loudly a hit is reported.
+FILLER_WORDS = _listed(_FILLER["filler-words"])
+FILLER_SEVERITY = _FILLER["filler-severity"]
+
+
+_SENTENCE_LENGTH = rule_thresholds("sentence-length")
+
+#: The longest sentence a slide's prose or notes may carry, in words, and how loudly a longer one
+#: is reported.
+WORDS_PER_SENTENCE = int(_SENTENCE_LENGTH["words-per-sentence-max"])
+SENTENCE_LENGTH_SEVERITY = _SENTENCE_LENGTH["sentence-length-severity"]
+
+
+_CONTRAST = rule_thresholds("no-contrast-for-emphasis")
+
+#: The phrases that set up a foil, and how loudly a hit is reported: a script finds the phrase, and
+#: only a reader can say whether the alternative it names is real.
+CONTRAST_PHRASES = _listed(_CONTRAST["contrast-phrases"])
+CONTRAST_SEVERITY = _CONTRAST["contrast-severity"]
+
+
 _SECTION_LOCATOR = rule_thresholds("section-locator")
 
 #: How many sections the footer's map can name, and how long each name may run, before the map

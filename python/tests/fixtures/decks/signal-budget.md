@@ -3,9 +3,9 @@ theme: ./theme
 title: Two emphasised spans on one slide
 ---
 
-# Cost tracks the index rather than the model
+# Cost tracks the size of the index
 
-Evidence sits beside the claim rather than under it.
+Evidence sits beside the claim.
 
 ---
 

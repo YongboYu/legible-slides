@@ -39,7 +39,7 @@ venue: KU Leuven · Research Centre for Information Systems Engineering
 layout: answer
 ---
 
-# A short method helps decide what each slide is for, and two commands check the deck.
+# A short set of rules shapes each slide, and two commands check the deck against them.
 
 ::questions::
 
@@ -48,9 +48,9 @@ layout: answer
 3. How can you use this in your own deck?
 
 <!--
-Here's the short version of the whole talk. The rest of the slides go through these three questions
-in order, and the last slide comes back to them with the same numbers. If anyone missed the QR code
-on the cover, it's on the last slide too, and the slides are already online.
+Here's the short version of the whole talk. We'll take these three questions in order, and the
+last slide answers them with the same numbers. You'll find the QR code from the cover on the last
+slide too, and the slides are already online.
 -->
 
 ---
@@ -59,7 +59,7 @@ ratio: 3fr 2fr
 section: Problem
 ---
 
-# Most templates give you a look, but little help deciding what each slide should say.
+# Most templates set the colors and fonts, and leave you to decide what each slide says.
 
 ::left::
 
@@ -94,15 +94,14 @@ section: Problem
 
 ::right::
 
-<Callout title="What a template can't decide for you">
+<Callout title="What the template leaves to you">
 
-Which question this slide answers. Masters, color themes and fonts don't help with that, and a slide
-without a clear question tends to keep growing.
+You still decide which question the slide answers. Without one, a slide tends to keep growing.
 
 </Callout>
 
 <!--
-Signpost: I'll start with the problem, then the method, then legibility, and finally how it all ships.
+Signpost: I'll start with the problem, then the method, then legibility, and last, how to use it.
 
 You might ask the room what their last template gave them. Usually it's a master, a color theme and
 a logo in the corner. Deciding what each slide is for is still up to you, and that's often the part
@@ -113,7 +112,7 @@ that takes the most time.
 layout: two-col-evidence
 ---
 
-# Most templates never check whether the back row, or color-blind viewers, can read the slides.
+# Most templates don't check whether people at the back, or with color blindness, can read the slides.
 
 ::left::
 
@@ -140,22 +139,22 @@ templates rarely account for it.
 
 <Figure
   src="/colour-alone.png"
-  caption="Ten pairs of data colors, measured under four conditions, shown as someone with deuteranomaly sees them. Color is the only thing that tells the five lines apart."
+  caption="How far apart the palette's colors are, pair by pair, under four kinds of vision. The chart is shown as someone with deuteranomaly sees it, and only color tells its lines apart."
   :cite="2"
 />
 
 <!--
-Both of these can be measured, and in my experience templates leave both to the author. The two text
-samples are on the screen in this room right now, so anyone at the back can check whether the small
-one is readable. On the right is this deck's own palette, simulated at full severity, without the
-dashes and markers that the later chart adds.
+Both problems can be measured, and in my experience templates leave both to the author. The two
+text samples are on the screen right now. Anyone at the back can check whether they can read the
+small one. On the right is this deck's own palette, simulated at full severity. Its lines have no
+dashes or markers yet, and a later slide adds them.
 -->
 
 ---
 section: Method
 ---
 
-# The method comes first, and the theme and tools are there to support it.
+# The method decides what goes on each slide, and the tools check the result.
 
 | What the method covers | What checks it |
 |---|---|
@@ -163,21 +162,20 @@ section: Method
 | how distinct the data colors stay | `cvd-validate`, on any palette |
 | how much fits on one slide | `legible lint`, on every push |
 | what text size the back row can read | the theme's fixed type scale |
-| what goes into a figure | the palette, regenerated rather than redrawn |
+| how a figure is colored | the figure helper, from the palette file |
 
 <Callout accent title="Why that order">
 
-A theme changes how the slides look. The method helps with what they say, and the tools make it
-easier to follow.
+A theme sets how the slides look. The method shapes what they say, and the two commands catch
+slides that break its rules.
 
 </Callout>
 
 <!--
 Signpost: That covers the problem, so now the method, one rule per slide.
 
-From here on, each slide shows one rule and tries to follow it. If you swapped in a different
-palette, every row in this table would still hold, which suggests the method is doing the work
-rather than the styling.
+From here on, each slide shows one rule and tries to follow it. Every row in this table would
+still hold with a different palette, and that's why the method comes first.
 -->
 
 ---
@@ -228,7 +226,7 @@ Three series pass, and a fourth would fail without retuning.
 
 </Callout>
 
-Read on its own, this already tells you the finding, and the rest of the slide can support
+Read on its own, this tells you the finding. The rest of the slide shows the evidence for
 it<sup>5</sup>.
 
 <Footnotes>
@@ -237,15 +235,15 @@ it<sup>5</sup>.
 
 <!--
 Read the two boxes and pause for a moment. Only one of them tells you something. A full sentence
-that fits comfortably on screen is usually enough. If someone reads only the headlines of a good
-deck, they should still be able to follow the argument.
+that fits on two lines is usually enough. Someone who reads only the headlines of a good deck should
+still be able to follow the argument.
 -->
 
 ---
 layout: two-col-evidence
 ---
 
-# Choosing the message before the chart keeps each slide focused.
+# Writing the message before choosing the chart keeps each slide to one point.
 
 ::left::
 
@@ -293,11 +291,11 @@ time<sup>7</sup>.
 </Footnotes>
 
 <!--
-Pause before the click and ask what the box might add. It's there to show that the same idea applies
-to time as well as space, and it's the only reveal in the deck. Of all the rules in the method, this
-one has some of the best research behind it, though most of it comes from one lab. A click is worth
-it when each step adds something, never to hold back a point the headline already made. And there
-are no slide transitions anywhere in this deck.
+Pause before the click and ask the room what the box might add. It shows that the same idea
+applies to time: a reveal should add evidence. It's the only reveal in this deck. This rule has
+some of the best research behind it, though most of it comes from one lab. Use a click when each
+step adds something, and don't use one to hold back a point the headline already made. This deck
+uses no slide transitions either.
 -->
 
 ---
@@ -305,7 +303,7 @@ layout: two-col-evidence
 section: Legibility
 ---
 
-# Body text is sized for the back of the room, not for your laptop screen.
+# Body text is sized so that people at the back of the room can read it.
 
 ::left::
 
@@ -317,22 +315,21 @@ section: Legibility
 2. 23 ÷ 720 = 3.2% of the height, on any screen
 3. A screen 2 m tall: 2 × 4.5 = 9 m, a session room
 
-Nothing goes below 18 px, anywhere.
+Nothing goes below 18 px.
 
 <!--
-Signpost: So far we've looked at what goes on a slide. Next is whether people can actually see it.
+Signpost: So far we've looked at what goes on a slide. Next is whether people can see it.
 
-Walk the three lines in order. The canvas is 1280 by 720 and scales to fill whatever screen it's on,
-so a size is really a share of the image height, and that share is the same on a projector and on a
-laptop. The AV industry's sizing rule says body text at that share reads to about four and a half
-image heights. On a screen two meters tall, that's nine meters: a seminar room or a conference
-session room. Captions, legends and page numbers all sit at or above eighteen pixels too.
+Walk through the three lines in order. The canvas is 1280 by 720, and it scales to fill whatever
+screen it's on. So a font size is a share of the image height, the same on a projector as on a
+laptop. The AV industry's sizing guideline says body text at that share reads to about four and a
+half image heights. On a screen two meters tall, that's nine meters, about a seminar or conference
+session room. Captions, legends and page numbers are all eighteen pixels or more.
 
-The method sets the type size once, rather than leaving it to the palette or to each slide. When
-text size can change per slide, it's tempting to shrink whatever runs long, and the people at the
-back pay for that. A lecture hall is beyond what this scale is designed for, so sharing the slides
-by QR code or asking for a second screen helps there. Whatever the room, it's worth doing the
-distance check from the method before the talk.
+The method fixes the type size once for the whole deck. When each slide can change it, it's tempting
+to shrink whatever runs long, and the people at the back pay for that. This scale isn't designed for
+a lecture hall. There, sharing the slides by QR code or asking for a second screen helps. In any
+room, do the distance check from the method before the talk.
 -->
 
 ---
@@ -358,7 +355,7 @@ layout: two-col-evidence
 
 <!--
 Here's the same chart from earlier, with the same palette and simulation (source 2). What's
-different is that each line now has its own dash pattern and marker. The figure template assigns
+different is that each line now has its own dash pattern and marker. The figure helper assigns
 them by position, so they're always there. Grayscale is only a warning for that reason: the dashes
 and markers already cover it.
 -->
@@ -381,12 +378,11 @@ university.
 </Callout>
 
 <!--
-These numbers are measured over the per-series colors, under normal vision and three types of color
+These numbers come from the per-series colors, under normal vision and three types of color
 blindness at full severity. No slide in this deck names a color directly. "At capacity" means a
-fourth series would fail, and the validator would say which one rather than quietly reusing a color.
-It's worth running on your own palette before a talk: a pass means it clears the floor, and a fail
-tells you which color to change. The theme file carries the same not-affiliated note in its
-description.
+fourth series would fail, and the validator would name the pair that's too close. Run it on your
+own palette before a talk. A pass means it clears the floor, and a fail tells you which color to
+change. The theme file carries the same not-affiliated note in its description.
 -->
 
 ---
@@ -397,21 +393,22 @@ section: Delivery
 
 | What you get | Status |
 |---|---|
-| the Slidev theme and this deck | available, and on screen now |
+| the Slidev theme and this deck | in use on this screen |
 | a PDF to present or share | `slidev export`, from the same file |
-| a skill for coding agents | available: it can start a deck and review one |
+| a skill for coding agents | starts a deck and reviews it |
 
 <Callout accent title="Why one file">
 
-Everything is built from the same markdown, so the different versions can't drift apart.
+The slides, the PDF and the review all read the same markdown, so one fix reaches all three.
 
 </Callout>
 
 <!--
 Signpost: The last part is how you can use this in your own deck.
 
-You might wonder why there's no PowerPoint master. An export is one screenshot per slide, and a
-separately maintained copy tends to drift as soon as either one changes.
+You might wonder why there's no PowerPoint master. Slidev's PowerPoint export puts one screenshot on
+each slide, so you can't edit it. A master kept by hand would drift from the theme as soon as either
+one changed.
 -->
 
 ---
@@ -428,9 +425,8 @@ layout: conclusion
 
 <!--
 Leave this slide up during questions, since it's what people will look at while they ask. Each
-answer matches the question with the same number on the second slide. Say thank you out loud rather
-than on a slide, and mention that the code and the rules are on GitHub, with the rules in
-docs/method.md.
+answer matches the question with the same number on the second slide. Thank the room out loud.
+Mention that the code is on GitHub, and that the rules are in docs/method.md.
 -->
 
 ---

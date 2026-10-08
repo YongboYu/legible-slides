@@ -87,6 +87,9 @@ grouped by slide and names each finding's rule; see
 | No em-dashes in headlines | `no-em-dash-headline` | scan headline text |
 | No inflated-register words | `no-inflated-register` | the rule's wordlist, at the severity the rule assigns |
 | Sentence-opener distribution | `opener-variety` | opener share per passage, against the rule's ceiling |
+| No filler words (advisory) | `no-filler-words` | the rule's wordlist, at the severity the rule assigns |
+| Sentence length (advisory) | `sentence-length` | words per sentence in prose and notes, table rows left out, at the severity the rule assigns |
+| Contrast phrases (advisory) | `no-contrast-for-emphasis` | the rule's phrase list and a clause opening on "not" after a comma, at the severity the rule assigns |
 | Section map fits | `section-locator` | the sections a deck declares, their count and each label's length, at the severity the rule assigns |
 | Type floor holds | `type-scale` | every font size a slide's markup sets (style attributes, style blocks, UnoCSS text classes, SVG `font-size` attributes): an inline px size, and any size that resolves below the rule's floor; and every absolute size in the deck's own `components/`, `layouts/`, `styles/` and `style.css` that resolves below it |
 | Closes on a conclusion | `conclusion-stays-up` | the last slide outside the backups: no headline, a closing label for one, or a thank-you, at the severity the rule assigns |
@@ -196,11 +199,16 @@ it has a row.
 | `no-em-dash-headline` | gate | |
 | `no-inflated-register` | advisory | |
 | `opener-variety` | gate | |
-| `no-contrast-for-emphasis` | review | |
+| `no-filler-words` | advisory | |
+| `sentence-length` | advisory | |
+| `no-contrast-for-emphasis` | advisory, review | the phrase is found; whether the alternative it names is real is judged |
 | `no-reflexive-tricolon` | review | |
 | `no-hedging-or-boilerplate` | review | |
 | `rhythm-variety` | review | |
 | `concrete-over-abstract` | review | |
+| `say-who-does-what` | review | |
+| `no-aphorism` | review | |
+| `measured-claims` | review | |
 
 So the report states two verdicts, not one: the **gate**, which is the exit code, and **readiness**,
 which no script can give and which the review and the rendered pages answer between them.

@@ -11,7 +11,7 @@ from pathlib import Path
 import pytest
 
 from legible.lint import lint
-from legible.method import ELEMENTS_PER_SLIDE, FLOOR_PX, WORDS_PER_SLIDE
+from legible.method import ELEMENTS_PER_SLIDE, FLOOR_PX, WORDS_PER_SENTENCE, WORDS_PER_SLIDE
 
 #: The fixture decks: one that breaks nothing, and one per rule, each named for the rule it breaks
 #: so the deck and what it is expected to produce cannot drift apart.
@@ -743,8 +743,9 @@ def test_sitting_on_the_element_ceiling_is_not(write_deck):
 
 
 def test_more_words_on_a_slide_than_the_ceiling_is_an_advisory(write_deck):
-    """One word past the budget outside the headline, which is not counted however long it runs."""
-    words = " ".join(["word"] * (WORDS_PER_SLIDE + 1))
+    """One word past the budget outside the headline, which is not counted however long it runs.
+    Each word is its own sentence, so `sentence-length` stays out of it."""
+    words = " ".join(["Word."] * (WORDS_PER_SLIDE + 1))
     report = lint(write_deck(f"# A headline whose own words are never counted here\n\n{words}\n"))
 
     _advisory(report, "on-slide-words")
@@ -752,7 +753,7 @@ def test_more_words_on_a_slide_than_the_ceiling_is_an_advisory(write_deck):
 
 
 def test_sitting_on_the_word_budget_is_not_and_a_figure_s_text_is_not_counted(write_deck):
-    words = " ".join(["word"] * WORDS_PER_SLIDE)
+    words = " ".join(["Word."] * WORDS_PER_SLIDE)
     caption = " ".join(["caption"] * 30)
     report = lint(
         write_deck(f'# A claim\n\n{words}\n\n<Figure\n  src="/f.png"\n  caption="{caption}"\n/>\n')
@@ -955,3 +956,63 @@ def test_an_exception_naming_no_rule_is_reported(write_deck):
 
     assert ("bullet-cieling", "warning") in {(f.rule, f.severity) for f in report.findings}
     assert not report.passed
+
+
+def test_a_filler_word_is_an_advisory(write_deck):
+    report = lint(write_deck("# A claim\n\nCost simply fell by half.\n"))
+
+    _advisory(report, "no-filler-words")
+    assert "'simply'" in report.findings[0].message
+
+
+def test_a_filler_word_is_matched_whole(write_deck):
+    """`just` is listed, and `justify` is not it."""
+    assert lint(write_deck("# A claim\n\nThe numbers justify the claim.\n")).findings == ()
+
+
+def test_a_sentence_past_the_length_is_an_advisory(write_deck):
+    sentence = " ".join(["word"] * (WORDS_PER_SENTENCE + 1)) + "."
+    report = lint(write_deck(f"# A claim\n\n{sentence}\n"))
+
+    _advisory(report, "sentence-length")
+    assert f"{WORDS_PER_SENTENCE + 1}-word sentence" in report.findings[0].message
+
+
+def test_a_sentence_at_the_length_is_not(write_deck):
+    sentence = " ".join(["word"] * WORDS_PER_SENTENCE) + "."
+
+    assert lint(write_deck(f"# A claim\n\n{sentence}\n")).findings == ()
+
+
+def test_a_notes_line_without_a_stop_ends_at_the_blank_line_after_it(write_deck):
+    """`Time: 1:00` has no full stop, and must not run on into the paragraph under it."""
+    sentence = " ".join(["word"] * (WORDS_PER_SENTENCE - 2)) + "."
+    report = lint(write_deck(f"# A claim\n\nEvidence.\n\n<!--\nTime: 1:00\n\n{sentence}\n-->\n"))
+
+    assert "sentence-length" not in rules(report)
+
+
+def test_a_table_row_is_not_a_sentence(write_deck):
+    cells = " | ".join(["cell"] * (WORDS_PER_SENTENCE + 5))
+    report = lint(write_deck(f"# A claim\n\n| {cells} |\n"))
+
+    assert "sentence-length" not in rules(report)
+
+
+@pytest.mark.parametrize(
+    ("text", "phrase"),
+    [
+        ("It is not just a theme, it is a method.", "not just"),
+        ("Figures are regenerated rather than redrawn.", "rather than"),
+        ("Body text is sized for the back row, not for your laptop.", ", not"),
+    ],
+)
+def test_a_contrast_set_up_for_emphasis_is_an_advisory(write_deck, text, phrase):
+    report = lint(write_deck(f"# A claim\n\n{text}\n"))
+
+    _advisory(report, "no-contrast-for-emphasis")
+    assert f"{phrase!r}" in report.findings[0].message
+
+
+def test_a_not_that_does_not_follow_a_comma_is_not_a_contrast(write_deck):
+    assert lint(write_deck("# A claim\n\nThe palette does not change.\n")).findings == ()

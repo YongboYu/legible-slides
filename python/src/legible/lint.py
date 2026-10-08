@@ -46,10 +46,14 @@ from legible.method import (
     CALLOUTS_PER_SLIDE,
     CLOSING_LABELS,
     CONCLUSION_SEVERITY,
+    CONTRAST_PHRASES,
+    CONTRAST_SEVERITY,
     ELEMENT_CEILING_SEVERITY,
     ELEMENTS_PER_SLIDE,
     EM_DASHES_PER_HEADLINE,
     EMPHASISED_SPANS_PER_SLIDE,
+    FILLER_SEVERITY,
+    FILLER_WORDS,
     FLOOR_PX,
     HEADLINE_LINES_MAX,
     HEADLINE_PX,
@@ -64,9 +68,11 @@ from legible.method import (
     SECTION_LABEL_CHARS_MAX,
     SECTION_LOCATOR_SEVERITY,
     SECTIONS_MAX,
+    SENTENCE_LENGTH_SEVERITY,
     SIGNAL_BUDGET_SEVERITY,
     THANK_YOU_WORDS,
     WORDS_PER_BULLET,
+    WORDS_PER_SENTENCE,
     WORDS_PER_SLIDE,
 )
 from legible.method import rules as canon_rules
@@ -114,6 +120,14 @@ _WORD = re.compile(r"[^\W_]", re.UNICODE)
 
 #: The end of a sentence, for counting openers over a passage.
 _SENTENCE_END = re.compile(r"(?<=[.!?])[\"')\]]*\s+")
+
+#: Where a sentence ends for measuring its length: at its stop, or at a blank line, which is where a
+#: line of the notes that has no stop of its own ("Time: 1:00") ends.
+_SENTENCE_OR_PARAGRAPH_END = re.compile(r"(?<=[.!?])[\"')\]]*\s+|\n\s*\n")
+
+#: The structural form of `no-contrast-for-emphasis` that a phrase list cannot carry: a clause that
+#: opens with "not" straight after a comma ("for the room, not for your laptop").
+_COMMA_NOT = re.compile(r",\s+not\b", re.IGNORECASE)
 
 #: A size in a style, split into its number and its unit.
 _CSS_SIZE = re.compile(
@@ -251,6 +265,27 @@ def _slide_findings(slide: Slide) -> Iterator[Finding]:
             severity=INFLATED_REGISTER_SEVERITY,
         )
 
+    for word in _listed_in(slide, FILLER_WORDS, besides=CONTRAST_PHRASES):
+        yield _finding(
+            "no-filler-words",
+            slide,
+            f"filler word {word!r}: cut it and check the sentence lost nothing",
+            severity=FILLER_SEVERITY,
+        )
+    for sentence, words in _long_sentences(slide):
+        yield _finding(
+            "sentence-length",
+            slide,
+            f"{words}-word sentence: {sentence!r}",
+            severity=SENTENCE_LENGTH_SEVERITY,
+        )
+    for phrase in _contrasts(slide):
+        yield _finding(
+            "no-contrast-for-emphasis",
+            slide,
+            f"contrast {phrase!r}: keep it only if the alternative is one the room would choose",
+            severity=CONTRAST_SEVERITY,
+        )
     for opener, shared, total in _monotonous(slide):
         yield _finding(
             "opener-variety",
@@ -579,12 +614,43 @@ def _inflated(slide: Slide) -> Iterator[str]:
     inflect here, so a form it does not carry is not a hit and `established-terminology` keeps the
     benefit of the doubt.
     """
-    text = " ".join(
+    yield from _listed_in(slide, INFLATED_REGISTER_WORDS)
+
+
+def _everything(slide: Slide) -> str:
+    """Every word the slide says, on it and in its notes, lowercased."""
+    return " ".join(
         part for part in (slide.headline, *slide.bullets, *slide.prose, slide.notes) if part
     ).lower()
-    for word in INFLATED_REGISTER_WORDS:
-        if re.search(rf"\b{re.escape(word.lower())}\b", text):
-            yield word
+
+
+def _listed_in(slide: Slide, listed: Sequence[str], besides: Sequence[str] = ()) -> Iterator[str]:
+    """Every listed word or phrase the slide uses anywhere, once each, in the canon's order. A use
+    inside one of ``besides`` is another rule's finding, and is not counted twice."""
+    text = _everything(slide)
+    for phrase in besides:
+        text = re.sub(rf"\b{re.escape(phrase.lower())}\b", " ", text)
+    for item in listed:
+        if re.search(rf"\b{re.escape(item.lower())}\b", text):
+            yield item
+
+
+def _long_sentences(slide: Slide) -> Iterator[tuple[str, int]]:
+    """Every sentence of the slide's prose and notes that runs past the canon's length. A table row
+    is cells, not a sentence, so a passage's table lines are left out."""
+    for passage in _passages(slide):
+        text = "\n".join(line for line in passage.split("\n") if not line.lstrip().startswith("|"))
+        for sentence in _SENTENCE_OR_PARAGRAPH_END.split(text):
+            sentence = " ".join(sentence.split())
+            if (words := _words(sentence)) > WORDS_PER_SENTENCE:
+                yield sentence, words
+
+
+def _contrasts(slide: Slide) -> Iterator[str]:
+    """Every contrast phrase the slide uses, then the comma-and-"not" form if it uses that too."""
+    yield from _listed_in(slide, CONTRAST_PHRASES)
+    if _COMMA_NOT.search(_everything(slide)):
+        yield ", not"
 
 
 def _monotonous(slide: Slide) -> Iterator[tuple[str, int, int]]:

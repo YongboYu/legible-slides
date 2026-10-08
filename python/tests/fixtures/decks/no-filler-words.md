@@ -1,6 +1,6 @@
 ---
 theme: ./theme
-title: One word that inflates register
+title: One word that adds emphasis and nothing else
 ---
 
 # Say it the way you would say it out loud
@@ -11,6 +11,6 @@ Evidence sits beside the claim.
 layout: assertion-evidence
 ---
 
-# The window size is the crucial variable
+# The window size sets the cost
 
-Cost fell by half, which is the whole of the argument.
+Cost simply fell by half when the window shrank.

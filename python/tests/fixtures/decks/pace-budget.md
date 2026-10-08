@@ -4,9 +4,9 @@ title: Time budgets that fill the slot
 duration: 10min
 ---
 
-# Cost tracks the index rather than the model
+# Cost tracks the size of the index
 
-Evidence sits beside the claim rather than under it.
+Evidence sits beside the claim.
 
 <!--
 Time: 5min

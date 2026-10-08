@@ -5,7 +5,7 @@ title: One slide past the bullet ceiling
 
 # The ceiling is what stops a second message
 
-Evidence sits beside the claim rather than under it.
+Evidence sits beside the claim.
 
 ---
 layout: assertion-evidence

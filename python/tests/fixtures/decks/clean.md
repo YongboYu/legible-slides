@@ -26,13 +26,13 @@ Walk the room along the highlighted line, then stop talking.
 layout: two-col-evidence
 ---
 
-# Cost tracks the index rather than the model
+# Cost tracks the size of the index
 
 - error falls at the short windows
 - the gap narrows past twelve hours
 - retrieval carries the long tail
 
-Evidence sits beside the claim rather than under it.
+Evidence sits beside the claim.
 
 ```python
 save(multi_series(palette, series), "public/figures/mae-by-window.png")

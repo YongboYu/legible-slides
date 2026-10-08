@@ -40,7 +40,11 @@ A slide carries exactly the optional fields its entry carries. Load what they ar
 
 ```bash
 legible rules signal-budget accent-is-attention motion-purpose established-terminology acronym-budget
+legible rules --section voice
 ```
+
+Anything build writes that the plan did not, such as a caption, a callout's wording or a line of the
+notes, is held to the voice rules too. Read each one back against them before the review does.
 
 Then the backups, after the conclusion and before the references, one slide per entry in the plan's
 order, filled the same way. The first declares `section: Backup` and `backup: true`, and the rest
