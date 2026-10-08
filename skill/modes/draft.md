@@ -30,7 +30,12 @@ version of the talk, quote what it says and where.
 legible rules message-before-visual answer-first conclusion-stays-up one-message assertion-headline
 legible rules no-section-dividers section-locator pace-budget acronym-budget
 legible rules signal-budget accent-is-attention motion-purpose established-terminology
+legible rules --section voice
 ```
+
+The voice rules hold every claim, question and note the plan writes, because build copies them onto
+the slides word for word. Write each one the way you would say it to the room, and read it back
+against them before moving on.
 
 ## 3. Write the questions, then the answer
 

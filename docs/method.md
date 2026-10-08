@@ -532,19 +532,46 @@ Counted over a passage of prose or notes, not over one sentence.
 **Decided by** script · **Threshold** `opener-words = [The, This, It, In]`, `opener-share-max = 0.5`
 (violation when more than half a passage's sentences open with a listed word)
 
+#### `no-filler-words`: no words that add emphasis and nothing else
+
+"Just", "simply" and "really" make a sentence sound surer without making it say more. Cut the word
+and read the sentence again; if it lost nothing, leave it out. A hit is a **warning**, because some
+of these carry meaning in place ("just after the drift").
+
+**Decided by** script · **Threshold**
+`filler-words = [just, simply, really, actually, quietly, genuinely, essentially, basically, truly]`,
+`filler-severity = warning`
+
+#### `sentence-length`: a sentence in prose or notes stays short enough to say in one breath
+
+Counted per sentence in a slide's prose and in its speaker notes. A headline is held by
+`headline-shape` and a bullet by `word-ceiling`. A long sentence usually holds two ideas: split it
+where the second one starts. A hit is a **warning**, because a list said aloud can run long and
+still be easy to follow.
+
+**Decided by** script · **Threshold** `words-per-sentence-max = 25`,
+`sentence-length-severity = warning`
+
+#### `no-contrast-for-emphasis`: no foil invented to make a claim sound bigger
+
+The tell is "not just X, it's Y", "X rather than Y" or "X, not Y", where Y is a position nobody held
+and the negation exists only to make X sound bigger. State the claim on its own: "body text is sized
+for the back of the room" says everything "…, not for your laptop screen" does.
+
+A contrast that names a **real alternative** the audience might otherwise choose is not this rule's
+target: "a headline works better as a claim than as a topic label" earns its comparison, because
+labels are what most decks actually put there. That is why a script can only flag the phrase, and
+why a hit is a **warning**: whether the alternative is real is a reader's call. Besides the phrases
+listed, a clause that opens with "not" straight after a comma is flagged.
+
+**Decided by** script (the phrase) · judgment (whether the alternative is real) · **Threshold**
+`contrast-phrases = [not just, not only, not merely, more than just, rather than, instead of]`,
+`contrast-severity = warning`
+
 ### 7b. Judgment
 
 Every rule in this subsection is **Decided by** judgment, and none carries a threshold. These are the
 tells a wordlist cannot catch.
-
-#### `no-contrast-for-emphasis`: no foil invented to make a claim sound bigger
-
-The tell is "not just X, it's Y", where X is a position nobody held and the negation exists only to
-set up the reveal. State the claim on its own.
-
-A contrast that names a **real alternative** the audience might otherwise choose is not this rule's
-target: "the headline is the claim, not a label" earns its second clause, because labels are what
-most decks actually put there.
 
 #### `no-reflexive-tricolon`: three items because the claim has three
 
@@ -566,6 +593,27 @@ Read it aloud. Fix anything you would not actually say.
 
 "Three series pass, and a fourth would fail" beats "demonstrates strong accessibility
 characteristics".
+
+#### `say-who-does-what`: every sentence names who or what acts, and what it does
+
+A sentence whose subject is vague ("the method does the work", "the tools make it easier") leaves
+the listener to guess what happens. Name the actor and the action: "the linter flags a sixth
+bullet" can be checked, and "the tools help" cannot. Read the sentence and ask "does what, exactly?"
+If you cannot answer from the sentence alone, rewrite it.
+
+#### `no-aphorism`: no slogans, punchlines or dramatic reveals
+
+A line built to be quoted ("Files without a method are a look"), a fragment used for effect
+("Nothing else."), or a colon held back for a reveal ("The answer: the template.") sounds written
+and reads as a performance. Say the same thing as a plain sentence, or cut it if a plain sentence
+says nothing.
+
+#### `measured-claims`: claim no more than the evidence shows
+
+Where the evidence shows a tendency, say "usually", "often" or "helps", not "always", "never" or "the
+slide is wrong". An absolute the room can think of one exception to costs the speaker the room's
+trust for the next claim too. A measured number needs no softening: "the closest pair lands on 15.0"
+is exact.
 
 ---
 

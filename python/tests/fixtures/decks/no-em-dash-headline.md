@@ -5,7 +5,7 @@ title: One headline carrying an em-dash
 
 # A headline is a claim the room can read in a glance
 
-Evidence sits beside the claim rather than under it.
+Evidence sits beside the claim.
 
 ---
 layout: assertion-evidence

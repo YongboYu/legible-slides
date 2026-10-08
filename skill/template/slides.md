@@ -61,9 +61,9 @@ section: Findings
 
 # The claim this slide proves, written as a sentence.
 
-<!-- Point src at a figure of your own and delete public/placeholder.svg. Charts are regenerated
-     from data rather than redrawn — `legible.figures` draws the archetypes from this deck's
-     palette, which is what makes a recolour reach them. See public/README.md. -->
+<!-- Point src at a figure of your own and delete public/placeholder.svg. `legible.figures`
+     draws charts from data in this deck's palette, so changing the palette recolors them too.
+     See public/README.md. -->
 
 <Figure
   src="/placeholder.svg"
@@ -78,8 +78,8 @@ section: Findings
 <!--
 Signpost: the sentence that tells the room a new part of the talk has started, and which.
 
-Everything you say out loud goes here. `legible rules no-script-on-slide` is why there is a place
-for it, and a review reads these notes like everything else in this file.
+Write what you'll say out loud here. `legible rules no-script-on-slide` explains why it goes in the
+notes. The review reads these notes too.
 -->
 
 ---
@@ -101,14 +101,14 @@ ratio: 3fr 2fr
 
 <Callout title="A label for the box">
 
-The one thing on this slide that has to read as set apart: a definition the rest of it leans on, or
-the number the evidence turns on.
+The one thing on this slide that has to stand out. It might be a definition the slide relies on,
+or the number the evidence turns on.
 
 </Callout>
 
 <!--
-Both panes serve the headline above them. Read `legible rules one-message` when a slide starts to
-feel like it is doing two jobs, because splitting it here is cheaper than splitting it in the room.
+Both panes support the headline above them. If a slide starts doing two jobs, read `legible rules
+one-message`. Splitting it now is easier than splitting it in front of the room.
 -->
 
 ---

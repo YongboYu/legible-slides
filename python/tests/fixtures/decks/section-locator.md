@@ -6,7 +6,7 @@ section: Problem
 
 # The map names every section in one line
 
-Evidence sits beside the claim rather than under it.
+Evidence sits beside the claim.
 
 ---
 section: Evaluations
