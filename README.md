@@ -162,4 +162,5 @@ with its authors. The rest of the evidence base is cited in
 The bundled typefaces, Inter and JetBrains Mono, are under the SIL Open Font License 1.1; their
 licence files ship beside them in [`theme/assets/fonts/`](theme/assets/fonts).
 
-Everything else is MIT — see [LICENSE](LICENSE).
+Everything else is MIT — see [LICENSE](LICENSE). Earlier commits contain KU Leuven logo files.
+They are the university's property and are not covered by this license.
