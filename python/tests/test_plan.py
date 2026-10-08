@@ -1,10 +1,12 @@
 """The talk plan's worked example, and the deck build mode made from it.
 
 ``docs/talk-plan.md`` fixes what a plan holds and what a deck built from one has to match. Both are
-claims a script can settle against the worked example in ``skill/examples/pmf-tsfm/``: the plan is
+claims a script can settle against a worked example in ``skill/examples/pmf-tsfm/``: the plan is
 complete, the deck follows it slide for slide, the deck clears the mechanical checks, and the review
 attached to it reports what the linter reports. Nothing here asserts a judgment, for the reason
 ``test_skill.py`` gives.
+
+The example is kept out of the published repo, so the whole module skips where it is absent.
 """
 
 import importlib.util
@@ -22,6 +24,10 @@ EXAMPLE = REPO / "skill" / "examples" / "pmf-tsfm"
 PLAN = EXAMPLE / "plan.md"
 DECK = EXAMPLE / "deck"
 REVIEW = EXAMPLE / "review.md"
+
+if not PLAN.is_file():
+    pytest.skip("the worked example is local-only, not in this checkout", allow_module_level=True)
+
 #: The example is the template stamped and then filled, so it wears the palette the template stamps.
 PALETTE = REPO / "skill" / "template" / "themes" / "palette.json"
 

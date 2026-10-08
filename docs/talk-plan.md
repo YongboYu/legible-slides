@@ -23,9 +23,6 @@ It sits between the paper and the deck, and the skill works on both sides of it
 This file says what a plan holds. It states no rule of the method; where a plan's shape leans on
 one, it names the rule by ID, and `legible rules <rule-id>` prints it.
 
-The worked example is [`skill/examples/pmf-tsfm/`](../skill/examples/pmf-tsfm): a plan drafted from
-a paper and its codebase, the deck built from it, and the review of that deck.
-
 ## The format
 
 ```markdown

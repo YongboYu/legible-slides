@@ -201,12 +201,12 @@ def test_the_skill_carries_a_mode_for_every_step_from_paper_to_review(skill):
         assert f"(modes/{mode}.md)" in _read(SKILL)
 
 
-def test_the_skill_points_at_the_talk_plan_s_format_and_its_worked_example(skill):
+def test_the_skill_points_at_the_talk_plan_s_format(skill):
     """Draft and build name the plan's parts without restating them, so the format has to be
     where the skill says it is."""
-    for path in ("docs/talk-plan.md", "skill/examples/pmf-tsfm/"):
-        assert f"`{path}`" in skill
-        assert (REPO / path).exists(), path
+    path = "docs/talk-plan.md"
+    assert f"`{path}`" in skill
+    assert (REPO / path).exists(), path
 
 
 @pytest.fixture(scope="module")

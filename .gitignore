@@ -30,3 +30,7 @@ Thumbs.db
 
 # local-only working notes
 .scratch/
+
+# the agent-built pmf-tsfm example, kept locally for comparison; python/tests/test_plan.py runs
+# against it when present and skips when not
+skill/examples/

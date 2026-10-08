@@ -25,8 +25,7 @@ never the `legible` on PATH: two decks pinned to different commits are held to d
 | a deck | **review**: say what breaks and how to fix it | [`modes/review.md`](modes/review.md) |
 
 Review is the acceptance bar for the other three: build and scaffold both end by running it. The
-talk plan joins draft to build, and its format is `docs/talk-plan.md` in the same checkout. The
-worked example of draft, build and review on one real paper is `skill/examples/pmf-tsfm/`.
+talk plan joins draft to build, and its format is `docs/talk-plan.md` in the same checkout.
 
 ## Two verdicts
 

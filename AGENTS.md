@@ -9,11 +9,6 @@ Extracted from the CAiSE 2026 deck in
 [`YongboYu/pmf-tsfm`](https://github.com/YongboYu/pmf-tsfm); see
 [`docs/design-provenance.md`](docs/design-provenance.md) for the decisions and their sources.
 
-## Status
-
-Being planned with `/wayfinder`. The map and open questions are GitHub issues labelled
-`wayfinder:map` / `wayfinder:*`. Structure below is provisional until its ticket closes.
-
 ## The method
 
 Every rule of the method — and every number it turns on — lives in
