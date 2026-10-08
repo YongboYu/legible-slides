@@ -75,9 +75,6 @@ in a backup section the slot doesn't count. It draws every chart from data with 
 figure helper, builds the deck, and runs review mode over it. The report goes to the author with the
 deck. An error is fixed as part of the build; a warning is left for the author.
 
-[`examples/pmf-tsfm/`](examples/pmf-tsfm) is both modes run end to end on a real paper, with the
-review attached, and `python/tests/test_plan.py` holds the deck to its plan.
-
 ## What review does
 
 Six steps, in order: find the deck, its palette and its figures; run `legible lint` for everything a

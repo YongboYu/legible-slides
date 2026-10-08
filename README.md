@@ -2,10 +2,6 @@
 
 **Slides that stay readable — from the back row, and for every pair of eyes.**
 
-> **Status: charting.** This repo is being planned with [`/wayfinder`](https://github.com/mattpocock/skills).
-> The map and its open questions live in [GitHub Issues](../../issues?q=label%3Awayfinder%3Amap).
-> Nothing here is settled until its ticket is closed.
-
 ---
 
 ## Why
@@ -104,7 +100,7 @@ and judgment stays with a reader, or with the coding-agent skill that reviews on
 questions the paper says it answers, a setup that makes the case for them, then one entry per
 slide with its headline claim, its evidence and where that comes from. You edit the plan, which is the cheap place to change an argument. **build**
 turns the plan into a deck on the template, draws its figures from data, and hands it over with a
-review. [`skill/examples/pmf-tsfm/`](skill/examples/pmf-tsfm) is both, run on a real paper.
+review.
 
 **review** runs the linter for everything a script settles, loads the rules that need reading
 straight from the canon (`legible rules`), and reports both halves as one review, grouped per slide,
@@ -154,6 +150,16 @@ across a long trail of issues and PRs.
 
 See [`docs/design-provenance.md`](docs/design-provenance.md) for what was decided, and why.
 
-## License
+## Credits and license
 
-MIT — see [LICENSE](LICENSE).
+The slide structure is Assertion-Evidence, developed by Michael Alley and colleagues: Alley &
+Neeley, "Rethinking the design of presentation slides: A case for sentence headlines and visual
+evidence," *Technical Communication* 52(4), 2005; and Alley, *The Craft of Scientific
+Presentations*, 2nd ed., Springer, 2013. This project applies their method and is not affiliated
+with its authors. The rest of the evidence base is cited in
+[`docs/research/presentation-methods.md`](docs/research/presentation-methods.md).
+
+The bundled typefaces, Inter and JetBrains Mono, are under the SIL Open Font License 1.1; their
+licence files ship beside them in [`theme/assets/fonts/`](theme/assets/fonts).
+
+Everything else is MIT — see [LICENSE](LICENSE).

@@ -225,39 +225,6 @@ jobs:
           echo "stamped: $built  palette: $want"
           test "$built" = "$want"
 
-  # The skill's build mode, end to end on its worked example: the template stamped, the files build
-  # mode wrote laid over it, built and linted. The example keeps only those files, so this is the
-  # one place they meet the template they were written into.
-  example:
-    name: the worked example builds
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 10
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-      - name: Stamp the template and lay the example over it
-        run: |
-          mkdir -p "$RUNNER_TEMP/example"
-          cp -R skill/template/. "$RUNNER_TEMP/example/"
-          cp -R skill/examples/pmf-tsfm/deck/. "$RUNNER_TEMP/example/"
-          rm "$RUNNER_TEMP/example/public/placeholder.svg"
-          sed -i "s|^theme: .*|theme: $GITHUB_WORKSPACE/theme|" "$RUNNER_TEMP/example/slides.md"
-      - run: pnpm install
-        working-directory: ${{ runner.temp }}/example
-      - run: pnpm run build
-        working-directory: ${{ runner.temp }}/example
-      - uses: astral-sh/setup-uv@v5
-        with:
-          enable-cache: true
-      - run: >
-          uv run --project "$GITHUB_WORKSPACE/python"
-          legible lint slides.md --theme themes/palette.json
-        working-directory: ${{ runner.temp }}/example
-
   python:
     name: python
     runs-on: ubuntu-latest

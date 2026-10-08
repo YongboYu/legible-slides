@@ -294,12 +294,6 @@ written before anything is drawn.
 Neither mode states a rule. Draft loads the rules a plan is shaped by with `legible rules`, the way
 review does, and build's acceptance bar is §5's review.
 
-The worked example is [`skill/examples/pmf-tsfm/`](../skill/examples/pmf-tsfm): a plan drafted from
-the pmf-tsfm paper and its code, the deck built from it, and its review. It is enforced, not
-asserted: `python/tests/test_plan.py` holds the plan to its format, the deck to the plan slide for
-slide, the deck to the linter's gate, and the attached review to the linter's verdict and findings.
-CI stamps the template, lays the example over it, builds it and lints it.
-
 ---
 
 ## Summary
@@ -312,4 +306,4 @@ CI stamps the template, lays the example over it, builds it and lints it.
 | Review engine | Hybrid — mechanical linter in `legible` (palette via `cvd-validate`) + LLM for 5 semantic checks |
 | Review posture | Flag + suggest (human applies); two-tier gate/advisory; merged per-slide markdown report |
 | Scaffold | Minimal Slidev starter on `leuven-blue`, review-ready from slide one |
-| Draft & build | Paper and codebase → talk plan (author edits) → deck, reviewed; worked on pmf-tsfm |
+| Draft & build | Paper and codebase → talk plan (author edits) → deck, reviewed |
