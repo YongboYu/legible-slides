@@ -450,3 +450,21 @@ def test_the_linter_wraps_a_headline_in_the_box_the_theme_sets_it_in(stylesheet)
     assert declared(h1.group("body"), "font-weight") == str(headline.HEADLINE_WEIGHT)
     assert declared(h1.group("body"), "letter-spacing") == f"{headline.HEADLINE_TRACKING_EM}em"
     assert declared(h1.group("body"), "font-size") == "var(--headline-px)"
+
+
+def test_every_file_the_theme_imports_is_in_its_published_package(package):
+    """The npm archive holds only what `files` lists, so an import the list leaves out builds from
+    a checkout and breaks from the registry."""
+    shipped = [(THEME / entry).resolve() for entry in package["files"]]
+    sources = [*THEME.glob("components/*.vue"), *THEME.glob("layouts/*.vue")]
+    sources += [THEME / "slide-top.vue", *THEME.glob("styles/*.ts")]
+
+    imported = {
+        (source.parent / match.group(1)).resolve()
+        for source in sources
+        for match in re.finditer(r"""import\s[^'"]*['"](\.{1,2}/[^'"?]+)""", source.read_text())
+    }
+
+    assert imported
+    for path in imported:
+        assert any(path == entry or entry in path.parents for entry in shipped), path
