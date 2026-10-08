@@ -2,6 +2,55 @@
 
 **Slides that stay readable — from the back row, and for every pair of eyes.**
 
+![Four slides from the flagship deck: a numbered list of the talk's questions, a topic label set
+against a claim, the back-row reading distance drawn as a diagram, and a chart of palette distances
+under colour-vision deficiency](docs/images/flagship.png)
+
+## Quickstart
+
+You need [Node](https://nodejs.org) 20 or later with [pnpm](https://pnpm.io), and
+[uv](https://docs.astral.sh/uv/) for the checks. No coding agent is required.
+
+**See the flagship**, the deck that teaches the method by following it:
+
+```bash
+git clone https://github.com/YongboYu/legible-slides
+cd legible-slides/deck
+pnpm install
+pnpm dev
+```
+
+**Start your own deck** from the template, with a copy of the theme and the checks pinned to the
+commit you cloned. Run this from the repo root:
+
+```bash
+mkdir ../my-talk
+cp -R skill/template/. ../my-talk/
+git archive HEAD theme | tar -x -C ../my-talk
+sed -i.bak "s|^REV=main$|REV=$(git rev-parse HEAD)|" ../my-talk/bin/legible && rm ../my-talk/bin/legible.bak
+cd ../my-talk
+pnpm install
+pnpm dev
+```
+
+**Check it**, while you write and before you present:
+
+```bash
+bin/legible lint slides.md --theme themes/palette.json   # the method's mechanical rules
+bin/cvd-validate themes/palette.json                     # the palette, under colour-vision deficiency
+```
+
+**Export it** to a PDF:
+
+```bash
+pnpm exec playwright install chromium   # once per machine
+pnpm export                             # → dist/slides.pdf
+```
+
+The new deck's own README covers the palette, the figures and the CI workflow it ships with. With a
+coding agent, the [skill](#starting-and-reviewing-with-a-coding-agent) does the same stamping and
+then reviews the deck for you.
+
 ---
 
 ## Why
