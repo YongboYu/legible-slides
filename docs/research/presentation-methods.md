@@ -298,3 +298,35 @@ Things needing **implementation**, or lower-priority / more taste-dependent:
   <https://www.oreilly.com/library/view/presentation-zen/9780132901529/ch06lev1sec3.html>
   · <https://www.garrreynolds.com/design-tips>
 - Nancy Duarte, *slide:ology* — visual thinking / storyboarding (book).
+
+### Added by the 2026-09-30 audit of the method
+
+- Naegle, K. M. (2021). Ten simple rules for effective presentation slides. *PLOS Computational
+  Biology* 17(12): e1009554.
+- Legge, G. E., & Bigelow, C. A. (2011). Does print size matter for reading? *Journal of Vision*
+  11(5):8.
+- Calabrèse, A., et al. (2016). *Investigative Ophthalmology & Visual Science* 57(8).
+- Kosslyn, S. M., et al. (2012). PowerPoint presentation flaws and failures. *Frontiers in
+  Psychology* 3:230.
+- Barnett, A., & Doubleday, Z. (2020). The growth of acronyms in the scientific literature. *eLife*
+  9:e60080.
+- Richter, J., Scheiter, K., & Eitel, A. (2016). *Educational Research Review* 17:19–36.
+- Rey, G. D., et al. (2019). A meta-analysis of the segmenting effect. *Educational Psychology
+  Review* 31.
+- Adesope, O. O., & Nesbit, J. C. (2012). Verbal redundancy in multimedia learning environments.
+  *Journal of Educational Psychology* 104(1).
+- Mayer, R. E., & Johnson, C. I. (2008). *Journal of Educational Psychology* 100(2).
+- Montero Perez, M., Van Den Noortgate, W., & Desmet, P. (2013). *System* 41(3).
+- AVIXA, DISCAS display-size standard —
+  <https://www.avixa.org/standards/discas-calculators/discas/learn-more-about-display-size>
+- SIGACCESS accessible presentation guide —
+  <https://www.sigaccess.org/welcome-to-sigaccess/resources/accessible-presentation-guide/> ·
+  W3C WAI — <https://www.w3.org/WAI/teach-advocate/accessible-presentations/>
+
+### Colour
+
+- Birch, J. (2012). Worldwide prevalence of red-green color deficiency. *JOSA A* 29(3) —
+  <https://doi.org/10.1364/JOSAA.29.000313>
+- Machado, Oliveira & Fernandes (2009). A physiologically-based model for simulation of color vision
+  deficiency. *IEEE TVCG* 15(6):1291–1298 —
+  <https://www.inf.ufrgs.br/~oliveira/pubs_files/CVD_Simulation/Machado_Oliveira_Fernandes_CVD_Vis2009_final.pdf>

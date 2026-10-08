@@ -247,5 +247,4 @@ Its numbers are the achieved minima for `themes/leuven-blue.json`, which the pac
 
 `slidev-theme-academic` (MIT, Alexander Eble) — the self-hosted-font mechanism, the globally injected
 chrome, the prop-driven figure, the manual `Footnote`/`Footnotes` pair, and the `index` layout this
-theme narrows into `references`. The survey that picked them out, and what was deliberately left
-behind, is [`docs/research/prior-art-themes.md`](../docs/research/prior-art-themes.md).
+theme narrows into `references`.

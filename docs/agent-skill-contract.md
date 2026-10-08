@@ -62,7 +62,7 @@ grows without an edit here. See [`python/README.md`](../python/README.md#legible
 
 The review parses a **Slidev deck**: the markdown slides, the `themes/*.json` palette, and the
 generated figure PNGs. The mechanical linter is Slidev-markdown-aware. Slidev is the only
-authoring surface ([ADR 0001](adr/0001-personal-leuven-template.md)).
+authoring surface.
 
 ## 4. Review engine — a hybrid seam
 
@@ -245,8 +245,7 @@ It stamps:
 - **one skeleton slide per AE layout** — `cover`, `assertion-evidence`, `two-col-evidence`,
   `references` — as fill-in placeholders.
 
-**Theme = `leuven-blue`.** The repo ships one theme ([ADR 0001](adr/0001-personal-leuven-template.md)),
-and the scaffold stamps a copy of it. It carries no institution's marks, so nothing stamped claims an
+**Theme = `leuven-blue`.** The repo ships one theme, and the scaffold stamps a copy of it. It carries no institution's marks, so nothing stamped claims an
 endorsement: the cover's logo slots arrive as placeholders. Slidev only.
 
 Built in **#24** as the scaffold mode of the skill, [`skill/modes/scaffold.md`](../skill/modes/scaffold.md), which stamps

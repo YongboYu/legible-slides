@@ -5,8 +5,7 @@ _Resolves [#10](https://github.com/YongboYu/legible-slides/issues/10). Consumes 
 [`token-contract.md`](token-contract.md)), the method canon + flagship outline
 ([#3](https://github.com/YongboYu/legible-slides/issues/3), [`method.md`](method.md)), the prior-art
 survey
-([#6](https://github.com/YongboYu/legible-slides/issues/6),
-[`research/prior-art-themes.md`](research/prior-art-themes.md)), and the CVD-validator contract
+([#6](https://github.com/YongboYu/legible-slides/issues/6)), and the CVD-validator contract
 ([#9](https://github.com/YongboYu/legible-slides/issues/9),
 [`cvd-validator-contract.md`](cvd-validator-contract.md))._
 
@@ -109,8 +108,7 @@ docs/       method.md, design-provenance.md, *-contract.md, research/
   self-hosted `@font-face`, drop the eot/svg legacy). The same TTFs the figure helper registers.
 - **Deck ↔ theme** — the deck consumes the theme via a local `theme:` path.
 - **Theme shipped** — `leuven-blue`, validated, with no institution's marks: the theme bundles the
-  cover's two logo placeholders, and a deck's `themeConfig` points a slot at its own file
-  ([ADR 0001](adr/0001-personal-leuven-template.md)).
+  cover's two logo placeholders, and a deck's `themeConfig` points a slot at its own file.
 
 ### The palette → CSS wiring
 
