@@ -21,7 +21,7 @@ throwaway prototypes.*
 
 Every content slide was **three zones plus chrome, nothing else** — a navy locator pill, the
 assertion headline, an accent rule, the evidence, and the page number. That shape, less the accent
-rule ([ADR 0001](adr/0001-personal-leuven-template.md)), is now fixed as `ae-skeleton`.
+rule, is now fixed as `ae-skeleton`.
 
 Two consequences were treated as load-bearing rather than cosmetic: the sentence headline absorbing
 the takeaway, and the deck shipping no section dividers. Both became canon

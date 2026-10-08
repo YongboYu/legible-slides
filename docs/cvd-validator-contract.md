@@ -1,8 +1,7 @@
 # The CVD-validator contract
 
 _Resolves [#9](https://github.com/YongboYu/legible-slides/issues/9). Depends on the
-library/metric research ([#4](https://github.com/YongboYu/legible-slides/issues/4),
-[`docs/research/cvd-validator.md`](research/cvd-validator.md)) and the token roles
+library/metric research ([#4](https://github.com/YongboYu/legible-slides/issues/4)) and the token roles
 ([#2](https://github.com/YongboYu/legible-slides/issues/2),
 [`docs/token-contract.md`](token-contract.md))._
 

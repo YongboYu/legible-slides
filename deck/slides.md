@@ -444,8 +444,7 @@ backup: true
 # No URI on any of them, though the layout takes one. A sources slide is for attribution; retrieval
 # is what a search box is for, and seven of these with a link under each runs past the slide's bottom
 # edge. The links for the presentation-method and colour-simulation sources are in
-# docs/research/presentation-methods.md and docs/research/cvd-validator.md; the prevalence figure is
-# Birch (2012), https://doi.org/10.1364/JOSAA.29.000313.
+# docs/research/presentation-methods.md, the prevalence figure among them.
 indexEntries:
   - title: 'Birch, J. (2012) — Worldwide prevalence of red-green color deficiency, JOSA A 29(3)'
   - title: 'Machado, Oliveira and Fernandes (2009) — Simulation of color vision deficiency, IEEE TVCG'

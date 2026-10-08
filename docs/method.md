@@ -613,10 +613,9 @@ time.
   CAiSE 2026 deck this method was extracted from, with the issue trail and the author's own words.
 - [`research/presentation-methods.md`](research/presentation-methods.md) — the evidence base: Alley
   and Neeley on assertion-evidence, Mayer on coherence, redundancy and segmenting, Tversky on
-  animation, Tufte on chartjunk, Williams on layout.
-- [`research/template-audit.md`](research/template-audit.md) — where an earlier version of this file
-  overstated that evidence, and the sources the corrected rules cite: Adesope & Nesbit, Mayer &
-  Johnson and Montero Perez et al. on key terms on screen, and Rey et al. on segmenting.
+  animation, Tufte on chartjunk, Williams on layout, plus the sources later corrections cite:
+  Adesope & Nesbit, Mayer & Johnson and Montero Perez et al. on key terms on screen, and Rey et
+  al. on segmenting.
 - [`cvd-validator-contract.md`](cvd-validator-contract.md) — how `separation-floor` is measured, why
   the floor is where it is, and the retired `≥39` claim it replaces.
 - [`token-contract.md`](token-contract.md) — the palette schema the colour rules are addressed to,

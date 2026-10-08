@@ -34,3 +34,10 @@ Thumbs.db
 # the agent-built pmf-tsfm example, kept locally for comparison; python/tests/test_plan.py runs
 # against it when present and skips when not
 skill/examples/
+
+# internal process notes, kept locally (see CLAUDE.local.md)
+CLAUDE.local.md
+docs/adr/
+docs/agents/
+docs/research/*
+!docs/research/presentation-methods.md

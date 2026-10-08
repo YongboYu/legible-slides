@@ -25,12 +25,6 @@ how an agent stamps a deck to them and turns them into a review is
 `legible rules` at review time. What it stamps is [`skill/template/`](skill/template), and that
 states none either: it names rules by ID, like everything else here.
 
-## Agent skills
+## Issues
 
-### Issue tracker
-
-Issues live in this repo's GitHub Issues, via the `gh` CLI. See `docs/agents/issue-tracker.md`.
-
-### Domain docs
-
-Single-context: one `CONTEXT.md` + `docs/adr/` at the repo root. See `docs/agents/domain.md`.
+Issues live in this repo's GitHub Issues, via the `gh` CLI.
