@@ -393,7 +393,7 @@ section: Delivery
 
 | What you get | Status |
 |---|---|
-| the Slidev theme and this deck | in use on this screen |
+| the Slidev theme and this deck | in use now: Slidev turns markdown into a web page, so a slide can hold HTML, video or live code |
 | a PDF to present or share | `slidev export`, from the same file |
 | a skill for coding agents | starts a deck and reviews it |
 

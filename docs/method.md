@@ -9,9 +9,9 @@ This is the canon: **every rule of the method, stated once, in tool-neutral lang
 human reads to learn the method, what an agent loads to review a deck, and what a linter quotes to
 get a number.
 
-> **One copy, here.** No other document in this repo states a rule or repeats one of these numbers.
-> They link to a rule by its ID instead. A second copy is a second thing to keep true, and the day
-> they disagree is the day the reviewer starts enforcing a rule nobody decided.
+> **This file is the only place the rules are written down.** Other files in this repo refer to a
+> rule by its ID, such as `one-message`, and don't repeat its wording or its numbers. So changing a
+> rule here changes it everywhere, including what `legible lint` checks.
 
 ## How to read a rule
 
