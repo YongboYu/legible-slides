@@ -178,8 +178,7 @@ single-word-emphasis layout, because the method forbids the slides they build.
 
 A deck stamped by the skill carries its own copy of it, taken from one commit of this repo, with its
 checks pinned to that same commit, so it builds from a clean clone. See
-[`theme/README.md`](theme/README.md), and
-[`theme/example.md`](theme/example.md) for every layout exercised once.
+[`theme/README.md`](theme/README.md).
 
 [`deck/`](deck) is the flagship: the deck that teaches the method by being it, and the artifact to
 read if you would rather see the rules applied than read them. It runs the fourteen beats the canon
