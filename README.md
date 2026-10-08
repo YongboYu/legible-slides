@@ -1,27 +1,33 @@
 # legible-slides
 
-**Slides that stay readable — from the back row, and for every pair of eyes.**
+A Slidev template for academic talks, with a short set of rules for what goes on each slide and
+two commands that check a deck against them.
 
 ![Four slides from the flagship deck: a numbered list of the talk's questions, a topic label set
 against a claim, the back-row reading distance drawn as a diagram, and a chart of palette distances
 under colour-vision deficiency](docs/images/flagship.png)
 
+- **The rules** are in [`docs/method.md`](docs/method.md): one message per slide, a headline that
+  states the claim, text sized for the back row, and colors that stay distinct for color-blind
+  viewers.
+- **`legible lint`** checks a deck's mechanical rules, such as bullet counts, type sizes and wording.
+- **`cvd-validate`** checks that a palette's colors stay apart under color-vision deficiency.
+- **A skill for coding agents** drafts a talk from a paper, builds the deck and reviews it.
+
 ## Quickstart
 
-You need [Node](https://nodejs.org) 22.12 or later with [pnpm](https://pnpm.io) 10, which is what
-CI runs, and [uv](https://docs.astral.sh/uv/) for the checks. No coding agent is required.
+You need [Node](https://nodejs.org) 22.12+, [pnpm](https://pnpm.io) 10 and
+[uv](https://docs.astral.sh/uv/).
 
-**See the flagship**, the deck that teaches the method by following it:
+See the flagship deck, which explains the rules by following them:
 
 ```bash
 git clone https://github.com/YongboYu/legible-slides
 cd legible-slides/deck
-pnpm install
-pnpm dev
+pnpm install && pnpm dev
 ```
 
-**Start your own deck** from the template, with a copy of the theme and the checks pinned to the
-commit you cloned. Run this from the repo root:
+Start your own deck. Run this from the repo root:
 
 ```bash
 mkdir ../my-talk
@@ -29,186 +35,41 @@ cp -R skill/template/. ../my-talk/
 git archive HEAD theme | tar -x -C ../my-talk
 sed -i.bak "s|^REV=main$|REV=$(git rev-parse HEAD)|" ../my-talk/bin/legible && rm ../my-talk/bin/legible.bak
 cd ../my-talk
-pnpm install
-pnpm dev
+pnpm install && pnpm dev
 ```
 
-**Check it**, while you write and before you present:
+Check it, and export a PDF:
 
 ```bash
-bin/legible lint slides.md --theme themes/palette.json   # the method's mechanical rules
-bin/cvd-validate themes/palette.json                     # the palette, under colour-vision deficiency
-```
-
-**Export it** to a PDF:
-
-```bash
+bin/legible lint slides.md --theme themes/palette.json
+bin/cvd-validate themes/palette.json
 pnpm exec playwright install chromium   # once per machine
-pnpm export                             # → dist/slides.pdf
+pnpm export                             # writes dist/slides.pdf
 ```
 
-The new deck's own README covers the palette, the figures and the CI workflow it ships with. With a
-coding agent, the [skill](#starting-and-reviewing-with-a-coding-agent) does the same stamping and
-then reviews the deck for you.
+To have a coding agent do this for you, see [`skill/README.md`](skill/README.md).
 
----
+## Read more
 
-## Why
-
-Most presentation templates give you *files* — a colour scheme, some layouts, a font pairing. They
-leave the hard part to you: deciding what any given slide is actually **for**.
-
-They also quietly fail two audiences. The person in the back row, who cannot read the 14px caption
-a template shrank to fit. And the roughly 1 in 12 men and 1 in 200 women with a colour vision
-deficiency, for whom the average "nice palette" collapses into indistinguishable mud the moment it
-becomes a five-line chart.
-
-`legible-slides` is the opposite bet: a small amount of **method**, verified against both of those
-failure modes, delivered as a Slidev theme.
-
-## What
-
-Three things, in order of how much they matter:
-
-1. **A method.** A short set of rules about what a slide is *for*, built on Assertion-Evidence
-   (Alley & Neeley) and the cognitive-load research underneath it. They live in
-   [`docs/method.md`](docs/method.md) — the canon, and the only place any of them is stated. The
-   ones a script can settle are settled by one (`legible lint`), reproducibly and in CI.
-2. **A verified accessibility floor.** A type scale stated for the rooms it suits, with a floor no
-   text goes under, and a colour-vision-deficiency validator you can run against *your* palette —
-   not just a promise that ours passes.
-3. **A Slidev theme** that carries the method, and a skill so a coding agent can build to this
-   standard on your behalf.
-
-### One palette, in one file
-
-The theme is `leuven-blue`, one palette file in [`themes/`](themes) that passes the validator. It is
-the author's own template for academic talks, and it ships no institution's marks: the cover's venue
-and affiliation slots show placeholder logos until a deck points them at its own files.
-
-> **Note:** the palette is inspired by KU Leuven's house colours. It is not affiliated with or
-> endorsed by the university.
-
-Editing that one file recolours the whole deck. The same Python that validates a palette also emits
-its CSS custom properties (`legible gen-css`), so the token schema is understood in one language
-and no second copy of it can drift. The generated stylesheet is committed and CI checks it against
-its palette — which is why building a deck needs no Python at all.
-
-Charts are regenerated from data rather than redrawn, so a recolour reaches them too. There are two
-chart shapes, deliberately — the multi-series comparison, where every line gets a dash and a marker
-of its own because colour is never allowed to be the only channel, and the headline chart, where a
-de-emphasised comparison stands against one highlight. Either can render itself as a
-colour-vision deficiency sees it, using the validator's own simulation. See
-[`python/README.md`](python/README.md#the-figure-helper).
-
-## Running the floor
-
-The validator is a command with an exit code, so the accessibility claim is evidence rather than a
-promise — including for a palette this project has never seen:
-
-```bash
-uv tool install "git+https://github.com/YongboYu/legible-slides#subdirectory=python"
-cvd-validate my-theme.json
-```
-
-It names each failing pair by role rather than by hex, prints the achieved minimum even when you
-pass — so you can see whether you have headroom — and exits non-zero if any pair falls below the
-floor, or an attention or text pairing falls short of its contrast (`accent-is-attention`,
-`decorative-neutral-never-text`). See
-[`python/README.md`](python/README.md).
-
-Inside this repo the same command gates CI over the theme in [`themes/`](themes) on push and pull
-request: a palette that fails cannot merge. The hook in `.pre-commit-config.yaml` runs it locally and
-is opt-in, because enforcement belongs somewhere nobody can skip. Your own palettes are yours — the
-command is offered, not imposed.
-
-## Running the method
-
-Bullet ceilings, word ceilings, em-dashes in a headline, inflated register and monotonous sentence
-openers are all decidable, so a script decides them rather than a reader:
-
-```bash
-legible lint deck/slides.md --theme themes/leuven-blue.json
-```
-
-Findings arrive grouped by slide and named by the rule they enforce, which is what makes one
-possible to look up and disagree with. Every threshold comes out of `docs/method.md` at import, so
-changing a rule there changes what the command enforces and nothing here holds a second copy of the
-number. The palette check is the validator above, shelled out to: there is exactly one
-implementation of the simulation in this project, and the linter is deliberately not it. See
-[`python/README.md`](python/README.md#legible-lint).
-
-What is left is judgment — whether a slide carries one message, whether its headline is a claim —
-and judgment stays with a reader, or with the coding-agent skill that reviews on your behalf.
-
-## Starting and reviewing with a coding agent
-
-[`skill/`](skill) is that skill, and it has four modes.
-
-**draft** reads a paper and its codebase and writes a [talk plan](docs/talk-plan.md): the
-questions the paper says it answers, a setup that makes the case for them, then one entry per
-slide with its headline claim, its evidence and where that comes from. You edit the plan, which is the cheap place to change an argument. **build**
-turns the plan into a deck on the template, draws its figures from data, and hands it over with a
-review.
-
-**review** runs the linter for everything a script settles, loads the rules that need reading
-straight from the canon (`legible rules`), and reports both halves as one review, grouped per slide,
-with a proposed fix on every finding. The two halves keep different authority: the mechanical one
-has an exit code and blocks, the judgments are advisory and never do. And it flags rather than
-edits — it can hold a deck to a structure, but deciding your message stays yours.
-
-**scaffold** stamps a new deck already wired to the theme, to a palette that clears the floor, and
-to both checks, with one skeleton slide per layout to fill in. It is lean on purpose — a correct
-starting point, not a second flagship — and it hands the deck over having run the review over it,
-so a deck is review-ready from slide one rather than retrofitted at the end. It stamps a copy of
-the `leuven-blue` palette, which the deck is free to edit.
-
-No mode states a rule of its own, which is what stops a review drifting from the method it
-claims to enforce. See [`skill/README.md`](skill/README.md).
-
-## Presenting with Slidev
-
-[`theme/`](theme) is `slidev-theme-legible`, the method as machinery: six layouts, among them an
-opening answer and a closing conclusion, the persistent chrome that carries orientation so no slide
-has to be spent on navigation, and styles that read nothing but the generated palette. Both typefaces are bundled, so a deck renders in the family it was
-designed in on a lecture-room laptop with no network — and in the same one the figures were drawn in.
-
-What it refuses is as much the point. There is no section-divider, no opener, no closer and no
-single-word-emphasis layout, because the method forbids the slides they build.
-
-A deck stamped by the skill carries its own copy of it, taken from one commit of this repo, with its
-checks pinned to that same commit, so it builds from a clean clone. See
-[`theme/README.md`](theme/README.md).
-
-[`deck/`](deck) is the flagship: the deck that teaches the method by being it, and the artifact to
-read if you would rather see the rules applied than read them. It runs the fourteen beats the canon
-outlines, plus a references slide, and is built and linted in CI. See
-[`deck/README.md`](deck/README.md).
-
-A green lint is the gate, not a verdict on the deck: what the scripts cover, rule by rule, and what
-they leave to a reader of the rendered pages, is
-[`docs/agent-skill-contract.md`](docs/agent-skill-contract.md) §4c.
-
-## Provenance
-
-This is not a greenfield idea. It is an extraction from a deck that shipped: the CAiSE 2026
-presentation of [`pmf-tsfm`](https://github.com/YongboYu/pmf-tsfm). The layouts, the token
-architecture, the CVD verification and the figure pipeline were all built and argued out there,
-across a long trail of issues and PRs.
-
-See [`docs/design-provenance.md`](docs/design-provenance.md) for what was decided, and why.
+| | |
+|---|---|
+| [`docs/method.md`](docs/method.md) | every rule, with its threshold and its source |
+| [`deck/`](deck) | the flagship deck |
+| [`theme/README.md`](theme/README.md) | the layouts and components |
+| [`python/README.md`](python/README.md) | the `legible` and `cvd-validate` commands, and the figure helper |
+| [`skill/README.md`](skill/README.md) | the coding-agent skill |
+| [`docs/design-provenance.md`](docs/design-provenance.md) | where the rules came from: the [`pmf-tsfm`](https://github.com/YongboYu/pmf-tsfm) talk at CAiSE 2026 |
 
 ## Credits and license
 
-The slide structure is Assertion-Evidence, developed by Michael Alley and colleagues: Alley &
-Neeley, "Rethinking the design of presentation slides: A case for sentence headlines and visual
-evidence," *Technical Communication* 52(4), 2005; and Alley, *The Craft of Scientific
-Presentations*, 2nd ed., Springer, 2013. This project applies their method and is not affiliated
-with its authors. The rest of the evidence base is cited in
+The slide structure is Assertion-Evidence, by Michael Alley and colleagues (Alley & Neeley,
+*Technical Communication* 52(4), 2005; Alley, *The Craft of Scientific Presentations*, 2013). This
+project is not affiliated with its authors. The other sources are in
 [`docs/research/presentation-methods.md`](docs/research/presentation-methods.md).
 
-The bundled typefaces, Inter and JetBrains Mono, are under the SIL Open Font License 1.1; their
-licence files ship beside them in [`theme/assets/fonts/`](theme/assets/fonts).
+The palette is inspired by KU Leuven's colors, and the project is not affiliated with or endorsed by
+the university. Earlier commits contain KU Leuven logo files, which belong to the university and are
+not covered by this license.
 
-Everything else is MIT — see [LICENSE](LICENSE). Earlier commits contain KU Leuven logo files.
-They are the university's property and are not covered by this license.
+The bundled fonts, Inter and JetBrains Mono, are under the SIL Open Font License 1.1. Everything
+else is [MIT](LICENSE).
