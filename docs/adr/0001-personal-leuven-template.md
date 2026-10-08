@@ -1,7 +1,7 @@
 # 0001 — A single-theme Slidev template for the author's KU Leuven talks
 
-**Status:** accepted, 2026-09-30. Supersedes the multi-brand, tool-plural scope of the v1 spec (#13)
-where the two disagree.
+**Status:** accepted, 2026-09-30; amended 2026-10-08 (logos in git history, under Scope). Supersedes
+the multi-brand, tool-plural scope of the v1 spec (#13) where the two disagree.
 
 ## Context
 
@@ -26,8 +26,13 @@ a prototype of the CAiSE deck with switchable chrome.
   palette keeps passing `cvd-validate`.
 - **Slidev only.** The PowerPoint master (`pptx/`, `docs/pptx-static-proof.md`) goes.
 - **No university marks in the repo.** Logo files are replaced by placeholders; the author points at
-  the real lockup in their own deck. This resolves #8 without asking the university. The logos
-  remain in git history, so history is rewritten (or a fresh repo published) before going public.
+  the real lockup in their own deck. This resolves #8 without asking the university.
+- **The logos stay in git history** (amended 2026-10-08). Earlier commits hold the university's
+  logo files and the retired PowerPoint master that embeds one. Rewriting history was the original
+  plan, but it is not a legal requirement: no current file carries a mark, the README disclaims
+  any affiliation, and the license excludes those files. Rewriting would cost either the issue
+  trail the docs link to, or a support request to purge the merged PR's refs. If the university
+  asks for their removal, history is rewritten then.
 
 ### Chrome
 - **No decorative accent.** The orange rule under every headline, the cover's orange bar and its
