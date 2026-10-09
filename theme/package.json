@@ -4,6 +4,11 @@
   "type": "module",
   "description": "Assertion-Evidence layouts, persistent chrome and tokenised styles for legible-slides.",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/YongboYu/legible-slides.git",
+    "directory": "theme"
+  },
   "keywords": [
     "slidev-theme",
     "slidev",

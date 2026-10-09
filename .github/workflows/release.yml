@@ -1,0 +1,151 @@
+name: Release
+
+# A `v*` tag releases every package at once (#46): the checks to PyPI, the theme to npm. Nothing
+# publishes until the check job has confirmed the tag names the version every file states and the
+# test suite passes, so a mistyped or early tag publishes nothing.
+#
+# Run by hand, the same workflow is a dry run: it checks, builds the wheel and packs the npm
+# packages, and skips both publish jobs. That is how it gets tested before the first real tag.
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Two pushes of the same tag never race each other to a registry.
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  # The npm packages a release publishes, one directory each. A new package joins by adding its
+  # directory here; python/tests/test_release.py reads this line.
+  NPM_PACKAGES: theme
+
+jobs:
+  check:
+    name: the tag names every version, and the tests pass
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # A dry run has no tag, so it rehearses the one this commit would be released under.
+      - name: The tag being released
+        run: |
+          if [ "$GITHUB_EVENT_NAME" = push ]; then
+            tag="$GITHUB_REF_NAME"
+          else
+            tag="v$(jq -r .version theme/package.json)"
+          fi
+          echo "releasing $tag"
+          echo "RELEASE_TAG=$tag" >> "$GITHUB_ENV"
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+      - run: uv sync --extra dev
+        working-directory: python
+      # Everywhere else the tag test skips, having no tag to compare, and a skip exits 0. Here the
+      # skipping plugin is off, so its skipif is ignored and a tag that never arrived fails the
+      # release instead of letting it through unchecked.
+      - name: The tag names the version every file states
+        working-directory: python
+        run: >
+          uv run pytest -p no:skipping -W ignore::pytest.PytestUnknownMarkWarning
+          tests/test_release.py::test_the_release_tag_names_the_version_every_file_states
+      - run: uv run pytest
+        working-directory: python
+
+  # Built once, here, so the publish jobs upload exactly what the dry run builds and packs.
+  build:
+    name: build the packages
+    needs: check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+      - run: uv build python --out-dir "$RUNNER_TEMP/python"
+      - name: Both artifacts are named legible-slides
+        run: ls "$RUNNER_TEMP"/python/legible_slides-*.whl "$RUNNER_TEMP"/python/legible_slides-*.tar.gz
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Pack the npm packages
+        run: |
+          mkdir -p "$RUNNER_TEMP/npm"
+          for package in $NPM_PACKAGES; do
+            npm pack "./$package" --pack-destination "$RUNNER_TEMP/npm"
+          done
+      - uses: actions/upload-artifact@v4
+        with:
+          name: python
+          path: ${{ runner.temp }}/python
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v4
+        with:
+          name: npm
+          path: ${{ runner.temp }}/npm
+          if-no-files-found: error
+
+  # Trusted publishing: PyPI trusts this workflow, in this environment, and no PyPI token is stored.
+  pypi:
+    name: publish to PyPI
+    needs: build
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/project/legible-slides/
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: python
+          path: dist
+      # A re-run after a partial failure skips the files PyPI already has rather than failing on them.
+      # release/v1 is the ref PyPA publishes this action under; it has no major-version tag.
+      - uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          skip-existing: true
+
+  # The first release publishes with the short-lived NPM_TOKEN, because npm can only trust a package
+  # that already exists. After it, each package trusts this workflow and the secret is deleted
+  # (scripts/setup-publishing.sh): the token then arrives empty, and npm authenticates through the
+  # id-token instead.
+  npm:
+    name: publish to npm
+    needs: build
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: npm
+          path: npm
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+      # Trusted publishing needs npm 11.5.1 or later. Installed by version rather than trusted to
+      # whichever Node 24 the runner has cached, since an older one would fail only after the
+      # token is gone, on a release.
+      - run: npm install -g npm@^11.5.1
+      # A re-run after a partial failure skips any version npm already has, since npm refuses to
+      # publish over one.
+      - name: Publish with provenance
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          for tarball in npm/*.tgz; do
+            spec=$(tar -xOzf "$tarball" package/package.json | jq -r '.name + "@" + .version')
+            if [ -n "$(npm view "$spec" version 2>/dev/null)" ]; then
+              echo "$spec is already on npm; skipping"
+            else
+              npm publish "$tarball" --provenance --access public
+            fi
+          done
