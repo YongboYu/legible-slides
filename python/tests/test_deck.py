@@ -209,6 +209,57 @@ def test_bullets_come_back_without_their_markers():
     assert slides[0].bullets == ("first point", "second point", "third point")
 
 
+def test_an_html_list_item_is_a_bullet():
+    """An author writes the list in HTML to give an item a class or a click; it is still a list."""
+    slides = deck(
+        """\
+        # Claim
+
+        <ul>
+          <li class="text-lg">first point</li>
+          <li v-click>second
+            point</li>
+        </ul>
+        <ol><li>third point</li><li>fourth <b>point</b></li></ol>
+
+        A passage after the list.
+        """
+    )
+
+    assert slides[0].bullets == ("first point", "second point", "third point", "fourth point")
+    assert slides[0].prose == ("A passage after the list.",)
+
+
+def test_a_nested_html_list_item_is_one_bullet_and_its_parent_another():
+    slides = deck("# Claim\n\n<ul><li>parent<ul><li>child</li></ul></li></ul>\n")
+
+    assert slides[0].bullets == ("parent", "child")
+
+
+def test_a_parent_items_text_after_its_child_list_is_still_the_parents():
+    """The browser sets both runs inside the parent's item, so its bullet holds both."""
+    slides = deck("# Claim\n\n<ul><li>one two<ul><li>child</li></ul>three four</li></ul>\n")
+
+    assert slides[0].bullets == ("one two three four", "child")
+    assert slides[0].prose == ()
+
+
+def test_an_html_list_item_runs_on_across_a_blank_line():
+    """Markdown starts a paragraph after the blank line, and the browser sets it inside the item."""
+    slides = deck("# Claim\n\n<ul><li>one two\n\nthree four\n\n</li></ul>\n\nAfter the list.\n")
+
+    assert slides[0].bullets == ("one two three four",)
+    assert slides[0].prose == ("After the list.",)
+
+
+def test_a_list_tag_in_inline_code_is_text_and_opens_no_bullet():
+    slides = deck("# The `<li>` element groups a list\n\nWrap each item in `<li>` and `</li>`.\n")
+
+    assert slides[0].headline == "The <li> element groups a list"
+    assert slides[0].bullets == ()
+    assert slides[0].prose == ("Wrap each item in <li> and </li>.",)
+
+
 def test_a_nested_bullet_is_a_bullet_the_room_still_reads():
     slides = deck(
         """\

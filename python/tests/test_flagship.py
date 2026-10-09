@@ -221,6 +221,7 @@ def test_the_slides_are_handed_over_on_the_first_and_the_last_slide():
 #: how to read it. Where the words were script, they were moved to the notes instead, so a new
 #: advisory turning up here is a slide to review rather than one more line for this table.
 OVERRIDDEN = {
+    (3, "bullet-ceiling"): "the stock template's slide is a picture of one, and its list is it",
     (3, "on-slide-words"): "the stock template's slide is a picture of one, and its words are it",
     (4, "on-slide-words"): "the two type samples are the evidence, set at the sizes they compare",
     (5, "on-slide-words"): "the table is the evidence: what the method decides, and what holds it",

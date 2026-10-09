@@ -61,6 +61,30 @@ def test_exceeding_the_bullet_ceiling_is_a_finding(write_deck):
     assert not report.passed
 
 
+def test_html_list_items_count_against_the_bullet_and_word_ceilings(write_deck):
+    items = "\n".join(f"<li>{word}</li>" for word in ("one", "two", "three", "four", "five"))
+    long = "<li>a bullet of thirteen words is a sentence and a sentence belongs elsewhere</li>"
+    report = lint(write_deck(f"# Six things happened at once\n\n<ul>\n{items}\n{long}\n</ul>\n"))
+
+    assert rules(report) == ["bullet-ceiling", "word-ceiling"]
+
+
+def test_an_html_bullet_split_by_its_child_list_counts_all_its_words(write_deck):
+    """Thirteen words are the parent's own: six before its child list, and seven after it."""
+    item = "one two three four five six<ul><li>child</li></ul>seven eight nine ten eleven twelve"
+    report = lint(write_deck(f"# Each item explains it\n\n<ul><li>{item} thirteen</li></ul>\n"))
+
+    assert rules(report) == ["word-ceiling"]
+
+
+def test_a_list_tag_in_inline_code_is_no_bullet(write_deck):
+    """Five bullets sit on the ceiling, and the ``<li>`` in the headline is a word of it."""
+    bullets = "\n".join(f"- {word}" for word in ("one", "two", "three", "four", "five"))
+    report = lint(write_deck(f"# The `<li>` element keeps list content grouped\n\n{bullets}\n"))
+
+    assert report.findings == ()
+
+
 def test_sitting_on_the_bullet_ceiling_is_not(write_deck):
     """The canon says the violation is *exceeding* it, so a slide sitting on the ceiling is a full
     slide rather than a fault."""
