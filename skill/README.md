@@ -26,8 +26,8 @@ ln -s "$PWD/skill" ~/.claude/skills/legible-slides          # yours, everywhere
 ln -s "$PWD/skill" path/to/deck/.claude/skills/legible-slides   # one project's
 ```
 
-It needs the commands it delegates to, which is the whole `legible` package
-([`python/README.md`](../python/README.md)):
+It needs the commands it delegates to, which is the whole `legible-slides` Python
+package ([`python/README.md`](../python/README.md)):
 
 ```bash
 uv tool install "git+https://github.com/YongboYu/legible-slides#subdirectory=python"

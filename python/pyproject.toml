@@ -3,7 +3,9 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "legible"
+# `legible` is taken on PyPI. Only the name a user installs differs: the import is still `legible`,
+# and the commands below keep theirs.
+name = "legible-slides"
 version = "0.1.0"
 description = "The mechanical half of legible-slides: palette loading and CVD validation."
 readme = "README.md"
@@ -27,6 +29,12 @@ dependencies = [
     # fontTools in, so this names a dependency rather than adding one.
     "fonttools>=4.22",
 ]
+
+[project.urls]
+Repository = "https://github.com/YongboYu/legible-slides"
+# The method is what the checks enforce, and the one place their rules and numbers are written.
+Documentation = "https://github.com/YongboYu/legible-slides/blob/main/docs/method.md"
+Issues = "https://github.com/YongboYu/legible-slides/issues"
 
 [project.optional-dependencies]
 dev = ["pytest>=8.0", "ruff>=0.6"]

@@ -226,6 +226,10 @@ jobs:
       # Builds the sdist, then the wheel from that sdist — the path where a canon the build forgot
       # to carry would go missing.
       - run: uv build python --out-dir "$RUNNER_TEMP/dist"
+      # Named for PyPI, as python/pyproject.toml explains. The install below globs the wheel and
+      # would take any name, so the name gets its own check.
+      - name: Both artifacts are named legible-slides
+        run: ls "$RUNNER_TEMP"/dist/legible_slides-*.whl "$RUNNER_TEMP"/dist/legible_slides-*.tar.gz
       - name: Check a palette outside this repo
         run: |
           mkdir -p "$RUNNER_TEMP/outside"
