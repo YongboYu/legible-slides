@@ -150,6 +150,20 @@ def test_an_unreadable_theme_does_not_silence_the_themes_named_after_it(
     assert captured.out.startswith("PASS")
 
 
+def test_a_theme_of_the_wrong_shape_does_not_silence_the_themes_named_after_it(
+    capsys, write_theme, base_palette, themes_dir
+):
+    """Valid JSON that is no theme is as unreadable as a missing file, and not a crash."""
+    base_palette["meta"] = None
+
+    code = main([str(write_theme(base_palette)), str(themes_dir / "leuven-blue.json")])
+
+    captured = capsys.readouterr()
+    assert code == 2
+    assert "meta" in captured.err
+    assert captured.out.startswith("PASS")
+
+
 def test_a_palette_below_the_floor_outranks_a_theme_that_could_not_be_read(
     capsys, tmp_path, write_theme, colliding_palette
 ):

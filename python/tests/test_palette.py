@@ -1,3 +1,5 @@
+import json
+
 import pytest
 
 from legible import PaletteError, load_palette
@@ -32,6 +34,24 @@ def test_a_file_that_is_not_json_fails_as_a_palette_error(tmp_path):
 
     with pytest.raises(PaletteError, match="broken.json"):
         load_palette(path)
+
+
+@pytest.mark.parametrize("root", [[], None, "#102a43"])
+def test_a_file_that_is_not_an_object_fails_as_a_palette_error(tmp_path, root):
+    """Valid JSON can still be no theme at all, and it reads as a bad theme like any other."""
+    path = tmp_path / "list.json"
+    path.write_text(json.dumps(root))
+
+    with pytest.raises(PaletteError, match="list.json.*object"):
+        load_palette(path)
+
+
+@pytest.mark.parametrize("meta", [None, [], "leuven-blue"])
+def test_meta_that_is_not_an_object_is_reported_by_name(write_theme, base_palette, meta):
+    base_palette["meta"] = meta
+
+    with pytest.raises(PaletteError, match="meta.*object"):
+        load_palette(write_theme(base_palette))
 
 
 def test_a_missing_role_is_reported_by_name(write_theme, base_palette):
