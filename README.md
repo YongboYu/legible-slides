@@ -27,7 +27,15 @@ cd my-talk
 pnpm install && pnpm dev
 ```
 
-The theme comes from npm and the checks from PyPI, both at the version the deck pins.
+The new deck uses two packages, pinned to the same version: the theme,
+[`slidev-theme-legible`](https://www.npmjs.com/package/slidev-theme-legible) on npm, and the checks,
+[`legible-slides`](https://pypi.org/project/legible-slides/) on PyPI. Each also works on its own:
+
+- **The theme, in a Slidev deck you already have:** run
+  `pnpm add --save-exact slidev-theme-legible`, then set `theme: legible` in the deck's frontmatter
+  ([`theme/README.md`](theme/README.md)).
+- **The checks alone:** run `uv tool install legible-slides`
+  ([`python/README.md`](python/README.md)).
 
 Check it, and export a PDF:
 
