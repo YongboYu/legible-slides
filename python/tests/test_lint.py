@@ -85,6 +85,14 @@ def test_a_list_tag_in_inline_code_is_no_bullet(write_deck):
     assert report.findings == ()
 
 
+def test_an_imported_slide_is_checked_where_it_is_shown(write_deck):
+    """Splitting a deck into files must not take a slide out of the check."""
+    write_deck("# Six things happened at once\n\n" + "\n".join(f"- {n}" for n in "abcdef"), "ch.md")
+    report = lint(write_deck("# Opening claim for the talk\n\n---\nsrc: ./ch.md\n---\n"))
+
+    assert [(finding.slide, finding.rule) for finding in report.findings] == [(2, "bullet-ceiling")]
+
+
 def test_sitting_on_the_bullet_ceiling_is_not(write_deck):
     """The canon says the violation is *exceeding* it, so a slide sitting on the ceiling is a full
     slide rather than a fault."""

@@ -31,11 +31,11 @@ repos:
 
       # Every rule docs/method.md marks decided by script, over the deck and the palette it wears.
       # The rules it leaves alone are the ones a reader settles — see the review mode of the skill.
-      # The files are every one the linter reads: the deck, its palette, and the components,
-      # layouts and stylesheets that set type on its slides.
+      # The files are every one the linter reads: the deck and any markdown it imports slides
+      # from, its palette, and the components, layouts and stylesheets that set type on its slides.
       - id: legible-lint
         name: the deck holds to the method
         entry: bin/legible lint slides.md --theme themes/palette.json
         language: script
-        files: ^(slides\.md|themes/palette\.json|(components|layouts)/.*\.vue|styles/.*\.css|style\.css)$
+        files: ^(.*\.md|themes/palette\.json|(components|layouts)/.*\.vue|styles/.*\.css|style\.css)$
         pass_filenames: false
