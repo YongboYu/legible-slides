@@ -159,6 +159,16 @@ def test_a_deck_that_cannot_be_read_is_not_a_violation(capsys, tmp_path):
     assert "absent.md" in capsys.readouterr().err
 
 
+def test_a_deck_that_imports_itself_is_not_a_violation_either(capsys, tmp_path):
+    deck = tmp_path / "slides.md"
+    deck.write_text("# A claim\n\n---\nsrc: ./slides.md\n---\n", encoding="utf-8")
+
+    code = main(["lint", str(deck)])
+
+    assert code == 2
+    assert "imports itself" in capsys.readouterr().err
+
+
 def test_a_theme_that_could_not_be_checked_is_not_a_violation_either(capsys, tmp_path):
     code = main(["lint", str(DECKS / "clean.md"), "--theme", str(tmp_path / "absent.json")])
 

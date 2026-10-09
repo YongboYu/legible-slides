@@ -24,11 +24,11 @@ a code block says are evidence, and no rule about them is a script's to decide.
 from __future__ import annotations
 
 import re
-from collections.abc import Iterator, Sequence
+from collections.abc import Iterable, Iterator, Sequence
 from dataclasses import dataclass
 from pathlib import Path
 
-__all__ = ["Slide", "font_sizes", "parse_deck", "read_deck"]
+__all__ = ["DeckError", "Slide", "font_sizes", "parse_deck", "read_deck"]
 
 #: A slide separator: three dashes alone on a line. Four or more is a horizontal rule, which is
 #: what Slidev's own parser makes of it too.
@@ -152,14 +152,21 @@ _EXCEPTION = re.compile(
 #: rather than as YAML, for the reason the module gives for the split: Slidev does not require the
 #: block to parse, so neither does this, and the keys asked for are scalars at column 0.
 _KEY = re.compile(
-    r"""^(?P<key>section|backup|layout|duration):[ \t]*"""
+    r"""^(?P<key>section|backup|layout|duration|src):[ \t]*"""
     r"""(?:(?P<quote>["'])(?P<quoted>.*?)(?P=quote)|(?P<plain>.*?))"""
     r"""[ \t]*(?:[ \t]\#.*)?$"""
 )
 
+#: One part of the range an import takes from a file, ``2``, ``4-`` or ``2-3``, as Slidev reads it.
+_RANGE_PART = re.compile(r"^\s*(?P<start>\d+)\s*(?:(?P<dash>-)\s*(?P<end>\d*))?\s*$")
+
 #: How YAML 1.1, which Slidev reads frontmatter with, spells a true boolean. A quoted value is a
 #: string whatever it says, so the theme would not take it for one and neither does this.
 _TRUE = frozenset({"true", "True", "TRUE"})
+
+
+class DeckError(ValueError):
+    """A deck that cannot be read as slides, though every file it names could be opened."""
 
 
 @dataclass(frozen=True)
@@ -205,18 +212,77 @@ class Slide:
 
 
 def read_deck(path: str | Path) -> tuple[Slide, ...]:
-    """The slides of a deck on disk. Unreadable files raise ``OSError`` for the caller to report."""
-    return parse_deck(Path(path).read_text(encoding="utf-8"))
+    """The slides of a deck on disk, as Slidev shows them.
+
+    A slide whose frontmatter names a ``src`` stands for the slides of the file it names, which are
+    read in its place, the way Slidev's own loader reads them. The import's frontmatter overrides
+    each imported slide's, and numbering runs on through them, so a finding names the slide the
+    room sees. Unreadable files raise ``OSError`` for the caller to report, and a file that imports
+    itself, directly or by way of another, raises ``DeckError``.
+    """
+    path = Path(path).resolve()
+    return _numbered(_imported(path, path.parent, "", {}, ()))
 
 
 def parse_deck(text: str) -> tuple[Slide, ...]:
-    """The slides of a Slidev deck, in order."""
-    return tuple(
-        _slide(number, frontmatter, lines)
-        for number, (frontmatter, lines) in enumerate(
-            _split(text.replace("\r\n", "\n").split("\n")), start=1
-        )
-    )
+    """The slides of a Slidev deck, in order. With no file to resolve it from, an import is read
+    as the slide it is written as."""
+    return _numbered(_parts(text))
+
+
+def _numbered(parts: Iterable[tuple[dict[str, str], list[str]]]) -> tuple[Slide, ...]:
+    return tuple(_slide(number, keys, lines) for number, (keys, lines) in enumerate(parts, start=1))
+
+
+def _parts(text: str) -> Iterator[tuple[dict[str, str], list[str]]]:
+    """Every slide of one file: the frontmatter keys the rules read, and its lines."""
+    for frontmatter, lines in _split(text.replace("\r\n", "\n").split("\n")):
+        yield _keys(frontmatter), lines
+
+
+def _imported(
+    path: Path,
+    root: Path,
+    wanted: str,
+    override: dict[str, str],
+    chain: tuple[Path, ...],
+) -> Iterator[tuple[dict[str, str], list[str]]]:
+    """The slides ``wanted`` of one file, each import in it read in its place.
+
+    Slidev's rules, from its loader: a ``src`` starting with ``/`` is from the deck's folder, and
+    any other from the file it is written in. An import's frontmatter, less its ``src``, overrides
+    every slide it brings in, and an outer import overrides an inner one.
+    """
+    if path in chain:
+        loop = " -> ".join(str(step) for step in (*chain[chain.index(path) :], path))
+        raise DeckError(f"{path} imports itself: {loop}")
+    parts = list(_parts(path.read_text(encoding="utf-8")))
+    for index in _range(wanted, len(parts)):
+        keys, lines = parts[index - 1]
+        if not keys.get("src"):
+            yield {**keys, **override}, lines
+            continue
+        target, _, inner = keys["src"].partition("#")
+        found = root / target[1:] if target.startswith("/") else path.parent / target
+        outer = {key: value for key, value in keys.items() if key != "src"}
+        yield from _imported(found.resolve(), root, inner, {**outer, **override}, (*chain, path))
+
+
+def _range(wanted: str, total: int) -> list[int]:
+    """The slides of a file an import's range takes, numbered from 1, in order, each once."""
+    if wanted.strip() in ("", "all", "*"):
+        return list(range(1, total + 1))
+    if wanted.strip() == "none":
+        return []
+    taken: set[int] = set()
+    for part in re.split(r"[,;]", wanted):
+        found = _RANGE_PART.match(part)
+        if not found:
+            raise DeckError(f"slide range {wanted!r}: {part!r} is not a number or a run of them")
+        start = int(found.group("start"))
+        end = int(found.group("end")) if found.group("end") else total
+        taken.update(range(start, end + 1) if found.group("dash") else (start,))
+    return sorted(index for index in taken if 1 <= index <= total)
 
 
 def _split(lines: Sequence[str]) -> Iterator[tuple[list[str], list[str]]]:
@@ -274,9 +340,8 @@ def _frontmatter_end(lines: Sequence[str], separator: int) -> int | None:
     return None
 
 
-def _slide(number: int, frontmatter: Sequence[str], lines: Sequence[str]) -> Slide:
+def _slide(number: int, keys: dict[str, str], lines: Sequence[str]) -> Slide:
     body, notes = _body_and_notes(_without_code(lines))
-    keys = _keys(frontmatter)
     markup = "\n".join(body)
     # What the slide says, as opposed to what it cites.
     said = _FOOTNOTES.sub(_line_breaks, markup)

@@ -381,7 +381,13 @@ def test_cvd_validate_goes_through_the_same_launcher(tmp_path):
 
 @pytest.mark.parametrize(
     "path",
-    ["slides.md", "themes/palette.json", *(_example(pattern) for pattern in TYPESET_SOURCES)],
+    [
+        "slides.md",
+        # A file the deck imports slides from, which the linter reads in the import's place.
+        "pages/results.md",
+        "themes/palette.json",
+        *(_example(pattern) for pattern in TYPESET_SOURCES),
+    ],
 )
 def test_the_lint_hook_runs_on_every_file_the_linter_reads(path):
     """A component edited alone is still a deck edited: the linter reads it for type below the

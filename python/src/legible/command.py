@@ -21,6 +21,7 @@ from itertools import groupby
 from pathlib import Path
 
 from legible.css import gen_css
+from legible.deck import DeckError
 from legible.lint import ERROR, WARNING, Finding, LintReport, lint
 from legible.method import DECIDERS, MethodError, Rule, read_canon, rules
 from legible.palette import PaletteError, load_palette
@@ -188,7 +189,7 @@ def _gen_css(args: argparse.Namespace) -> int:
 def _lint(args: argparse.Namespace) -> int:
     try:
         report = lint(args.deck, themes=args.themes)
-    except OSError as error:
+    except (OSError, DeckError) as error:
         print(f"legible lint: {error}", file=sys.stderr)
         return NOT_LINTED
 

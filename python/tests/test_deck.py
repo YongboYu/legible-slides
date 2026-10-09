@@ -9,7 +9,7 @@ from textwrap import dedent
 
 import pytest
 
-from legible.deck import parse_deck
+from legible.deck import DeckError, parse_deck, read_deck
 
 
 def deck(text: str):
@@ -776,3 +776,89 @@ def test_footnotes_are_neither_a_group_nor_emphasis_and_a_line_break_is_not_a_gr
 
     assert slide.groups == ("paragraph",)
     assert slide.emphasis == ()
+
+
+# ── slides imported from another file ────────────────────────────────────────
+
+
+def _imports(tmp_path, files: dict[str, str]):
+    for name, text in files.items():
+        (tmp_path / name).parent.mkdir(parents=True, exist_ok=True)
+        (tmp_path / name).write_text(dedent(text), encoding="utf-8")
+    return read_deck(tmp_path / "slides.md")
+
+
+def test_an_imported_file_s_slides_stand_where_the_import_does(tmp_path):
+    """Slidev shows the imported slides in the import's place, so a finding has to count them."""
+    slides = _imports(
+        tmp_path,
+        {
+            "slides.md": "# Opening\n\n---\nsrc: ./pages/results.md\n---\n\n---\n\n# Closing\n",
+            "pages/results.md": "# First result\n\n- a point\n\n---\n\n# Second result\n",
+        },
+    )
+
+    assert [slide.headline for slide in slides] == [
+        "Opening",
+        "First result",
+        "Second result",
+        "Closing",
+    ]
+    assert [slide.number for slide in slides] == [1, 2, 3, 4]
+    assert slides[1].bullets == ("a point",)
+
+
+def test_the_import_s_frontmatter_overrides_each_imported_slide_s(tmp_path):
+    slides = _imports(
+        tmp_path,
+        {
+            "slides.md": "# Opening\n\n---\nsrc: ./chapter.md\nsection: Results\n---\n",
+            "chapter.md": "---\nsection: Method\nlayout: two-col\n---\n\n# One\n\n---\n\n# Two\n",
+        },
+    )
+
+    assert [(slide.section, slide.layout) for slide in slides[1:]] == [
+        ("Results", "two-col"),
+        ("Results", None),
+    ]
+
+
+def test_a_range_imports_only_the_slides_it_names(tmp_path):
+    chapter = "\n\n---\n\n".join(f"# Slide {n}" for n in range(1, 6)) + "\n"
+    slides = _imports(
+        tmp_path,
+        {"slides.md": "---\nsrc: ./chapter.md#1,4-\n---\n", "chapter.md": chapter},
+    )
+
+    assert [slide.headline for slide in slides] == ["Slide 1", "Slide 4", "Slide 5"]
+
+
+def test_an_import_resolves_from_the_file_it_is_in_or_from_the_deck_s_folder(tmp_path):
+    slides = _imports(
+        tmp_path,
+        {
+            "slides.md": "---\nsrc: ./pages/a.md\n---\n",
+            "pages/a.md": "# A\n\n---\nsrc: ./b.md\n---\n\n---\nsrc: /c.md\n---\n",
+            "pages/b.md": "# B\n",
+            "c.md": "# C\n",
+        },
+    )
+
+    assert [slide.headline for slide in slides] == ["A", "B", "C"]
+
+
+def test_a_file_that_imports_itself_is_an_error(tmp_path):
+    with pytest.raises(DeckError, match="a.md"):
+        _imports(
+            tmp_path,
+            {
+                "slides.md": "---\nsrc: ./a.md\n---\n",
+                "a.md": "# A\n\n---\nsrc: ./b.md\n---\n",
+                "b.md": "---\nsrc: ./a.md\n---\n",
+            },
+        )
+
+
+def test_an_import_of_a_missing_file_is_an_unreadable_deck(tmp_path):
+    with pytest.raises(OSError, match="absent.md"):
+        _imports(tmp_path, {"slides.md": "# A\n\n---\nsrc: ./absent.md\n---\n"})
