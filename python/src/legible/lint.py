@@ -134,8 +134,8 @@ _CSS_SIZE = re.compile(
     r"^font-size:\s*(?P<number>\d*\.?\d+)\s*(?P<unit>px|pt|rem)\b", re.IGNORECASE
 )
 
-#: A UnoCSS arbitrary size in px, which is an inline px size spelled as a class.
-_ARBITRARY_PX = re.compile(r"^text-\[(?P<number>\d*\.?\d+)px\]$")
+#: A UnoCSS arbitrary size in an absolute unit. In px, it is an inline px size spelled as a class.
+_ARBITRARY = re.compile(r"^text-\[(?P<number>\d*\.?\d+)(?P<unit>px|pt|rem)\]$", re.IGNORECASE)
 
 #: How many canvas px one of each absolute unit is. A rem is the browser's 16 px root: Slidev scales
 #: the canvas as a whole rather than the root size, so a rem is 16 of the canvas' own px.
@@ -392,12 +392,10 @@ def _excepted(findings: Sequence[Finding], slides: Sequence[Slide]) -> list[Find
 def _resolve(size: str) -> tuple[float, bool] | None:
     """A size in canvas px, and whether it was written as an inline px size; ``None`` if it is
     relative, and only the page can say what it comes to."""
-    css, arbitrary = _CSS_SIZE.match(size), _ARBITRARY_PX.match(size)
-    if css:
-        unit = css.group("unit").lower()
-        return float(css.group("number")) * _PX_PER[unit], unit == "px"
-    if arbitrary:
-        return float(arbitrary.group("number")), True
+    absolute = _CSS_SIZE.match(size) or _ARBITRARY.match(size)
+    if absolute:
+        unit = absolute.group("unit").lower()
+        return float(absolute.group("number")) * _PX_PER[unit], unit == "px"
     if size in _TEXT_CLASS_PX:
         return _TEXT_CLASS_PX[size], False
     return None
