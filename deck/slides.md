@@ -64,8 +64,8 @@ section: Problem
 ::left::
 
 <!-- A picture of a slide rather than a slide: it is evidence, and its markup and its scale both
-     live in style.css. The bullets are `li` elements because they are part of the picture, not
-     content this deck is making. -->
+     live in style.css. Its ten `li` elements are bullets to the linter like any list, so the notes
+     take an exception to the bullet ceiling. -->
 <div class="demo-stock" aria-hidden="true">
   <div class="demo-stock-head">
     <span class="demo-stock-logo">LOGO</span>
@@ -106,6 +106,8 @@ Signpost: I'll start with the problem, then the method, then legibility, and las
 You might ask the room what their last template gave them. Usually it's a master, a color theme and
 a logo in the corner. Deciding what each slide is for is still up to you, and that's often the part
 that takes the most time.
+
+Exception: bullet-ceiling the stock slide is a picture of one, and its ten bullets are what it shows
 -->
 
 ---

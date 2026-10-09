@@ -47,6 +47,13 @@ _IMAGE = re.compile(r"!\[[^\]]*\]\([^)]*\)")
 _LINK = re.compile(r"\[(?P<text>[^\]]*)\]\([^)]*\)")
 _TAG = re.compile(r"<[^>]+>")
 
+#: An HTML list's tags, opening or closing: the list's own, and each item's.
+_LIST_TAG = re.compile(r"<(?P<closing>/?)(?P<name>ul|ol|li)\b", re.IGNORECASE)
+
+#: How a list's tag stands while the slide is read: this, then ``ul``, ``/li`` and the like, on a
+#: line of its own.
+_LIST_MARK = ""
+
 #: A line break the author forced, and the character it stands as while tags are taken out. A
 #: forced break shapes a headline, so the headline keeps it; elsewhere it only separates words. The
 #: character is no space, so a heading's trim leaves a break at either end of it in place.
@@ -283,8 +290,17 @@ def _slide(number: int, frontmatter: Sequence[str], lines: Sequence[str]) -> Sli
     # the next bullet ends one, so where an author's editor wrapped a long bullet cannot decide
     # its word count — markdown's own lazy continuation, and the ceiling depends on it.
     continuing = False
+    # The HTML lists open around the line being read, the innermost last. Each holds the bullet of
+    # its open item, or None between items. Text inside an item is that item's own, whatever blank
+    # lines or child lists come between, as the browser groups it.
+    lists: list[int | None] = []
 
     for line in _without_tags(_BREAK_TAG.sub(_BREAK, _code_shown(said))).split("\n"):
+        if line.startswith(_LIST_MARK):
+            _flush(paragraph, prose)
+            continuing = False
+            _follow(line.removeprefix(_LIST_MARK), lists, bullets)
+            continue
         # A slot marker is where a layout splits the slide, which is layout rather than words.
         line = "" if _SLOT.match(line) else line
         heading = _HEADING.match(line)
@@ -305,6 +321,8 @@ def _slide(number: int, frontmatter: Sequence[str], lines: Sequence[str]) -> Sli
             continue
         elif continuing:
             bullets[-1] = f"{bullets[-1]} {_plain(line)}".strip()
+        elif (item := _open_item(lists)) is not None:
+            bullets[item] = f"{bullets[item]} {_plain(line)}".strip()
         else:
             paragraph.append(_plain(line))
 
@@ -335,9 +353,46 @@ def _without_tags(markup: str) -> str:
     """The slide with its tags taken out, a line break inside one kept as a line break.
 
     A tag the author wrapped over several lines is still one tag: its attributes are the
-    component's, a figure's caption say, and not prose the room reads beside it.
+    component's, a figure's caption say, and not prose the room reads beside it. A list's tags each
+    leave a mark on a line of their own. The reader follows the lists by those marks, and reads an
+    HTML list the way it reads the same list in markdown.
     """
-    return _TAG.sub(_line_breaks, markup)
+    return _TAG.sub(_tag_left, markup)
+
+
+def _tag_left(match: re.Match[str]) -> str:
+    """What a tag leaves behind: the line breaks it spanned, and a list's tag as its mark."""
+    breaks = _line_breaks(match)
+    tag = _LIST_TAG.match(match.group())
+    if tag:
+        return f"{breaks}\n{_LIST_MARK}{tag.group('closing')}{tag.group('name').lower()}\n"
+    return breaks
+
+
+def _follow(tag: str, lists: list[int | None], bullets: list[str]) -> None:
+    """Move the reader's place in the HTML lists past one of their tags.
+
+    Each item opens a bullet, and its own closing tag or its list's closes it. An item outside any
+    list is read as a list of its own.
+    """
+    if tag in {"ul", "ol"}:
+        lists.append(None)
+    elif tag in {"/ul", "/ol"}:
+        if lists:
+            lists.pop()
+    elif tag == "li":
+        bullets.append("")
+        if lists:
+            lists[-1] = len(bullets) - 1
+        else:
+            lists.append(len(bullets) - 1)
+    elif lists:
+        lists[-1] = None
+
+
+def _open_item(lists: Sequence[int | None]) -> int | None:
+    """The bullet of the innermost HTML list item open, or None outside every item."""
+    return next((item for item in reversed(lists) if item is not None), None)
 
 
 def _line_breaks(match: re.Match[str]) -> str:
