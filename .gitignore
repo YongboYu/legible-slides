@@ -43,3 +43,6 @@ docs/adr/
 docs/agents/
 docs/research/*
 !docs/research/presentation-methods.md
+
+# the maintainer's publishing wizard, kept locally (see CLAUDE.local.md)
+scripts/setup-publishing.sh
