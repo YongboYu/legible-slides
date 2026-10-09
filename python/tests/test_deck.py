@@ -7,6 +7,8 @@ prose rather than chrome. The rules applied to that reading are test_lint.py's b
 
 from textwrap import dedent
 
+import pytest
+
 from legible.deck import parse_deck
 
 
@@ -137,6 +139,54 @@ def test_the_headline_is_the_slides_first_heading():
     )
 
     assert slides[0].headline == "The claim this slide makes"
+
+
+@pytest.mark.parametrize("br", ["<br>", "<br/>", "<br />", "<BR>"])
+def test_a_line_break_in_the_headline_is_kept_as_a_newline(br):
+    """The author chose where the headline breaks, so its shape is measured with the breaks in."""
+    slides = deck(f"# First line{br}Second line{br}Third line\n")
+
+    assert slides[0].headline == "First line\nSecond line\nThird line"
+
+
+@pytest.mark.parametrize(
+    ("heading", "headline"),
+    [
+        ("First<br><br>Third", "First\n\nThird"),
+        ("First <br> <br> Third", "First\n\nThird"),
+        ("<br>First", "\nFirst"),
+        ("First<br>", "First"),
+        ("First<br><br>", "First\n"),
+    ],
+)
+def test_the_headline_keeps_each_empty_line_its_breaks_set(heading, headline):
+    """Each break starts a line, so two in a row leave an empty one. A break at the very end closes
+    the last line and starts none. Chromium sets all five this way."""
+    slides = deck(f"# {heading}\n")
+
+    assert slides[0].headline == headline
+
+
+def test_a_headline_of_breaks_alone_is_no_headline():
+    slides = deck("# <br><br>\n")
+
+    assert slides[0].headline is None
+
+
+def test_a_line_break_in_a_bullet_or_a_passage_separates_its_words():
+    slides = deck("# A claim\n\n- one<br>two\n\nThree<br/>four.\n")
+
+    assert slides[0].bullets == ("one two",)
+    assert slides[0].prose == ("Three four.",)
+
+
+def test_a_break_in_inline_code_is_text_the_slide_shows():
+    """The slide shows the tag in backticks as written, and breaks no line there."""
+    slides = deck("# Use `<br>` with care\n\n- `<br/>` ends a line\n\nWrite ``<br>`` once.\n")
+
+    assert slides[0].headline == "Use <br> with care"
+    assert slides[0].bullets == ("<br/> ends a line",)
+    assert slides[0].prose == ("Write <br> once.",)
 
 
 def test_a_slide_with_no_heading_has_no_headline():

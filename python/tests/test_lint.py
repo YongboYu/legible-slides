@@ -144,6 +144,17 @@ def test_a_headline_that_fills_two_lines_is_not(write_deck):
     assert report.findings == ()
 
 
+@pytest.mark.parametrize(
+    "heading", ["First line<br>Second line<br />Third line", "First<br><br>Third"]
+)
+def test_a_headline_broken_by_hand_into_three_lines_is_a_finding(write_deck, heading):
+    """Three short lines are still three lines on the slide, and so is an empty one between."""
+    report = lint(write_deck(f"# {heading}\n"))
+
+    assert rules(report) == ["headline-shape"]
+    assert "3 lines" in report.findings[0].message
+
+
 def test_the_cover_s_title_is_not_a_headline(write_deck):
     """The cover is set heavier and has no headline zone for a third line to run into."""
     report = lint(

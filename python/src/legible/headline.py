@@ -53,19 +53,24 @@ _PAIR_ADJUSTMENT, _EXTENSION = 2, 9
 
 
 def wrap(headline: str) -> tuple[str, ...]:
-    """The lines a headline is set in, in order. Nothing takes no lines."""
+    """The lines a headline is set in, in order. Nothing takes no lines.
+
+    A newline is a break the author forced with ``<br>``, so the next line starts there whatever
+    room is left. Each part between two breaks fills its lines on its own. A part with no words is
+    the empty line two breaks in a row set, and it takes a line too.
+    """
     lines: list[str] = []
-    line = ""
-    for piece, joint in _pieces(headline):
-        candidate = f"{line}{joint}{piece}" if line else piece
-        if not line or rendered_width(candidate) <= HEADLINE_WIDTH_PX:
-            line = candidate
-        else:
-            lines.append(line)
-            line = piece
-    if line:
+    for part in headline.split("\n"):
+        line = ""
+        for piece, joint in _pieces(part):
+            candidate = f"{line}{joint}{piece}" if line else piece
+            if not line or rendered_width(candidate) <= HEADLINE_WIDTH_PX:
+                line = candidate
+            else:
+                lines.append(line)
+                line = piece
         lines.append(line)
-    return tuple(lines)
+    return tuple(lines) if any(lines) else ()
 
 
 def rendered_width(text: str) -> float:
