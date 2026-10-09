@@ -21,6 +21,7 @@
  */
 import { computed } from 'vue'
 import { useSlideContext } from '@slidev/client'
+import { resolveAssetUrl } from '@slidev/client/layoutHelper.ts'
 import affiliationPlaceholder from '../assets/placeholders/affiliation-logo.svg?url'
 import venuePlaceholder from '../assets/placeholders/venue-logo.svg?url'
 import Share from '../components/Share.vue'
@@ -51,10 +52,13 @@ const { $slidev } = useSlideContext()
 
 /**
  * The slide's own image, then the deck's, then the placeholder. `??` rather than `||`, so an empty
- * string is an answer — no mark — and not a request for the placeholder.
+ * string is an answer — no mark — and not a request for the placeholder. A path the deck names is
+ * resolved against the base the deck is hosted under. The placeholder is a bundled import, which
+ * Vite resolved already.
  */
 function markOrPlaceholder(own: string | undefined, deck: string | undefined, placeholder: string) {
-  return own ?? deck ?? placeholder
+  const named = own ?? deck
+  return named == null ? placeholder : resolveAssetUrl(named)
 }
 
 const venueLogo = computed(() =>
