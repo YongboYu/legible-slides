@@ -3,9 +3,15 @@
 A thin gate over a tested seam. What counts as a separation failure is settled in
 test_validate.py; what is checked here is the part only the command has — the **exit code**
 everything downstream keys on, and that `--json` round-trips into the documented report shape.
+So is what an author sees on a first run: the report, and nothing else.
 """
 
 import json
+import os
+import shutil
+import subprocess
+import sys
+from pathlib import Path
 
 from legible import load_palette, validate
 from legible.cli import main
@@ -171,3 +177,22 @@ def test_a_passing_theme_prints_the_attention_contrast_it_achieved(capsys, theme
     out = capsys.readouterr().out
     assert "ink on accent" in out
     assert "4.65" in out
+
+
+def test_a_first_run_prints_the_report_and_nothing_else(tmp_path, themes_dir):
+    """An author's first check after stamping runs with nothing compiled yet, so every module the
+    command imports compiles on the spot. Anything a dependency warns while it compiles lands on the
+    author's terminal above the report, as if their deck had a problem."""
+    command = shutil.which("cvd-validate", path=str(Path(sys.executable).parent))
+    assert command, "cvd-validate is not installed beside this interpreter"
+
+    result = subprocess.run(
+        [command, str(themes_dir / "leuven-blue.json")],
+        env={**os.environ, "PYTHONPYCACHEPREFIX": str(tmp_path / "pycache")},
+        capture_output=True,
+        text=True,
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert result.stdout.startswith("PASS")
+    assert result.stderr == ""

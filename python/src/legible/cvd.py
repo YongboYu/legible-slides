@@ -11,11 +11,17 @@ they arrive here from ``legible.method``, and ``docs/cvd-validator-contract.md``
 
 from __future__ import annotations
 
+import warnings
 from collections.abc import Sequence
 
-from colorspacious import cspace_convert, deltaE
-
 from legible.method import CVD_CONDITIONS, CVD_TYPES, DELTA_E_METRIC, SEVERITY
+
+# A docstring in colorspacious 1.1.2, the release pinned, holds an escape Python 3.12 calls invalid.
+# Python warns when it compiles the module, which happens on an author's first check after
+# stamping, so the warning would print above their report.
+with warnings.catch_warnings():
+    warnings.simplefilter("ignore", SyntaxWarning)
+    from colorspacious import cspace_convert, deltaE
 
 __all__ = [
     "CVD_CONDITIONS",
