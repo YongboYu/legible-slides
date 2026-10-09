@@ -198,7 +198,7 @@ NPM_PACKAGES=("slidev-theme-legible" "create-legible-slides")
 PYPI_PROJECT="legible-slides"
 RELEASE_WORKFLOW="release.yml"
 PYPI_ENVIRONMENT="pypi"
-ENVIRONMENT_BY_HAND="GitHub environment $PYPI_ENVIRONMENT (Settings → Environments → New environment)"
+ENVIRONMENT_BY_HAND="GitHub environment $PYPI_ENVIRONMENT, you as reviewer (Settings → Environments)"
 
 # ok "..." — a line confirming something is in place.
 ok() { printf '  %s✓%s %s\n' "$GREEN" "$RESET" "$1"; }
@@ -208,9 +208,14 @@ has_secret() {
   gh secret list --json name --jq '.[].name' | grep -qxF "$1"
 }
 
-# has_environment NAME — whether the repository already has a deployment environment by that name.
-has_environment() {
-  gh api "repos/$GH_REPO/environments/$1" >/dev/null 2>&1
+# environment_waits NAME — whether the repository has a deployment environment by that name that
+# holds each job until a required reviewer approves it.
+environment_waits() {
+  local reviewers
+  reviewers=$(gh api "repos/$GH_REPO/environments/$1" \
+    --jq '[.protection_rules[] | select(.type == "required_reviewers")] | length' 2>/dev/null) ||
+    return 1
+  [[ "${reviewers:-0}" -gt 0 ]]
 }
 
 # check_name_free REGISTRY URL NAME — report whether NAME is still unclaimed, from a GET on URL.
@@ -370,16 +375,20 @@ fi
 pause
 
 # ── 4 ─────────────────────────────────────────────────────────────────────
-stage "GitHub: a '$PYPI_ENVIRONMENT' environment"
-say "PyPI only trusts a publish that runs in this environment of the release workflow."
-if has_environment "$PYPI_ENVIRONMENT"; then
-  note "It already exists. Skipping ahead."
-elif confirm "Create the '$PYPI_ENVIRONMENT' environment on $GH_REPO now?"; then
-  if gh api -X PUT "repos/$GH_REPO/environments/$PYPI_ENVIRONMENT" >/dev/null 2>&1; then
-    ok "created environment $PYPI_ENVIRONMENT"
+stage "GitHub: a '$PYPI_ENVIRONMENT' environment that waits for you"
+say "PyPI only trusts a publish that runs in this environment of the release workflow. The"
+say "environment holds each release until you approve it on GitHub, as npm holds a staged one."
+if environment_waits "$PYPI_ENVIRONMENT"; then
+  note "It exists and waits for a reviewer. Skipping ahead."
+elif confirm "Set up '$PYPI_ENVIRONMENT' on $GH_REPO, with you as its required reviewer?"; then
+  # Self-review stays allowed: the reviewer is the maintainer who pushes the tag.
+  if printf '{"reviewers":[{"type":"User","id":%s}],"prevent_self_review":false}' \
+    "$(gh api user --jq .id)" |
+    gh api -X PUT "repos/$GH_REPO/environments/$PYPI_ENVIRONMENT" --input - >/dev/null 2>&1; then
+    ok "environment $PYPI_ENVIRONMENT waits for your approval"
   else
     SKIPPED+=("$ENVIRONMENT_BY_HAND")
-    warn "Couldn't create it through gh. Add it under Settings → Environments instead."
+    warn "Couldn't set it up through gh. Add it under Settings → Environments instead."
   fi
 else
   SKIPPED+=("$ENVIRONMENT_BY_HAND")
@@ -431,10 +440,10 @@ else
   warn "NPM_TOKEN isn't set, and the first release needs it."
   SKIPPED+=("NPM_TOKEN: re-run this wizard, or gh secret set NPM_TOKEN --repo $GH_REPO")
 fi
-if has_environment "$PYPI_ENVIRONMENT"; then
-  ok "the $PYPI_ENVIRONMENT environment exists"
+if environment_waits "$PYPI_ENVIRONMENT"; then
+  ok "the $PYPI_ENVIRONMENT environment waits for your approval"
 else
-  warn "The $PYPI_ENVIRONMENT environment is missing."
+  warn "The $PYPI_ENVIRONMENT environment is missing, or doesn't wait for a reviewer."
   [[ " ${SKIPPED[*]} " == *"$ENVIRONMENT_BY_HAND"* ]] || SKIPPED+=("$ENVIRONMENT_BY_HAND")
 fi
 # Until the first release each name should still be free. After it, each should be yours.

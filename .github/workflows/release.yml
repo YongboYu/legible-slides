@@ -1,9 +1,9 @@
 name: Release
 
 # A `v*` tag releases every package at once (#46): the checks to PyPI, the theme and the create
-# package to npm, where they wait for a maintainer to approve them. Nothing publishes until the
-# check job has confirmed the tag names the version every file states and the test suite passes,
-# so a mistyped or early tag publishes nothing.
+# package to npm, and each waits for a maintainer to approve it. Nothing publishes until the check
+# job has confirmed the tag names the version every file states and the test suite passes, so a
+# mistyped or early tag publishes nothing.
 #
 # Run by hand, the same workflow is a dry run: it checks, builds the wheel and packs the npm
 # packages, and skips both publish jobs. That is how it gets tested before the first real tag.
@@ -91,6 +91,8 @@ jobs:
           if-no-files-found: error
 
   # Trusted publishing: PyPI trusts this workflow, in this environment, and no PyPI token is stored.
+  # The environment holds the job until a maintainer approves it on GitHub, as npm holds a staged
+  # version, so a compromised workflow can't release here either (scripts/setup-publishing.sh).
   pypi:
     name: publish to PyPI
     needs: build
