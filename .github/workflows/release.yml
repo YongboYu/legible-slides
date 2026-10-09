@@ -1,8 +1,9 @@
 name: Release
 
 # A `v*` tag releases every package at once (#46): the checks to PyPI, the theme and the create
-# package to npm. Nothing publishes until the check job has confirmed the tag names the version
-# every file states and the test suite passes, so a mistyped or early tag publishes nothing.
+# package to npm, where they wait for a maintainer to approve them. Nothing publishes until the
+# check job has confirmed the tag names the version every file states and the test suite passes,
+# so a mistyped or early tag publishes nothing.
 #
 # Run by hand, the same workflow is a dry run: it checks, builds the wheel and packs the npm
 # packages, and skips both publish jobs. That is how it gets tested before the first real tag.
@@ -111,12 +112,12 @@ jobs:
         with:
           skip-existing: true
 
-  # The first release publishes with the short-lived NPM_TOKEN, because npm can only trust a package
-  # that already exists. After it, each package trusts this workflow and the secret is deleted
-  # (scripts/setup-publishing.sh): the token then arrives empty, and npm authenticates through the
-  # id-token instead.
+  # Each package trusts this workflow to stage a version and nothing more
+  # (scripts/setup-publishing.sh), so no npm token is stored: npm authenticates through the
+  # id-token. A staged version goes live only when a maintainer approves it with 2FA, on npmjs.com
+  # under Staged Packages or with `npm stage approve`, so a compromised workflow can't release.
   npm:
-    name: publish to npm
+    name: stage on npm
     needs: build
     if: github.event_name == 'push'
     runs-on: ubuntu-latest
@@ -131,22 +132,22 @@ jobs:
         with:
           node-version: 24
           registry-url: https://registry.npmjs.org
-      # Trusted publishing needs npm 11.5.1 or later. Installed by version rather than trusted to
-      # whichever Node 24 the runner has cached, since an older one would fail only after the
-      # token is gone, on a release.
-      - run: npm install -g npm@^11.5.1
+      # `npm stage` needs npm 11.15.0 or later. Installed by version rather than trusted to
+      # whichever Node 24 the runner has cached, since an older one would fail only on a release.
+      - run: npm install -g npm@^11.15.0
       # A re-run after a partial failure skips any version npm already has, since npm refuses to
-      # publish over one. Each tarball is named from `./`: npm reads `npm/x.tgz` as the GitHub
-      # repository npm/x.tgz and tries to clone it, which is how the first v0.1.0 run failed.
-      - name: Publish with provenance
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      # publish over one. A version still waiting for approval isn't one it has, and staging it
+      # again fails: approve or reject it first, then re-run. Each tarball is named from `./`: npm
+      # reads `npm/x.tgz` as the GitHub repository npm/x.tgz and tries to clone it, which is how the
+      # first v0.1.0 run failed.
+      - name: Stage with provenance
         run: |
           for tarball in ./npm/*.tgz; do
             spec=$(tar -xOzf "$tarball" package/package.json | jq -r '.name + "@" + .version')
             if [ -n "$(npm view "$spec" version 2>/dev/null)" ]; then
               echo "$spec is already on npm; skipping"
             else
-              npm publish "$tarball" --provenance --access public
+              npm stage publish "$tarball" --provenance --access public
+              echo "::notice::$spec is staged. Approve it on npmjs.com, under Staged Packages."
             fi
           done

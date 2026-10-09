@@ -319,7 +319,8 @@ if [[ "$PUBLISHED" != yes ]]; then
   say "This needs both packages on npm, so it waits for the first release."
   note "Re-run this wizard once v0.1.0 is out. Skipping ahead."
 else
-  say "npm will accept a publish only from $GH_REPO's $RELEASE_WORKFLOW, with no token stored."
+  say "npm will accept a version only from $GH_REPO's $RELEASE_WORKFLOW, with no token stored,"
+  say "and only staged: it goes live when you approve it with 2FA."
   note "npm doesn't let this script see it, so this stage can't tell if it's done."
   trusted=no
   if confirm "Already added the trusted publisher to both packages?"; then
@@ -327,7 +328,8 @@ else
     note "Skipping ahead."
   else
     warn "A new trusted publisher expires unless it publishes within 2 days."
-    say "  Do this stage right before you tag the next release."
+    say "  Do this stage right before you tag the next release, and approve what it stages"
+    say "  the same day."
     if confirm "Tagging a release within 2 days?"; then
       for package in "${NPM_PACKAGES[@]}"; do
         open_url "https://www.npmjs.com/package/$package/access"
@@ -336,7 +338,9 @@ else
         say "    Repository            ${BOLD}${GH_REPO#*/}${RESET}"
         say "    Workflow filename     ${BOLD}$RELEASE_WORKFLOW${RESET}"
         say "    Environment name      ${DIM}(leave empty)${RESET}"
-        step "Allow npm publish, then Set up connection."
+        step "Leave Allow npm publish and Allow npm dist-tag unchecked, then Set up connection."
+        note "  The workflow can then only stage. Each release waits under Staged Packages on"
+        note "  npmjs.com until you approve it there with 2FA, or with npm stage approve."
         step "Publishing access → Require two-factor authentication and disallow tokens → Update."
         note "  You can still publish by hand with your 2FA, so a wrong field can't lock you out."
         pause "Press Enter once $package is done."

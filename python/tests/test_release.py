@@ -136,6 +136,29 @@ def test_the_release_hands_npm_each_tarball_as_a_file():
     assert globs[0].startswith(("./", "/")), f"npm reads {globs[0]!r} as a git repository"
 
 
+#: The npm the npm job installs before it stages, as `npm install -g npm@^X.Y.Z`.
+_NPM_FLOOR = re.compile(r"npm install -g npm@\^(?P<version>\d+\.\d+\.\d+)")
+
+
+def test_the_release_stages_npm_packages_for_a_maintainer_to_approve():
+    # Each package trusts the workflow to stage and nothing more, so a bare `npm publish` would be
+    # turned away on the tag, after PyPI has already published. Comments may still name it.
+    workflow = (REPO / ".github/workflows/release.yml").read_text(encoding="utf-8")
+    commands = [line for line in workflow.splitlines() if not line.lstrip().startswith("#")]
+
+    assert any("npm stage publish" in line for line in commands)
+    assert not [line for line in commands if re.search(r"(?<!stage )npm publish\b", line)]
+
+
+def test_the_release_installs_an_npm_that_can_stage():
+    # `npm stage` arrived in npm 11.15.0; an older one fails only on a release tag.
+    workflow = (REPO / ".github/workflows/release.yml").read_text(encoding="utf-8")
+    floors = _NPM_FLOOR.findall(workflow)
+
+    assert len(floors) == 1, f"release.yml installs npm {len(floors)} times"
+    assert tuple(map(int, floors[0].split("."))) >= (11, 15, 0), f"npm {floors[0]} can't stage"
+
+
 def test_every_npm_package_the_release_publishes_names_this_repository():
     # npm checks a provenance statement against the package's `repository`, and refuses the
     # publish when the two disagree, so a package without one fails on the release tag itself.
