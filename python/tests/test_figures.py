@@ -334,6 +334,15 @@ def test_a_series_needs_one_value_per_group(palette):
     assert "'a'" in str(error.value)
 
 
+@pytest.mark.parametrize("values", [[-0.5, 0.5], [-0.5, -0.2]])
+def test_small_multiples_refuse_a_negative_value_and_name_where_it_is(palette, values):
+    """Every panel runs from zero, so a bar below it would be drawn off the panel, label and all."""
+    series = [Series(name, [value]) for name, value in zip("AB", values, strict=True)]
+
+    with pytest.raises(FigureError, match=r"'A' is -0\.5 in 'Change'"):
+        small_multiples(palette, series, ["Change"])
+
+
 def test_small_multiples_refuse_more_series_than_the_palette_validated(palette):
     too_many = [Series(f"s{i}", [1.0]) for i in range(len(palette.series_roles) + 1)]
 

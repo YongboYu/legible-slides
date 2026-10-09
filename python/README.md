@@ -315,6 +315,8 @@ small_multiples(
   multi-series chart or small multiples, the de-emphasised role plus one highlight for a two-group
   one. That puts the attention roles out of reach (`accent-is-attention`) along with every
   structural neutral, because a pair nobody checked is a pair nobody can vouch for.
+- **Small multiples draw magnitudes.** Each panel runs from zero, so a negative value is an error,
+  with the series and the group it sits in.
 - **The deck's typeface is registered before anything is drawn**, and a resolution landing outside
   the bundle is an error. See [`theme/assets/fonts/`](../theme/assets/fonts/).
 
