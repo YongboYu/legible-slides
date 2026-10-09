@@ -524,6 +524,8 @@ def test_an_inline_px_size_is_a_finding_even_above_the_floor(write_deck, body):
         ('<p class="text-xs">Source.</p>', "12"),
         ('<p class="mt-2 text-sm">Source.</p>', "14"),
         ('<p class="text-base">Source.</p>', "16"),
+        ('<span class="text-[0.5rem]">Source.</span>', "8"),
+        ('<span class="text-[10pt]">Source.</span>', "13.3"),
     ],
 )
 def test_a_size_below_the_floor_is_a_finding(write_deck, body, px):
@@ -547,6 +549,8 @@ def test_an_inline_px_size_below_the_floor_says_both(write_deck):
         '<p class="text-lg">At the floor.</p>',
         '<p class="text-xl text-red-500">Above it.</p>',
         '<p style="font-size: 1.25rem">Above it, in rem.</p>',
+        '<p class="text-[1.25rem]">Above it, in rem, as a class.</p>',
+        '<p class="text-[0.8em]">Relative to its parent, as a class.</p>',
         '<p style="font-size: 0.8em">Relative to its parent, which the theme sizes.</p>',
         "```css\n.caption { font-size: 12px; }\n```",
         "Prose that mentions font-size: 12px is not markup.",
