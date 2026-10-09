@@ -136,12 +136,13 @@ jobs:
       # token is gone, on a release.
       - run: npm install -g npm@^11.5.1
       # A re-run after a partial failure skips any version npm already has, since npm refuses to
-      # publish over one.
+      # publish over one. Each tarball is named from `./`: npm reads `npm/x.tgz` as the GitHub
+      # repository npm/x.tgz and tries to clone it, which is how the first v0.1.0 run failed.
       - name: Publish with provenance
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
-          for tarball in npm/*.tgz; do
+          for tarball in ./npm/*.tgz; do
             spec=$(tar -xOzf "$tarball" package/package.json | jq -r '.name + "@" + .version')
             if [ -n "$(npm view "$spec" version 2>/dev/null)" ]; then
               echo "$spec is already on npm; skipping"

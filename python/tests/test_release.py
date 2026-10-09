@@ -122,6 +122,20 @@ def test_the_release_publishes_the_theme_and_the_create_package_to_npm(package):
     assert package in _npm_packages()
 
 
+#: The tarballs the npm job publishes, as its loop globs them.
+_NPM_TARBALLS = re.compile(r"^\s*for tarball in (?P<glob>\S+); do\s*$", re.MULTILINE)
+
+
+def test_the_release_hands_npm_each_tarball_as_a_file():
+    # npm reads `npm/x.tgz` as the GitHub repository npm/x.tgz and tries to clone it; only a path
+    # from `./` or `/` is a file to it. The dry run skips the publish job, so only a tag finds this.
+    workflow = (REPO / ".github/workflows/release.yml").read_text(encoding="utf-8")
+    globs = _NPM_TARBALLS.findall(workflow)
+
+    assert len(globs) == 1, f"release.yml globs its tarballs {len(globs)} times"
+    assert globs[0].startswith(("./", "/")), f"npm reads {globs[0]!r} as a git repository"
+
+
 def test_every_npm_package_the_release_publishes_names_this_repository():
     # npm checks a provenance statement against the package's `repository`, and refuses the
     # publish when the two disagree, so a package without one fails on the release tag itself.
