@@ -2,8 +2,9 @@
 // npm create legible-slides my-talk: stamps the starter into a new directory, named for it.
 //
 // The starter is bundled into this package when it is packed (bundle.js). Run from a checkout of
-// legible-slides, where nothing is bundled, it stamps the starter in skill/template/ instead.
-// Node's standard library only, so the command installs nothing before it runs.
+// legible-slides, it stamps the starter in skill/template/ instead, the one being edited, even over
+// a bundle an interrupted pack left behind. Node's standard library only, so the command installs
+// nothing before it runs.
 import {
   chmodSync,
   cpSync,
@@ -18,12 +19,19 @@ import { basename, dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const here = dirname(fileURLToPath(import.meta.url));
-const bundled = join(here, "template");
-const starter = existsSync(bundled) ? bundled : join(here, "..", "skill", "template");
+const inCheckout = join(here, "..", "skill", "template");
+const starter = existsSync(inCheckout) ? inCheckout : join(here, "template");
 
 function fail(message) {
   console.error(`create-legible-slides: ${message}`);
   process.exit(1);
+}
+
+// The `cd` an author pastes into a shell: quoted when the path holds anything a shell would read,
+// and after `--` when it would otherwise be taken for an option.
+function cdInto(path) {
+  const quoted = /^[\w@%+=:,./-]+$/.test(path) ? path : `'${path.replaceAll("'", "'\\''")}'`;
+  return path.startsWith("-") ? `cd -- ${quoted}` : `cd ${quoted}`;
 }
 
 const [target] = process.argv.slice(2);
@@ -57,7 +65,7 @@ writeFileSync(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`);
 
 console.log(`Stamped a new deck in ${target}. Next:
 
-  cd ${target}
+  ${cdInto(target)}
   pnpm install
   pnpm dev
 `);

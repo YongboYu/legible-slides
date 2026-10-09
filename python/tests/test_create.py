@@ -150,9 +150,27 @@ def test_it_prints_the_next_steps_in_order(package, tmp_path):
     assert sorted(steps, key=commands.index) == steps
 
 
+@pytest.mark.parametrize("name", ["my-talk", "My Talk", "Bob's talk", "-talk"])
+def test_the_printed_cd_reaches_the_deck_when_pasted_into_a_shell(package, tmp_path, name):
+    """Whatever the directory is called. A space, an apostrophe or a leading dash would otherwise
+    print a `cd` that fails for an author who pastes it. The deck keeps the name as typed."""
+    deck = tmp_path / name
+    result = _create(package, deck)
+    assert result.returncode == 0, result.stderr
+    (cd,) = (line.strip() for line in result.stdout.splitlines() if line.strip().startswith("cd "))
+
+    landed = subprocess.run(
+        ["sh", "-c", f"{cd} && pwd -P"], cwd=tmp_path, capture_output=True, text=True
+    )
+
+    assert landed.returncode == 0, f"{cd!r}: {landed.stderr}"
+    assert Path(landed.stdout.strip()) == deck.resolve()
+    assert json.loads((deck / "package.json").read_text(encoding="utf-8"))["name"] == name
+
+
 def test_packing_leaves_no_bundled_starter_behind(checkout, package):
-    """The bundle is an artifact of the pack. Left in a checkout, it would be a second starter for
-    the create command to prefer over the one being edited."""
+    """The bundle is an artifact of the pack, so the checkout keeps one starter: the one being
+    edited."""
     assert (package / "template").is_dir()
     assert not (checkout / "create" / "template").exists()
 
@@ -166,6 +184,23 @@ def test_from_a_checkout_it_stamps_the_starter_in_the_repo(checkout, tmp_path):
     assert result.returncode == 0, result.stderr
     assert _files(deck) == _files(STARTER)
     assert json.loads((deck / "package.json").read_text(encoding="utf-8"))["name"] == "my-talk"
+
+
+def test_from_a_checkout_it_stamps_the_starter_in_the_repo_over_a_stale_bundle(tmp_path):
+    """An interrupted pack can leave its bundle behind, and the starter moves on without it. The
+    checkout's own starter is the one being edited, so it wins."""
+    checkout = tmp_path / "checkout"
+    shutil.copytree(CREATE, checkout / "create")
+    shutil.copytree(STARTER, checkout / "skill" / "template")
+    stale = checkout / "create" / "template"
+    shutil.copytree(STARTER, stale)
+    (stale / "slides.md").write_text("# the starter as it was\n", encoding="utf-8")
+    deck = tmp_path / "my-talk"
+
+    result = _create(checkout / "create", deck)
+
+    assert result.returncode == 0, result.stderr
+    assert (deck / "slides.md").read_bytes() == (STARTER / "slides.md").read_bytes()
 
 
 def test_with_no_directory_named_it_says_how_to_name_one(package, tmp_path):
