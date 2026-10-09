@@ -43,14 +43,6 @@ It holds UnoCSS to 66.7 the same way, the line the theme's and the flagship's lo
 66.10 writes a rule for Slidev's code line numbers that the CSS minifier rejects, and the build
 fails on its last step. Drop that override once a later UnoCSS builds the stamped template.
 
-A PDF to present from is Slidev's own export, and the renderer it needs is not stamped here because
-a browser download is something you should have asked for:
-
-```bash
-pnpm add -D playwright-chromium
-pnpm exec slidev export slides.md --format pdf --output dist/slides.pdf
-```
-
 ## The palette
 
 One file, `themes/palette.json`, and every colour on these slides comes from it. It arrives as a
