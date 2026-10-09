@@ -70,8 +70,12 @@ def load_palette(path: str | Path) -> Palette:
         # same error type as a missing role. What the file *is* is this module's business; whether
         # it could be read at all stays the caller's.
         raise PaletteError(f"{path}: not valid JSON: {error}") from error
+    if not isinstance(raw, dict):
+        raise PaletteError(f"{path}: a theme is a JSON object of roles, not {type(raw).__name__}")
 
     meta = raw.get("meta", {})
+    if not isinstance(meta, dict):
+        raise PaletteError(f"{path}: 'meta' must be an object, not {type(meta).__name__}")
 
     missing = [role for role in (*SCALAR_ROLES, "series") if role not in raw]
     if missing:
