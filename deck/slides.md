@@ -1,5 +1,5 @@
 ---
-# The theme by path, until the package is on npm. The canvas, the aspect ratio, the two bundled
+# The theme by path, the copy in this repo. The canvas, the aspect ratio, the two bundled
 # families and the locked light scheme all arrive with it, so this deck configures none of them.
 theme: ../theme
 title: legible-slides

@@ -14,6 +14,7 @@ the theme's. What no test here asserts is a judgment, for the reason ``test_skil
 
 import json
 import re
+import subprocess
 from pathlib import Path
 
 import pytest
@@ -233,8 +234,17 @@ def test_the_deck_loads_the_stamped_stylesheet():
 def test_the_deck_is_wired_to_the_theme(slides):
     """The headmatter names a theme, which is the one line the whole stamp hangs off: a deck that
     named none would build in Slidev's own default and carry none of the method's machinery — and
-    would still lint clean, because the linter reads slides rather than what renders them."""
-    assert re.search(r"^theme:\s*\S", slides, re.MULTILINE)
+    would still lint clean, because the linter reads slides rather than what renders them.
+
+    Slidev resolves `theme: legible` to the package `slidev-theme-legible`, so the name is checked
+    against the package the deck depends on. The pin is exact, so the theme stays the same until the
+    author changes it; ``test_release.py`` holds it to the release's version."""
+    named = re.search(r"^theme:\s*(?P<theme>\S+)\s*$", slides, re.MULTILINE)
+    package = json.loads(_read(REPO / "theme" / "package.json"))["name"]
+    dependencies = json.loads(_read(TEMPLATE / "package.json"))["dependencies"]
+
+    assert named and f"slidev-theme-{named.group('theme')}" == package
+    assert re.fullmatch(r"\d+\.\d+\.\d+", dependencies[package]), dependencies[package]
 
 
 def test_the_deck_sets_no_slide_transition(slides):
@@ -288,12 +298,22 @@ def _example(pattern: str) -> str:
     return pattern.replace("**/", "nested/deeper/").replace("*", "example")
 
 
-def test_every_check_runs_at_the_decks_pinned_commit():
-    """A deck pinned to one commit is checked against that commit's rules everywhere, which only
+#: The launcher's pin: one line, naming one release.
+_VERSION_PIN = re.compile(r"^VERSION=(?P<version>\d+\.\d+\.\d+)$", re.MULTILINE)
+
+
+def _pinned_version() -> str:
+    pinned = _VERSION_PIN.search(_read(TEMPLATE / "bin" / "legible"))
+    assert pinned, "bin/legible pins no release"
+    return pinned["version"]
+
+
+def test_every_check_runs_at_the_decks_pinned_version():
+    """A deck pinned to one release is checked against that release's rules everywhere, which only
     holds when nothing reaches for whatever `legible` is on PATH. The pin lives in one file, and the
     hooks and the workflow both go through it."""
     pinned = TEMPLATE / "bin" / "legible"
-    assert re.search(r"^REV=main$", _read(pinned), re.MULTILINE)
+    assert _pinned_version()
     for script in (pinned, TEMPLATE / "bin" / "cvd-validate"):
         assert script.stat().st_mode & 0o111, f"{script.name} is not executable"
 
@@ -305,6 +325,58 @@ def test_every_check_runs_at_the_decks_pinned_commit():
     assert entries and all(entry.startswith("bin/") for entry in entries)
     assert {"bin/legible", "bin/cvd-validate"} <= set(runs)
     assert not any(run in {"legible", "cvd-validate", "uv"} for run in runs)
+
+
+def _launch(tmp_path: Path, script: str, *args: str, **env: str) -> list[str]:
+    """What a stamped launcher hands to uvx, read off a stand-in uvx that records its arguments."""
+    stand_in = tmp_path / "uvx"
+    stand_in.write_text('#!/bin/sh\nprintf "%s\\n" "$@"\n', encoding="utf-8")
+    stand_in.chmod(0o755)
+    environment = {"PATH": f"{tmp_path}:/usr/bin:/bin", **env}
+
+    result = subprocess.run(
+        [TEMPLATE / "bin" / script, *args],
+        capture_output=True,
+        text=True,
+        check=True,
+        env=environment,
+    )
+    return result.stdout.splitlines()
+
+
+def test_the_launcher_installs_the_checks_from_pypi_at_the_pinned_version(tmp_path):
+    """The default a stamped deck runs with: the checks from PyPI, at the release its theme is
+    pinned to, so nothing on the author's machine decides which rules apply."""
+    called = _launch(tmp_path, "legible", "rules", "one-message")
+
+    assert called == [
+        "--quiet",
+        "--from",
+        f"legible-slides=={_pinned_version()}",
+        "legible",
+        "rules",
+        "one-message",
+    ]
+
+
+def test_legible_from_overrides_where_the_checks_install_from(tmp_path):
+    """CI points this at a wheel it built, since the version under test is not on PyPI yet."""
+    called = _launch(tmp_path, "legible", "--version", LEGIBLE_FROM="dist/legible_slides.whl")
+
+    assert called[:3] == ["--quiet", "--from", "dist/legible_slides.whl"]
+
+
+def test_cvd_validate_goes_through_the_same_launcher(tmp_path):
+    """The floor reads the same pin, so the two commands never install different releases."""
+    called = _launch(tmp_path, "cvd-validate", "themes/palette.json")
+
+    assert called == [
+        "--quiet",
+        "--from",
+        f"legible-slides=={_pinned_version()}",
+        "cvd-validate",
+        "themes/palette.json",
+    ]
 
 
 @pytest.mark.parametrize(

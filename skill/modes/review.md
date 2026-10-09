@@ -24,7 +24,7 @@ legible lint DECK --theme THEME --json          # --theme is repeatable, once pe
 ```
 
 In a deck with a `bin/legible`, a stamped one, run this and every `legible` and `cvd-validate`
-command below through `bin/legible` and `bin/cvd-validate`. They install the checks from the commit
+command below through `bin/legible` and `bin/cvd-validate`. They install the checks at the version
 the deck is pinned to, so its review applies the rules it was built to, whatever is on PATH.
 
 Each finding names its rule, its slide and its severity. Take them **verbatim**: the linter's count

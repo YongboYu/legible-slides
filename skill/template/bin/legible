@@ -1,5 +1,5 @@
 #!/bin/sh
-# The checks this deck is held to, at the one commit of legible-slides its theme was copied from.
+# The checks this deck is held to, at the release of legible-slides its theme is pinned to.
 #
 # Run every check through here: the hooks, the workflow, and an agent reviewing the deck. A deck
 # pinned to one release is then never checked against another's rules by whatever `legible`
@@ -9,20 +9,19 @@
 #     bin/legible rules one-message
 #     bin/cvd-validate themes/palette.json
 #
-# The scaffold writes the commit in place of `main`. Taking a later release is something you do on
-# purpose: change it here and copy the theme again. The first run fetches and builds that commit;
-# uv caches it, so every run after is immediate.
+# VERSION is the release, and package.json pins slidev-theme-legible to the same one. To take a
+# later release, change both together. The first run installs the checks from PyPI; uv caches
+# them, so every run after that starts right away.
 #
-# The pin is the commit. Where the repository cannot be fetched over HTTPS, a private clone for
-# one, point LEGIBLE_REPO at one that can be, an SSH or file URL, and the commit stays the same.
+# LEGIBLE_FROM installs the checks from somewhere else, such as a wheel you built yourself.
 set -eu
 
-REV=main
-REPO=${LEGIBLE_REPO:-https://github.com/YongboYu/legible-slides}
+VERSION=0.1.0
+FROM=${LEGIBLE_FROM:-legible-slides==$VERSION}
 
 if ! command -v uvx >/dev/null 2>&1; then
   echo "bin/legible: needs uv, which installs the pinned checks — https://docs.astral.sh/uv/" >&2
   exit 2
 fi
 
-exec uvx --quiet --from "git+$REPO@$REV#subdirectory=python" "${LEGIBLE_TOOL:-legible}" "$@"
+exec uvx --quiet --from "$FROM" "${LEGIBLE_TOOL:-legible}" "$@"

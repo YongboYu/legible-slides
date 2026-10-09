@@ -30,12 +30,12 @@ It needs the commands it delegates to, which is the whole `legible-slides` Pytho
 package ([`python/README.md`](../python/README.md)):
 
 ```bash
-uv tool install "git+https://github.com/YongboYu/legible-slides#subdirectory=python"
+uv tool install legible-slides
 ```
 
 That install carries the canon with it, so the skill reads the rules it reviews against on a machine
 with no checkout of this repo. A deck the skill stamped needs none of it: its own `bin/legible` installs the
-checks from the commit the deck is pinned to, and the skill runs them through that instead.
+checks at the version the deck is pinned to, and the skill runs them through that instead.
 
 ## What scaffold does
 

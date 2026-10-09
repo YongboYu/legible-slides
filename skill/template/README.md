@@ -25,14 +25,14 @@ pnpm export   # the PDF, every slide in its final state, into dist/
 pnpm render   # a PNG per click step, into render/, to look at before you present
 ```
 
-The theme lives in `theme/`, a copy of `slidev-theme-legible` taken from one commit of
-legible-slides, and `slides.md` names it as `./theme`. Every check runs through `bin/legible`, which
-installs the `legible` tooling from that same commit, so this deck builds from a clean clone and is
-always checked against the rules it was built to — by the hooks, the workflow and you alike. Updating
-is a choice you make: copy the theme again from a later commit and change `REV` in `bin/legible` to
-it. Nothing else
-is configured here, because everything the method fixes — the canvas, the type scale, the bundled
-typefaces, the light ground — arrives with the theme.
+The theme is the npm package `slidev-theme-legible`, and `slides.md` names it as `legible`.
+`package.json` pins it to one exact version. Every check runs through `bin/legible`, which installs
+the `legible-slides` checks from PyPI at that same version, set on its `VERSION=` line. The hooks,
+the workflow and you all run the same checks, so the deck is held to the rules it was built to.
+
+To update, change the version in both places to the same later release, then run `pnpm install`.
+Nothing else is configured here. The canvas, the type scale, the bundled typefaces and the light
+ground all arrive with the theme.
 
 `package.json` holds markdown-it to its 14.x line under `pnpm.overrides`. Slidev's markdown plugin
 imports a file the next major version of markdown-it no longer exports, and with no lockfile a fresh
@@ -82,7 +82,7 @@ bin/legible lint slides.md --theme themes/palette.json
 Every rule the canon marks *decided by script*, with an exit code. `.pre-commit-config.yaml` runs it
 locally and is opt-in; `.github/workflows/method.yml` runs it where nobody can skip it, and is the
 gate. Both run it through `bin/legible`, and all that needs is
-[uv](https://docs.astral.sh/uv/): the first run fetches the pinned commit and caches it.
+[uv](https://docs.astral.sh/uv/): the first run installs the pinned version and caches it.
 
 A green run is the gate and nothing more: the deck has none of the faults a script can find. What is
 left is judgment, and what the rendered pages show — whether a slide carries one message, whether its headline is a claim.
@@ -94,8 +94,8 @@ both halves as one review with a proposed fix on every finding.
 
 | | |
 |---|---|
-| `bin/` | the checks, at the commit the theme was copied from. `bin/legible` holds the pin; run every `legible` command through it. |
-| `theme/` | the vendored theme. Not edited here: a change to it belongs upstream, or it drifts from the commit the checks are pinned to. |
+| `bin/` | the checks, at the version the theme is pinned to. `bin/legible` holds the pin; run every `legible` command through it. |
+| `package.json` | the theme, pinned exactly. Change its version and the one in `bin/legible` together. |
 | `slides.md` | the deck. The first frontmatter block is the headmatter *and* the cover's own frontmatter, which is why the cover's props sit up there. |
 | `themes/palette.json` | the palette. One file, and the only place a colour is written. |
 | `styles/tokens.css` | generated from it, committed, imported by `styles/index.ts`. Do not edit. |

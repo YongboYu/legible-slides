@@ -12,8 +12,8 @@ If it exits 2, the ID has moved in the canon: say so and stop, because a run tha
 fewer rules finds fewer faults.
 
 A deck stamped by scaffold carries its own `bin/legible` and `bin/cvd-validate`, pinned to the
-commit it was built from. In such a deck, run every command this skill names through them, and
-never the `legible` on PATH: two decks pinned to different commits are held to different rules.
+release it was built with. In such a deck, run every command this skill names through them, and
+never the `legible` on PATH: two decks pinned to different releases are held to different rules.
 
 ## Pick the mode, then read its file
 

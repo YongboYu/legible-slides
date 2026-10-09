@@ -48,11 +48,34 @@ def _package_json_version(relative: str) -> str:
     return _package_json(relative)["version"]
 
 
-#: Every place a release's version is written, and how to read it. The create package and the
-#: starter's two pins (the theme dependency and the checks launcher's) join this as they land.
+#: The theme a stamped deck depends on, under the name it has on npm.
+THEME_PACKAGE = "slidev-theme-legible"
+
+
+def _starter_theme_pin(relative: str) -> str:
+    """The version the starter depends on the theme at, as written. Read raw, so a range such as
+    ``^0.1.0`` fails the comparison: a stamped deck pins the theme exactly."""
+    return _package_json(relative)["dependencies"][THEME_PACKAGE]
+
+
+#: The checks launcher's pin, one line of shell.
+_LAUNCHER_VERSION = re.compile(r"^VERSION=(?P<version>\S*)$", re.MULTILINE)
+
+
+def _launcher_version(relative: str) -> str:
+    text = (REPO / relative).read_text(encoding="utf-8")
+    versions = _LAUNCHER_VERSION.findall(text)
+    assert len(versions) == 1, f"{relative} states its version {len(versions)} times"
+    return versions[0]
+
+
+#: Every place a release's version is written, and how to read it. The create package joins this
+#: when it lands.
 VERSIONS = {
     "python/pyproject.toml": _pyproject_version,
     "theme/package.json": _package_json_version,
+    "skill/template/package.json": _starter_theme_pin,
+    "skill/template/bin/legible": _launcher_version,
 }
 
 

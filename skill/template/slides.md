@@ -1,8 +1,8 @@
 ---
-# The theme, vendored: the scaffold copies slidev-theme-legible into theme/ from the same commit of
-# legible-slides that .github/workflows/method.yml installs the checks from, so a fresh clone builds
-# with nothing else and the rules it is checked against are the ones it was built to.
-theme: ./theme
+# The theme is the npm package slidev-theme-legible, which Slidev finds under the name `legible`.
+# package.json pins it to the release that bin/legible installs the checks from, so the deck is
+# checked against the rules it was built to.
+theme: legible
 title: Your title
 author: You
 info: |

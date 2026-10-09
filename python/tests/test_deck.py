@@ -75,7 +75,7 @@ def test_a_frontmatter_block_that_opens_with_a_comment_is_still_frontmatter():
     slides = deck(
         """\
         ---
-        # The theme by path, until the package is on npm.
+        # The theme by path, the copy in this repo.
         theme: ../theme
         ---
 

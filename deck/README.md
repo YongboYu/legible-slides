@@ -19,8 +19,8 @@ pnpm dev      # with hot reload
 pnpm build    # what CI builds
 ```
 
-The deck names the theme by path (`theme: ../theme`), which is how a deck consumes
-[`slidev-theme-legible`](../theme/README.md) until the package is on npm. Nothing else is configured
+The deck names the theme by path (`theme: ../theme`), so it builds from the copy of
+[`slidev-theme-legible`](../theme/README.md) in this repo. Nothing else is configured
 here, because everything the method fixes arrives with the theme — see that README for what.
 
 **No Python is needed to build it.** The palette reaches these slides as

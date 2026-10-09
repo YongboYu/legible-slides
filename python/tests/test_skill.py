@@ -11,6 +11,7 @@ call, and it is advisory precisely because it is fallible; asserting it would be
 of a deck, which is the thing this repo declines to automate.
 """
 
+import json
 import re
 from pathlib import Path
 
@@ -48,10 +49,19 @@ LINTER, READING = "linter", "reading"
 #: A rule addressed by its stable ID, which is the only way `SKILL.md` may mention one.
 _NAMED = re.compile(r"`(?P<rule>[a-z0-9-]+)`")
 
-#: Hyphenated the way a rule ID is, and not one: the command the palette check runs, and the two
-#: palette roles the worked report names, and the Slidev directive build mode writes for a reveal.
-#: Everything else shaped like a rule has to be one.
-NOT_RULES = frozenset({"cvd-validate", "series-1", "series-2", "v-click"})
+#: Hyphenated the way a rule ID is, and not one: the command the palette check runs, the two
+#: palette roles the worked report names, the Slidev directive build mode writes for a reveal, and
+#: the two packages scaffold pins. Everything else shaped like a rule has to be one.
+NOT_RULES = frozenset(
+    {
+        "cvd-validate",
+        "series-1",
+        "series-2",
+        "v-click",
+        "legible-slides",
+        json.loads((REPO / "theme" / "package.json").read_text(encoding="utf-8"))["name"],
+    }
+)
 
 #: The three numbers the procedure owns rather than the canon: `legible lint`'s exit codes, which
 #: step 2 has to spell out to say what each of them means.

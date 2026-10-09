@@ -1,3 +1,3 @@
 #!/bin/sh
-# The accessibility floor, at the commit bin/legible pins. That file holds the pin, so there is one.
+# The accessibility floor, at the version bin/legible pins. That file holds the pin, so there is one.
 LEGIBLE_TOOL=cvd-validate exec "$(dirname "$0")/legible" "$@"

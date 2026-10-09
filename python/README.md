@@ -93,7 +93,7 @@ read. Grayscale collisions are warnings and never change it.
 ### Installing it without this repo
 
 ```bash
-uv tool install "git+https://github.com/YongboYu/legible-slides#subdirectory=python"
+uv tool install legible-slides
 ```
 
 The build copies `docs/method.md` in beside the module, so an install with no checkout still reads

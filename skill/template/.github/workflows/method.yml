@@ -10,11 +10,10 @@ permissions:
 # never block, which is why they are not a job. A green run says the gate holds, not that the deck is
 # ready: that is the review's, read off the rendered pages.
 #
-# The checks run through bin/, which installs them from one commit of legible-slides, the same one
-# the theme in theme/ was copied from. bin/legible holds that commit, and the hooks read the same
-# file, so the gate and a local run cannot disagree about which rules apply. A later release is
-# something you take on purpose, by changing it there and copying the theme again, not something a
-# rerun picks up on its own.
+# The checks run through bin/, which installs them from PyPI at the release of legible-slides that
+# package.json pins the theme to. bin/legible holds that version, and the hooks go through the same
+# file, so the gate and a local run agree about which rules apply. A rerun keeps the same release.
+# To take a later one, change the version in bin/legible and in package.json together.
 #
 # Blocking is the half a workflow cannot grant itself: make this a required status check in the
 # branch ruleset, or a red run merges anyway.
@@ -40,8 +39,8 @@ jobs:
       - run: bin/legible lint slides.md --theme themes/palette.json
 
 
-  # The deck renders from a clean checkout: the theme is vendored, so nothing outside this
-  # repository is needed. What the pages look like is still the review's to read.
+  # The deck renders from a clean checkout, with the theme installed from npm at the version
+  # package.json pins. What the pages look like is still the review's to read.
   build:
     name: the deck builds from a clean checkout
     runs-on: ubuntu-latest

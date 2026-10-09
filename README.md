@@ -32,11 +32,11 @@ Start your own deck. Run this from the repo root:
 ```bash
 mkdir ../my-talk
 cp -R skill/template/. ../my-talk/
-git archive HEAD theme | tar -x -C ../my-talk
-sed -i.bak "s|^REV=main$|REV=$(git rev-parse HEAD)|" ../my-talk/bin/legible && rm ../my-talk/bin/legible.bak
 cd ../my-talk
 pnpm install && pnpm dev
 ```
+
+The theme comes from npm and the checks from PyPI, both at the version the starter pins.
 
 Check it, and export a PDF:
 

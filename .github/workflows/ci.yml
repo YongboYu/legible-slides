@@ -104,51 +104,53 @@ jobs:
   # and holds it to the theme's layouts and to its own palette; what it cannot reach is whether the
   # result renders, and whether the palette that reaches it is the deck's own.
   #
-  # That second half is the one worth a runner. The stamped deck carries its own generated tokens
-  # and a vendored copy of the theme, so a theme wearing another palette is exactly what it has to
-  # outrank — and a deck that silently wore the checkout's palette instead would look fine everywhere
-  # except in the built CSS.
+  # That second half is the one worth a runner. The stamped deck carries its own generated tokens,
+  # and the theme package carries the project's palette, so a theme wearing another palette is
+  # exactly what the deck has to outrank. A deck that wore the theme's palette by mistake would look
+  # fine everywhere except in the built CSS.
+  #
+  # The stamped deck pins a theme on npm and checks on PyPI at this commit's version, which may not
+  # be published yet. So the job builds both from this checkout and points the deck at them: a pnpm
+  # override for the theme, and LEGIBLE_FROM for the checks. The pins themselves are held to the
+  # release's version by python/tests/test_release.py.
   scaffold:
     name: the scaffold's template builds
     runs-on: ubuntu-latest
-    # The stamped deck's checks install this commit through its own bin/legible. They fetch it from
-    # this checkout rather than from GitHub: the commit under test may not be fetchable there yet (a
-    # pull request's merge commit, a private repository), and the pin under test is the commit, not
-    # the URL — which is what LEGIBLE_REPO overrides, and all it overrides.
-    env:
-      LEGIBLE_REPO: file://${{ github.workspace }}
     steps:
-      # The whole history, so the pinned commit is one this checkout can hand to uv's git fetch.
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
       - uses: pnpm/action-setup@v4
         with:
           version: 10
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+      # The two packages a release would publish, built the way the release workflow builds them.
+      - name: Pack the theme and build the checks
+        run: |
+          npm pack ./theme --pack-destination "$RUNNER_TEMP/npm"
+          uv build python --wheel --out-dir "$RUNNER_TEMP/python"
+          echo "THEME_TARBALL=$(ls "$RUNNER_TEMP"/npm/slidev-theme-legible-*.tgz)" >> "$GITHUB_ENV"
+          echo "LEGIBLE_FROM=$(ls "$RUNNER_TEMP"/python/legible_slides-*.whl)" >> "$GITHUB_ENV"
       # A plain copy, dotfiles included, which is what the skill's own step does. Stamped outside
-      # the checkout so nothing here can accidentally satisfy it.
+      # the checkout so nothing here can accidentally satisfy it. The override is the one edit, and
+      # it leaves the pin in place: pnpm still reads the pinned version and resolves it to the
+      # tarball.
       - name: Stamp it
         run: |
           mkdir -p "$RUNNER_TEMP/stamped"
           cp -R skill/template/. "$RUNNER_TEMP/stamped/"
-          # The theme, vendored from this commit the way the skill's scaffold step vendors it, so
-          # the build below proves a stamped deck needs nothing outside itself.
-          git archive HEAD theme | tar -x -C "$RUNNER_TEMP/stamped"
-          # The pin, written the way the skill's scaffold step writes it, then read back: the line
-          # has to name this exact commit, which a sed that matched nothing would leave as main.
-          sed -i "s|^REV=main$|REV=$GITHUB_SHA|" "$RUNNER_TEMP/stamped/bin/legible"
-          test "$(grep -c "^REV=" "$RUNNER_TEMP/stamped/bin/legible")" = 1
-          grep -qx "REV=$GITHUB_SHA" "$RUNNER_TEMP/stamped/bin/legible"
+          cd "$RUNNER_TEMP/stamped"
+          jq --arg tarball "file:$THEME_TARBALL" \
+            '.pnpm.overrides["slidev-theme-legible"] = $tarball' package.json > package.tmp
+          mv package.tmp package.json
+          grep -q '^theme: legible$' slides.md
       # The template arrives holding the theme's own palette, so a deck that wore the checkout's
       # colours instead would pass the check below by coincidence. Recolour it first, the way the
       # skill's step 4 does, so the two differ and the check can tell them apart. Any hex other than
       # the theme's own would do; the guard at the end of the step fails if the two ever coincide.
-      - uses: astral-sh/setup-uv@v5
-        with:
-          enable-cache: true
       - name: Recolour it
         working-directory: ${{ runner.temp }}/stamped
         run: |
@@ -156,9 +158,9 @@ jobs:
           bin/legible gen-css themes/palette.json --output styles/tokens.css
           test "$(jq -r .brand themes/palette.json)" != "$(jq -r .brand "$GITHUB_WORKSPACE/themes/leuven-blue.json")"
       # The stamped deck's own checks, run the way its workflow and hooks run them: through bin/,
-      # with no legible installed on this runner, so a launcher that fell back to PATH would fail
-      # here rather than pass on a copy nobody pinned. The guard at the top proves that copy is absent.
-      - name: The stamped checks run at the pinned commit
+      # with no legible installed on this runner. A launcher that fell back to PATH would fail here
+      # instead of passing on a copy nobody pinned. The guard at the top proves that copy is absent.
+      - name: The stamped checks run through the launcher
         working-directory: ${{ runner.temp }}/stamped
         run: |
           if command -v legible || command -v cvd-validate; then
@@ -169,9 +171,17 @@ jobs:
           bin/legible gen-css themes/palette.json --output styles/tokens.css --check
           bin/legible lint slides.md --theme themes/palette.json
       # No lockfile is stamped: a deck resolves its own, and pinning one here would pin every deck
-      # scaffolded from it to whatever this repo last resolved.
+      # scaffolded from it to whatever this repo last resolved. The check after it asks pnpm where
+      # the theme came from, so a theme fetched from npm in place of the tarball turns this red.
       - run: pnpm install
         working-directory: ${{ runner.temp }}/stamped
+      - name: The theme came from the packed tarball
+        working-directory: ${{ runner.temp }}/stamped
+        run: |
+          resolved=$(pnpm list --json slidev-theme-legible \
+            | jq -r '.[0].dependencies["slidev-theme-legible"].resolved')
+          echo "resolved: $resolved  packed: $THEME_TARBALL"
+          test "$(basename "$resolved")" = "$(basename "$THEME_TARBALL")"
       - run: pnpm run build
         working-directory: ${{ runner.temp }}/stamped
       # The starter has one slide per layout the theme ships, so this build is also the theme's.
@@ -181,7 +191,7 @@ jobs:
       - name: Both bundled families shipped with it
         working-directory: ${{ runner.temp }}/stamped
         run: ls dist/assets/Inter-*.woff2 dist/assets/JetBrainsMono-*.woff2
-      - name: The deck wears its own palette, not the theme checkout's
+      - name: The deck wears its own palette, not the theme package's
         working-directory: ${{ runner.temp }}/stamped
         run: |
           built=$(awk 'match($0, /--brand: *#[0-9a-fA-F]+/) {

@@ -9,26 +9,28 @@ this file names them by ID — `ae-skeleton`, `type-scale`, `light-ground`, `no-
 so that a rule can change in one place. What gets built and why is
 [`docs/slidev-reference-impl.md`](../docs/slidev-reference-impl.md).
 
-> **v1 is in-repo.** The package is structured to be published and is not published: a deck consumes
-> it by local path. The starter in [`skill/template/`](../skill/template) uses every layout once, and
-> CI builds it as the theme's own test.
+> **Published on npm** as `slidev-theme-legible`, released together with the `legible-slides`
+> checks on PyPI under one version. The starter in [`skill/template/`](../skill/template) depends on
+> it at that version and uses every layout once, and CI builds it as the theme's own test. The
+> flagship deck in [`deck/`](../deck) uses the copy in this repo, by path.
 
 ## Using it
 
+```bash
+pnpm add --save-exact slidev-theme-legible
+```
+
 ```yaml
 ---
-theme: ../theme # a path, until the package is on npm
+theme: legible
 ---
 ```
+
+Pin the version exactly, so the theme stays the same until you change it. To check the deck with the matching
+rules, run `legible-slides` at the same version.
 
 Nothing else is required. The canvas, the aspect ratio, the font families and the locked light
 colour scheme arrive with the theme.
-
-```bash
-pnpm install
-pnpm dev      # the example deck, with hot reload
-pnpm build    # what CI builds
-```
 
 ## Layouts
 

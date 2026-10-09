@@ -1,8 +1,8 @@
 """The project's licence, in everything a user receives.
 
 MIT asks for its notice in every copy, and a copy here is a package rather than the repo: the wheel
-and the sdist are built from ``python/``, and the npm archive and a scaffolded deck's vendored theme
-from ``theme/``. Neither sees the root, so each carries the root's licence word for word.
+and the sdist are built from ``python/``, and the npm archive from ``theme/``. Neither sees the
+root, so each carries the root's licence word for word.
 """
 
 from pathlib import Path

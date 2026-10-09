@@ -5,9 +5,9 @@
 # The gate is .github/workflows/method.yml, which runs the same three checks on push and pull
 # request. A hook any author can skip with `--no-verify` is convenience, never enforcement.
 #
-# Every hook runs through bin/, which installs the checks from the one commit of legible-slides
-# the theme was copied from — the same commit the workflow uses, so the hooks and the gate apply
-# the same rules, whatever `legible` is on PATH. It needs uv, and nothing else.
+# Every hook runs through bin/, which installs the checks from PyPI at the version bin/legible
+# pins. The workflow uses the same launcher, so the hooks and the gate apply the same rules,
+# whatever `legible` is on PATH. It needs uv, and nothing else.
 repos:
   - repo: local
     hooks:
