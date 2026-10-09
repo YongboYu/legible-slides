@@ -46,7 +46,24 @@ _COMMENT = re.compile(r"<!--(?P<text>.*?)-->", re.DOTALL)
 _IMAGE = re.compile(r"!\[[^\]]*\]\([^)]*\)")
 _LINK = re.compile(r"\[(?P<text>[^\]]*)\]\([^)]*\)")
 _TAG = re.compile(r"<[^>]+>")
+
+#: A line break the author forced, and the character it stands as while tags are taken out. A
+#: forced break shapes a headline, so the headline keeps it; elsewhere it only separates words. The
+#: character is no space, so a heading's trim leaves a break at either end of it in place.
+_BREAK_TAG = re.compile(r"<br\b[^>]*>", re.IGNORECASE)
+_BREAK = "\ue000"
 _EMPHASIS = re.compile(r"[*`~]+")
+
+#: Inline code, which the slide shows as written: a ``<br>`` in backticks is text, and breaks no
+#: line. Markdown closes a span on a run of as many backticks as opened it, within one paragraph.
+_CODE_SPAN = re.compile(
+    r"(?<!`)(?P<ticks>`+)(?!`)(?:(?!\n[ \t]*\n).)+?(?<!`)(?P=ticks)(?!`)", re.DOTALL
+)
+
+#: The characters a code span's angle brackets stand as while tags are read, so no reader of tags
+#: takes one for a tag. ``_plain`` turns them back into what the span shows.
+_SHOWN = str.maketrans("<>", "\ue001\ue002")
+_UNSHOWN = str.maketrans("\ue001\ue002", "<>")
 
 #: Where a slide's markup can set a size: a style attribute (Vue's bound one included), a style
 #: block, and a class list. A size anywhere else — a sentence about CSS, a code block — is not one.
@@ -147,6 +164,8 @@ class Slide:
     """
 
     number: int
+    #: The slide's first heading, its lines joined by newlines. A ``<br>`` the author wrote starts a
+    #: line, so two in a row leave an empty one between.
     headline: str | None
     bullets: tuple[str, ...]
     prose: tuple[str, ...]
@@ -265,7 +284,7 @@ def _slide(number: int, frontmatter: Sequence[str], lines: Sequence[str]) -> Sli
     # its word count — markdown's own lazy continuation, and the ceiling depends on it.
     continuing = False
 
-    for line in _without_tags(said).split("\n"):
+    for line in _without_tags(_BREAK_TAG.sub(_BREAK, _code_shown(said))).split("\n"):
         # A slot marker is where a layout splits the slide, which is layout rather than words.
         line = "" if _SLOT.match(line) else line
         heading = _HEADING.match(line)
@@ -278,7 +297,7 @@ def _slide(number: int, frontmatter: Sequence[str], lines: Sequence[str]) -> Sli
             continuing = False
 
         if heading:
-            headline = headline or _plain(heading.group("text")) or None
+            headline = headline or _headline(heading.group("text")) or None
         elif bullet:
             bullets.append(_plain(bullet.group("text")))
             continuing = True
@@ -521,9 +540,27 @@ def _body_and_notes(lines: Sequence[str]) -> tuple[list[str], str | None]:
     return _COMMENT.sub("", text).split("\n"), notes or None
 
 
+def _headline(text: str) -> str:
+    """The headline as the room receives it, each line the author's breaks set ending at a newline.
+
+    A break starts a line, an empty one too when the next break follows it, as the browser sets
+    them. A break at the very end only closes the last line. A headline of breaks alone is empty.
+    """
+    lines = [_plain(part) for part in text.split(_BREAK)]
+    if len(lines) > 1 and not lines[-1]:
+        lines.pop()
+    return "\n".join(lines) if any(lines) else ""
+
+
+def _code_shown(markup: str) -> str:
+    """The markup with each inline code span's angle brackets standing as other characters."""
+    return _CODE_SPAN.sub(lambda span: span.group().translate(_SHOWN), markup)
+
+
 def _plain(text: str) -> str:
     """One line as the room receives it: no markup, no components, no URLs."""
+    text = text.replace(_BREAK, " ")
     text = _IMAGE.sub("", text)
     text = _LINK.sub(lambda match: match.group("text"), text)
     text = _TAG.sub("", text)
-    return _EMPHASIS.sub("", text).strip()
+    return _EMPHASIS.sub("", text).translate(_UNSHOWN).strip()

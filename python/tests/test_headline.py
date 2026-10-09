@@ -84,3 +84,16 @@ def test_a_word_wider_than_the_line_still_takes_one_line():
 
 def test_nothing_takes_no_lines():
     assert wrap("") == ()
+    assert wrap("\n\n") == ()
+
+
+def test_a_forced_break_starts_a_new_line():
+    """A newline is a ``<br>`` the author wrote, and each part between them wraps on its own."""
+    assert wrap("First line\nSecond line\nThird") == ("First line", "Second line", "Third")
+    assert wrap(f"Short\n{THREE_LINES}") == ("Short", *wrap(THREE_LINES))
+
+
+def test_an_empty_line_between_two_breaks_is_still_a_line():
+    """The slide sets it, so it takes its place among the lines."""
+    assert wrap("First\n\nThird") == ("First", "", "Third")
+    assert wrap("\nFirst") == ("", "First")
