@@ -326,7 +326,8 @@ def small_multiples(
 
     Each panel takes its own scale, from zero. That is what small multiples are for: groups whose
     values differ by orders of magnitude, where one shared axis would flatten all but the largest.
-    The comparison a panel makes is within it, and its labels say what each bar is worth.
+    The comparison a panel makes is within it, and its labels say what each bar is worth. So every
+    value is a magnitude, and a negative one is refused.
 
     ``value_format`` is one format for every label, or one per group: a panel of 8.30s and a panel
     of 0.117s need not share a precision any more than they share a scale. ``columns`` is how many
@@ -341,6 +342,12 @@ def small_multiples(
                 f"series {line.label!r} has {len(line.values)} values against {len(groups)} "
                 f"groups: every series is measured once in every panel"
             )
+        for group, value in zip(groups, line.values, strict=True):
+            if value < 0:
+                raise FigureError(
+                    f"series {line.label!r} is {value} in {group!r}: every panel runs from zero, "
+                    "so a negative bar would fall off it"
+                )
     formats = [value_format] * len(groups) if isinstance(value_format, str) else list(value_format)
     if len(formats) != len(groups):
         raise FigureError(
@@ -381,7 +388,7 @@ def small_multiples(
             axes.tick_params(axis="x", length=0, labelbottom=False)
             axes.tick_params(axis="y", length=0, labelleft=index % columns == 0)
             # Room past the longest bar for the label it carries.
-            axes.set_xlim(0, max(max(values), 0) * 1.35 or 1)
+            axes.set_xlim(0, max(values) * 1.35 or 1)
 
     return figure
 
