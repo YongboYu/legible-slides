@@ -46,8 +46,6 @@ pnpm exec playwright install chromium   # once per machine
 pnpm export                             # writes dist/slides.pdf
 ```
 
-To have a coding agent do this for you, see [`skill/README.md`](skill/README.md).
-
 See the flagship deck, which explains the rules by following them:
 
 ```bash
@@ -55,6 +53,21 @@ git clone https://github.com/YongboYu/legible-slides
 cd legible-slides/deck
 pnpm install && pnpm dev
 ```
+
+## With a coding agent
+
+The skill lets [Claude Code](https://claude.com/claude-code) draft a talk from a paper, build the
+deck and review it. Link it from a clone of this repo, and install the checks it runs:
+
+```bash
+git clone https://github.com/YongboYu/legible-slides
+mkdir -p ~/.claude/skills
+ln -s "$PWD/legible-slides/skill" ~/.claude/skills/legible-slides
+uv tool install legible-slides
+```
+
+Then ask in plain words: "draft a talk from paper.pdf", "build the deck from the plan" or "review
+slides.md". The skill picks its mode from your request ([`skill/README.md`](skill/README.md)).
 
 ## Read more
 
