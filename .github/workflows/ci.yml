@@ -112,7 +112,8 @@ jobs:
   # The stamped deck pins a theme on npm and checks on PyPI at this commit's version, which may not
   # be published yet. So the job builds both from this checkout and points the deck at them: a pnpm
   # override for the theme, and LEGIBLE_FROM for the checks. The pins themselves are held to the
-  # release's version by python/tests/test_release.py.
+  # release's version by python/tests/test_release.py. The deck itself is stamped by the create
+  # package, packed from this checkout too, so the one command an author runs is the one tried here.
   scaffold:
     name: the scaffold's template builds
     runs-on: ubuntu-latest
@@ -127,25 +128,39 @@ jobs:
       - uses: astral-sh/setup-uv@v5
         with:
           enable-cache: true
-      # The two packages a release would publish, built the way the release workflow builds them:
-      # the wheel from the sdist, and the theme packed into a directory made first, since npm pack
-      # fails on a destination that does not exist and a fresh runner has none.
-      - name: Pack the theme and build the checks
+      # The three packages a release would publish, built the way the release workflow builds them:
+      # the wheel from the sdist, and the theme and the create package packed into a directory made
+      # first, since npm pack fails on a destination that does not exist and a fresh runner has
+      # none. Packing the create package bundles the starter into it.
+      - name: Pack the theme and the create package, and build the checks
         run: |
           mkdir -p "$RUNNER_TEMP/npm"
-          npm pack ./theme --pack-destination "$RUNNER_TEMP/npm"
+          npm pack ./theme ./create --pack-destination "$RUNNER_TEMP/npm"
           uv build python --out-dir "$RUNNER_TEMP/python"
           echo "THEME_TARBALL=$(ls "$RUNNER_TEMP"/npm/slidev-theme-legible-*.tgz)" >> "$GITHUB_ENV"
+          echo "CREATE_TARBALL=$(ls "$RUNNER_TEMP"/npm/create-legible-slides-*.tgz)" >> "$GITHUB_ENV"
           echo "LEGIBLE_FROM=$(ls "$RUNNER_TEMP"/python/legible_slides-*.whl)" >> "$GITHUB_ENV"
-      # A plain copy, dotfiles included, which is what the skill's own step does. Stamped outside
-      # the checkout so nothing here can accidentally satisfy it. The override is the one edit, and
-      # it leaves the pin in place: pnpm still reads the pinned version and resolves it to the
-      # tarball.
-      - name: Stamp it
+      # Stamped the way an author stamps one, `npm create legible-slides`, with the packed package
+      # in place of the published one. npm runs it from its own cache, where no checkout sits
+      # beside it, so the deck can only come from the starter bundled into the tarball. Stamped
+      # outside the checkout too, so nothing here can accidentally satisfy what follows.
+      - name: Stamp it with the create package
+        working-directory: ${{ runner.temp }}
+        run: npm exec --yes --package "$CREATE_TARBALL" -- create-legible-slides stamped
+      # npm leaves a .gitignore out of a package, and the checks below run the launchers with no
+      # chmod, so the two things a package can lose on its way are checked before anything else.
+      - name: The deck arrived whole, named for its directory
+        working-directory: ${{ runner.temp }}/stamped
         run: |
-          mkdir -p "$RUNNER_TEMP/stamped"
-          cp -R skill/template/. "$RUNNER_TEMP/stamped/"
-          cd "$RUNNER_TEMP/stamped"
+          test -f .gitignore
+          test -x bin/legible
+          test -x bin/cvd-validate
+          test "$(jq -r .name package.json)" = stamped
+      # The one edit, and it leaves the pin in place: pnpm still reads the pinned version and
+      # resolves it to the tarball.
+      - name: Point the theme at the packed tarball
+        working-directory: ${{ runner.temp }}/stamped
+        run: |
           jq --arg tarball "file:$THEME_TARBALL" \
             '.pnpm.overrides["slidev-theme-legible"] = $tarball' package.json > package.tmp
           mv package.tmp package.json

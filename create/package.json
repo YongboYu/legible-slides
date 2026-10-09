@@ -1,0 +1,33 @@
+{
+  "name": "create-legible-slides",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Start a Slidev talk built to the legible-slides method: npm create legible-slides my-talk.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/YongboYu/legible-slides.git",
+    "directory": "create"
+  },
+  "keywords": [
+    "slidev",
+    "create",
+    "starter",
+    "assertion-evidence",
+    "accessibility"
+  ],
+  "engines": {
+    "node": "^20.19.0 || >=22.12.0"
+  },
+  "bin": {
+    "create-legible-slides": "index.js"
+  },
+  "files": [
+    "index.js",
+    "template"
+  ],
+  "scripts": {
+    "prepack": "node bundle.js",
+    "postpack": "node bundle.js --remove"
+  }
+}

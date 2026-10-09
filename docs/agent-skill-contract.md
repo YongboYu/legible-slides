@@ -258,10 +258,12 @@ endorsement: the cover's logo slots arrive as placeholders. Slidev only.
 
 Built in **#24** as the scaffold mode of the skill, [`skill/modes/scaffold.md`](../skill/modes/scaffold.md), which stamps
 [`skill/template/`](../skill/template) — files rather than instructions, so what a stamp produces is
-something a suite can be run over. It is: the deck wired to the theme package, pinned exactly at the
-release its checks install at from PyPI, the palette at
-`themes/palette.json` with the stylesheet `legible gen-css` emits from it committed beside it, both
-checks as a pre-commit config and a workflow, and one skeleton slide per layout.
+something a suite can be run over. Since #51 it stamps them with `npm create legible-slides`, the
+command an author runs: the `create-legible-slides` package on npm carries the template, bundled
+into it when it is packed. What it stamps is: the deck wired to the theme package, pinned exactly at
+the release its checks install at from PyPI, the palette at `themes/palette.json` with the
+stylesheet `legible gen-css` emits from it committed beside it, both checks as a pre-commit config
+and a workflow, and one skeleton slide per layout.
 
 The palette is named for its job rather than for the palette it arrives holding, because everything
 else in the stamped deck points at that path: choosing another one is a change to the file's
@@ -271,9 +273,10 @@ of the theme.
 **The acceptance bar is §5's own review**, and it is enforced rather than asserted:
 `python/tests/test_scaffold.py` lints the template, so a template that would stamp an error fails
 this repo's CI, and the same suite holds it to the theme's layouts and to the palette it copies. CI
-also stamps the template, recolours it, and builds it against the packed theme and the built checks.
-That build settles the claim that the deck's own tokens outrank the theme package's: a stamped deck
-wearing the wrong palette would be visible in the built CSS and nowhere else.
+also stamps the template through the packed create package, recolours it, and builds it against the
+packed theme and the built checks. That build settles the claim that the deck's own tokens outrank
+the theme package's: a stamped deck wearing the wrong palette would be visible in the built CSS and
+nowhere else.
 
 ## 7. Draft and build — a talk plan between the paper and the deck
 

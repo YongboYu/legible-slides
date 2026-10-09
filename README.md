@@ -19,24 +19,15 @@ under colour-vision deficiency](docs/images/flagship.png)
 You need [Node](https://nodejs.org) 22.12+, [pnpm](https://pnpm.io) 10 and
 [uv](https://docs.astral.sh/uv/).
 
-See the flagship deck, which explains the rules by following them:
+Start your own deck:
 
 ```bash
-git clone https://github.com/YongboYu/legible-slides
-cd legible-slides/deck
+npm create legible-slides my-talk
+cd my-talk
 pnpm install && pnpm dev
 ```
 
-Start your own deck. Run this from the repo root:
-
-```bash
-mkdir ../my-talk
-cp -R skill/template/. ../my-talk/
-cd ../my-talk
-pnpm install && pnpm dev
-```
-
-The theme comes from npm and the checks from PyPI, both at the version the starter pins.
+The theme comes from npm and the checks from PyPI, both at the version the deck pins.
 
 Check it, and export a PDF:
 
@@ -48,6 +39,14 @@ pnpm export                             # writes dist/slides.pdf
 ```
 
 To have a coding agent do this for you, see [`skill/README.md`](skill/README.md).
+
+See the flagship deck, which explains the rules by following them:
+
+```bash
+git clone https://github.com/YongboYu/legible-slides
+cd legible-slides/deck
+pnpm install && pnpm dev
+```
 
 ## Read more
 

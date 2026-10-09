@@ -39,10 +39,11 @@ checks at the version the deck is pinned to, and the skill runs them through tha
 
 ## What scaffold does
 
-Copies [`template/`](template) — one skeleton slide per layout the theme ships, a palette that
-clears the accessibility floor, the stylesheet generated from it, and both checks wired as a
-pre-commit hook and a workflow. Then it fills in the blanks the author named, regenerates the
-stylesheet if the palette changed, builds, and **runs review mode over what it stamped**.
+Stamps [`template/`](template) with `npm create legible-slides`, the command an author runs. The
+template is one skeleton slide per layout the theme ships, a palette that clears the accessibility
+floor, the stylesheet generated from it, and both checks wired as a pre-commit hook and a workflow.
+Then scaffold fills in the blanks the author named, regenerates the stylesheet if the palette
+changed, builds, and **runs review mode over what it stamped**.
 
 That last step is the point. The acceptance bar for the scaffold is the review, so a stamped deck
 carrying an error is a bug in the template rather than in anybody's talk — which is what "correct

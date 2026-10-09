@@ -10,9 +10,10 @@ so that a rule can change in one place. What gets built and why is
 [`docs/slidev-reference-impl.md`](../docs/slidev-reference-impl.md).
 
 > **Published on npm** as `slidev-theme-legible`, released together with the `legible-slides`
-> checks on PyPI under one version. The starter in [`skill/template/`](../skill/template) depends on
-> it at that version and uses every layout once, and CI builds it as the theme's own test. The
-> flagship deck in [`deck/`](../deck) uses the copy in this repo, by path.
+> checks on PyPI under one version. The starter in [`skill/template/`](../skill/template), which
+> `npm create legible-slides` stamps, depends on it at that version and uses every layout once, and
+> CI builds it as the theme's own test. The flagship deck in [`deck/`](../deck) uses the copy in
+> this repo, by path.
 
 ## Using it
 

@@ -69,11 +69,11 @@ def _launcher_version(relative: str) -> str:
     return versions[0]
 
 
-#: Every place a release's version is written, and how to read it. The create package joins this
-#: when it lands.
+#: Every place a release's version is written, and how to read it.
 VERSIONS = {
     "python/pyproject.toml": _pyproject_version,
     "theme/package.json": _package_json_version,
+    "create/package.json": _package_json_version,
     "skill/template/package.json": _starter_theme_pin,
     "skill/template/bin/legible": _launcher_version,
 }
@@ -117,8 +117,9 @@ def _npm_packages() -> list[str]:
     return listed[0].split()
 
 
-def test_the_release_publishes_the_theme_to_npm():
-    assert "theme" in _npm_packages()
+@pytest.mark.parametrize("package", ["theme", "create"])
+def test_the_release_publishes_the_theme_and_the_create_package_to_npm(package):
+    assert package in _npm_packages()
 
 
 def test_every_npm_package_the_release_publishes_names_this_repository():

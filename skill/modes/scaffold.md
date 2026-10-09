@@ -14,21 +14,26 @@ Ask for whichever of these the author has not already said.
 | Which palette it wears | the one the template carries, a copy of `themes/leuven-blue.json`. Change it only if the author names another. |
 | Which marks the cover shows | the placeholders the theme bundles, unless the author names their own files. |
 
-The template already pins the theme and the checks to the release this skill ships with:
-`slidev-theme-legible` from npm in `package.json`, and `legible-slides` from PyPI on the `VERSION=`
-line of `bin/legible`.
+The version is settled for you: the release that stamps the deck pins the theme and the checks to
+itself, `slidev-theme-legible` from npm in `package.json` and `legible-slides` from PyPI on the
+`VERSION=` line of `bin/legible`.
 
 ## 2. Stamp the template
 
-`template/` beside this skill's `SKILL.md` is the deck. Copy all of it, dotfiles included:
+Stamp it the way an author would, with the create command, naming the new directory:
 
 ```bash
-cp -R /path/to/this/skill/template/. path/to/new-deck/
+npm create legible-slides path/to/new-deck
 ```
 
-The trailing `/.` copies the dotfiles, which are the checks. `bin/legible` is the one place the
-checks' pin lives: the hooks, the workflow and every command below run the checks through it, so the
-deck is checked against the rules it was built to, whatever `legible` is on the machine's PATH.
+It stamps the starter as the latest release ships it, dotfiles included, since the dotfiles are the
+checks. That release can be newer than this skill, which is why every check runs through the deck's
+own launcher. It names the deck after its directory, and it refuses a directory that is not empty,
+so name a new one.
+
+`bin/legible` is the one place the checks' pin lives: the hooks, the workflow and every command
+below run the checks through it, so the deck is checked against the rules it was built to, whatever
+`legible` is on the machine's PATH.
 
 **Done when** `.github/workflows/method.yml`, `.pre-commit-config.yaml` and `bin/` are in the new
 deck, and the `VERSION=` line in `bin/legible` names the version `package.json` pins
@@ -39,7 +44,7 @@ deck, and the `VERSION=` line in `bin/legible` names the version `package.json` 
 | Where | What |
 |---|---|
 | the headmatter of `slides.md` | the title, the author, and the cover's own venue and date. The theme is already `legible` |
-| `package.json` | the deck's name and its description |
+| `package.json` | the deck's description. The create command has already named it after its directory |
 | `themes/palette.json` | the chosen palette's contents, if it is not the one stamped. Keep the path: everything in the deck points at it, which makes a recolour one edit. |
 | `public/`, `themeConfig.venueLogo` and `themeConfig.affiliationLogo` | the author's own marks, if they named any |
 | `themeConfig.shareUrl`, `themeConfig.shareQr` and `themeConfig.contact` | where the slides will be shared and how to reach the author, if they said; a QR code for the link goes in `public/` |

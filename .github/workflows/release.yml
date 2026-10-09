@@ -1,8 +1,8 @@
 name: Release
 
-# A `v*` tag releases every package at once (#46): the checks to PyPI, the theme to npm. Nothing
-# publishes until the check job has confirmed the tag names the version every file states and the
-# test suite passes, so a mistyped or early tag publishes nothing.
+# A `v*` tag releases every package at once (#46): the checks to PyPI, the theme and the create
+# package to npm. Nothing publishes until the check job has confirmed the tag names the version
+# every file states and the test suite passes, so a mistyped or early tag publishes nothing.
 #
 # Run by hand, the same workflow is a dry run: it checks, builds the wheel and packs the npm
 # packages, and skips both publish jobs. That is how it gets tested before the first real tag.
@@ -22,7 +22,7 @@ concurrency:
 env:
   # The npm packages a release publishes, one directory each. A new package joins by adding its
   # directory here; python/tests/test_release.py reads this line.
-  NPM_PACKAGES: theme
+  NPM_PACKAGES: theme create
 
 jobs:
   check:

@@ -4,6 +4,8 @@ node_modules/
 
 # build output
 dist/
+# the starter, bundled into the create package while it packs (create/bundle.js)
+create/template/
 .vite-inspect/
 .remote-assets/
 components.d.ts
