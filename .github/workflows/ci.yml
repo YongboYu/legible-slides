@@ -127,11 +127,14 @@ jobs:
       - uses: astral-sh/setup-uv@v5
         with:
           enable-cache: true
-      # The two packages a release would publish, built the way the release workflow builds them.
+      # The two packages a release would publish, built the way the release workflow builds them:
+      # the wheel from the sdist, and the theme packed into a directory made first, since npm pack
+      # fails on a destination that does not exist and a fresh runner has none.
       - name: Pack the theme and build the checks
         run: |
+          mkdir -p "$RUNNER_TEMP/npm"
           npm pack ./theme --pack-destination "$RUNNER_TEMP/npm"
-          uv build python --wheel --out-dir "$RUNNER_TEMP/python"
+          uv build python --out-dir "$RUNNER_TEMP/python"
           echo "THEME_TARBALL=$(ls "$RUNNER_TEMP"/npm/slidev-theme-legible-*.tgz)" >> "$GITHUB_ENV"
           echo "LEGIBLE_FROM=$(ls "$RUNNER_TEMP"/python/legible_slides-*.whl)" >> "$GITHUB_ENV"
       # A plain copy, dotfiles included, which is what the skill's own step does. Stamped outside

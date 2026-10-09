@@ -14,8 +14,9 @@ Ask for whichever of these the author has not already said.
 | Which palette it wears | the one the template carries, a copy of `themes/leuven-blue.json`. Change it only if the author names another. |
 | Which marks the cover shows | the placeholders the theme bundles, unless the author names their own files. |
 
-The template already pins the theme and the checks to the release this skill ships with: `slidev-theme-legible` from npm in `package.json`, and `legible-slides` from PyPI on the
-`VERSION=` line of `bin/legible`.
+The template already pins the theme and the checks to the release this skill ships with:
+`slidev-theme-legible` from npm in `package.json`, and `legible-slides` from PyPI on the `VERSION=`
+line of `bin/legible`.
 
 ## 2. Stamp the template
 

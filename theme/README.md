@@ -26,8 +26,8 @@ theme: legible
 ---
 ```
 
-Pin the version exactly, so the theme stays the same until you change it. To check the deck with the matching
-rules, run `legible-slides` at the same version.
+Pin the version exactly, so the theme stays the same until you change it. To check the deck
+against the matching rules, install the `legible-slides` checks at the same version.
 
 Nothing else is required. The canvas, the aspect ratio, the font families and the locked light
 colour scheme arrive with the theme.
