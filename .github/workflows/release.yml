@@ -92,7 +92,7 @@ jobs:
 
   # Trusted publishing: PyPI trusts this workflow, in this environment, and no PyPI token is stored.
   # The environment holds the job until a maintainer approves it on GitHub, as npm holds a staged
-  # version, so a compromised workflow can't release here either (scripts/setup-publishing.sh).
+  # version. A compromised workflow can't release here either.
   pypi:
     name: publish to PyPI
     needs: build
@@ -114,10 +114,10 @@ jobs:
         with:
           skip-existing: true
 
-  # Each package trusts this workflow to stage a version and nothing more
-  # (scripts/setup-publishing.sh), so no npm token is stored: npm authenticates through the
-  # id-token. A staged version goes live only when a maintainer approves it with 2FA, on npmjs.com
-  # under Staged Packages or with `npm stage approve`, so a compromised workflow can't release.
+  # Each package's trusted publisher on npm lets this workflow stage a version and nothing more.
+  # No npm token is stored: npm authenticates through the id-token. A staged version goes live only
+  # when a maintainer approves it with 2FA, on npmjs.com under Staged Packages or with
+  # `npm stage approve`. A compromised workflow can't release on its own.
   npm:
     name: stage on npm
     needs: build
