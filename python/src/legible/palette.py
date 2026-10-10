@@ -64,7 +64,11 @@ def load_palette(path: str | Path) -> Palette:
     """Load and check a theme file, returning its roles flattened."""
     path = Path(path)
     try:
-        raw = json.loads(path.read_text())
+        raw = json.loads(path.read_text(encoding="utf-8"))
+    except UnicodeDecodeError as error:
+        # JSON is UTF-8 (RFC 8259 §8.1) whatever the machine's locale says, so bytes that do not
+        # decode as it are a file that is not JSON either, and come back the same way.
+        raise PaletteError(f"{path}: not UTF-8: {error}") from error
     except json.JSONDecodeError as error:
         # A file that is not JSON is a theme this loader cannot honour, so it comes back as the
         # same error type as a missing role. What the file *is* is this module's business; whether

@@ -456,6 +456,18 @@ def test_a_theme_that_could_not_be_read_is_unchecked_rather_than_a_violation(wri
     assert [unchecked.theme for unchecked in report.unchecked] == [str(tmp_path / "absent.json")]
 
 
+def test_a_theme_that_is_not_utf8_is_unchecked_rather_than_a_violation(write_deck, tmp_path):
+    """Bytes that do not decode never reached a colour, so they cannot have failed the floor."""
+    theme = tmp_path / "latin1.json"
+    theme.write_bytes(b'{"meta": {"name": "Caf\xe9"}}')
+
+    report = lint(write_deck("# A claim\n"), themes=[theme])
+
+    assert report.findings == ()
+    assert report.passed
+    assert [unchecked.theme for unchecked in report.unchecked] == [str(theme)]
+
+
 def test_the_clean_fixture_deck_produces_no_findings():
     """A deck written to the method, carrying the chrome a real one carries — headmatter, layouts,
     a figure, notes and a code block. Anything the linter says about it is a false positive."""

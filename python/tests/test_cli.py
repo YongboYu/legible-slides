@@ -138,6 +138,17 @@ def test_a_theme_that_breaks_the_schema_names_the_role_it_is_missing(
     assert "muted" in capsys.readouterr().err
 
 
+def test_a_theme_that_is_not_utf8_is_unreadable_rather_than_a_crash(capsys, tmp_path):
+    """A crash exits 1 too, and anything keying on the exit code would read it as a failed floor."""
+    theme = tmp_path / "latin1.json"
+    theme.write_bytes(b'{"meta": {"name": "Caf\xe9"}}')
+
+    code = main([str(theme)])
+
+    assert code == 2
+    assert "latin1.json" in capsys.readouterr().err
+
+
 def test_an_unreadable_theme_does_not_silence_the_themes_named_after_it(
     capsys, tmp_path, themes_dir
 ):

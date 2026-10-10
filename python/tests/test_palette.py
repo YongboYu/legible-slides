@@ -36,6 +36,15 @@ def test_a_file_that_is_not_json_fails_as_a_palette_error(tmp_path):
         load_palette(path)
 
 
+def test_a_file_that_is_not_utf8_fails_as_a_palette_error(tmp_path):
+    """JSON is UTF-8, so bytes that do not decode are a bad theme too, wherever they came from."""
+    path = tmp_path / "latin1.json"
+    path.write_bytes(b'{"meta": {"name": "Caf\xe9"}}')
+
+    with pytest.raises(PaletteError, match="latin1.json.*UTF-8"):
+        load_palette(path)
+
+
 @pytest.mark.parametrize("root", [[], None, "#102a43"])
 def test_a_file_that_is_not_an_object_fails_as_a_palette_error(tmp_path, root):
     """Valid JSON can still be no theme at all, and it reads as a bad theme like any other."""
