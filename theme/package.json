@@ -1,6 +1,6 @@
 {
   "name": "slidev-theme-legible",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "type": "module",
   "description": "Assertion-Evidence layouts, persistent chrome and tokenised styles for legible-slides.",
   "license": "MIT",

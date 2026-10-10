@@ -6,7 +6,7 @@ build-backend = "hatchling.build"
 # `legible` is taken on PyPI. Only the name a user installs differs: the import is still `legible`,
 # and the commands below keep theirs.
 name = "legible-slides"
-version = "0.1.0"
+version = "0.1.1"
 description = "The mechanical half of legible-slides: palette loading and CVD validation."
 readme = "README.md"
 requires-python = ">=3.10"
