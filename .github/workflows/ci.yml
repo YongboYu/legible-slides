@@ -79,11 +79,15 @@ jobs:
         run: ls dist/assets/Inter-*.woff2 dist/assets/JetBrainsMono-*.woff2
       # A deck is often hosted under a path, as GitHub Pages hosts a project's. Slidev leaves the
       # images a component binds to the theme, so the theme has to resolve them against the base.
+      # The flagship's images are paths into its public/. The fixture's is one a deck imports, which
+      # Vite has resolved already, so the theme has to leave it as it is.
       - name: Every image loads when the deck is hosted under a path
         run: |
           pnpm exec slidev build slides.md --base /talk/ --out "$RUNNER_TEMP/talk"
+          pnpm exec slidev build fixtures/imported-figure.md --base /talk/ --out "$RUNNER_TEMP/imported"
           pnpm exec playwright install --with-deps chromium
           node check-hosted-images.mjs "$RUNNER_TEMP/talk" /talk/
+          node check-hosted-images.mjs "$RUNNER_TEMP/imported" /talk/
       # The claim that a palette edit reaches the deck with nothing edited in it. The value is read
       # from the theme file at check time rather than written here, so recolouring keeps this green
       # and cutting the deck off from the generated stylesheet turns it red.

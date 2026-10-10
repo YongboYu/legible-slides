@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { resolveAssetUrl } from '@slidev/client/layoutHelper.ts'
+import { assetUrl } from '../utils/assets'
 
 /**
  * An image, its caption and its citation, kept together as one thing.
@@ -10,7 +10,10 @@ import { resolveAssetUrl } from '@slidev/client/layoutHelper.ts'
  * from the same palette this theme is coloured from.
  */
 defineProps<{
-  /** The image URL, served by the deck. A path from its root follows the base the deck is under. */
+  /**
+   * The image URL, served by the deck. A path from its root follows the base the deck is under, and
+   * an image the deck imports keeps the URL Vite gave it.
+   */
   src: string
   /** What the figure shows. Sits under the image, at the caption size. */
   caption?: string
@@ -29,7 +32,7 @@ defineProps<{
 
 <template>
   <figure class="legible-figure">
-    <img :src="resolveAssetUrl(src)" :alt="alt ?? caption ?? ''" />
+    <img :src="assetUrl(src)" :alt="alt ?? caption ?? ''" />
     <figcaption v-if="caption">
       {{ caption }}<sup v-if="cite">{{ cite }}</sup>
     </figcaption>
