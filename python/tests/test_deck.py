@@ -670,6 +670,15 @@ def test_each_top_level_block_beneath_the_headline_is_one_visual_group():
     assert slide.groups == ("paragraph", "list", "table", "image", "v-click", "Figure", "code")
 
 
+def test_a_slot_marker_ends_the_list_above_it():
+    """Slidev reads a slot marker as a block of its own, so a list in each column is a group in each,
+    with or without a blank line between them."""
+    [slide] = deck("# A claim\n\n::left::\n- one\n- two\n::right::\n- three\n")
+
+    assert slide.groups == ("list", "list")
+    assert slide.bullets == ("one", "two", "three")
+
+
 def test_a_slide_of_a_headline_alone_has_no_visual_groups():
     [slide] = deck("# A claim\n\n<!-- notes -->\n")
 

@@ -2,9 +2,10 @@
 
 Slidev renders with markdown-it, which markdown-it-py ports to Python, set up with options and a
 stack of plugins of its own. Most of the plugins change no word and no block a rule reads: they
-highlight code, number footnotes, draw maths and the like. One changes what is a block, and so what
-the deck reader takes for a paragraph, a passage or a visual group, so it is ported here: the
-component plugin, ``@mdit-vue/plugin-component``.
+highlight code, number footnotes, draw maths and the like. Two change what is a block, and so what
+the deck reader takes for a paragraph, a passage or a visual group, so they are ported here.
+
+The component plugin, ``@mdit-vue/plugin-component``:
 
 - A line that opens with a tag HTML does not set inline, which is to say a component, opens a block
   of markup, even straight after a paragraph. CommonMark would have run it on as the paragraph's.
@@ -12,9 +13,12 @@ component plugin, ``@mdit-vue/plugin-component``.
   markdown unparsed.
 - An attribute's name may open with ``@``, as Vue writes an event handler.
 
+Slidev's slot sugar: ``::right::`` alone on a line is a block of its own, even straight after a
+paragraph or a list item, and what follows it is the content of the layout's slot of that name.
+
 Ported from ``@slidev/cli`` 52.18 and ``@mdit-vue/plugin-component`` 3.0.2, the versions the deck
-and the template build with. Its HTML block rule is markdown-it's own with the component kind added,
-so the port follows markdown-it-py's ``html_block`` and reads alongside it.
+and the template build with. The plugin's HTML block rule is markdown-it's own with the component
+kind added, so the port follows markdown-it-py's ``html_block`` and reads alongside it.
 """
 
 from __future__ import annotations
@@ -25,7 +29,9 @@ from functools import cache
 from markdown_it import MarkdownIt
 from markdown_it.common.html_blocks import block_names
 from markdown_it.rules_block import StateBlock
+from markdown_it.rules_core import StateCore
 from markdown_it.rules_inline import StateInline
+from markdown_it.token import Token
 
 __all__ = ["INLINE_TAGS", "render"]
 
@@ -92,6 +98,9 @@ _HTML_BLOCKS: tuple[tuple[re.Pattern[str], re.Pattern[str], bool], ...] = (
 )
 _COMPONENT = _HTML_BLOCKS[6]
 
+#: A slot marker, ``::right::`` alone on a line, and the name of the slot it opens.
+_SLOT_MARKER = re.compile(r"^::\s*(?P<name>[A-Za-z0-9_.\-:]+)\s*::\s*$")
+
 
 def render(markdown: str) -> str:
     """The HTML Slidev hands the browser for a slide's markdown, as far as words and blocks go."""
@@ -109,6 +118,13 @@ def _markdown() -> MarkdownIt:
         "html_block", _html_block, {"alt": ["paragraph", "reference", "blockquote"]}
     )
     markdown.inline.ruler.at("html_inline", _html_inline)
+    markdown.block.ruler.before(
+        "fence",
+        "slot_marker",
+        _slot_marker,
+        {"alt": ["paragraph", "reference", "blockquote", "list"]},
+    )
+    markdown.core.ruler.push("slot_sugar", _slots)
     return markdown
 
 
@@ -178,3 +194,41 @@ def _html_inline(state: StateInline, silent: bool) -> bool:
         token.content = tag.group()
     state.pos = tag.end()
     return True
+
+
+def _slot_marker(state: StateBlock, start: int, end: int, silent: bool) -> bool:
+    """A slot marker, as a block of its own, unless it is indented past the block it sits in."""
+    if state.sCount[start] - state.blkIndent > 0:
+        return False
+    position = state.bMarks[start] + state.tShift[start]
+    marker = _SLOT_MARKER.search(state.src[position : state.eMarks[start]])
+    if not marker:
+        return False
+    if silent:
+        return True
+    token = state.push("slot_marker", "", 0)
+    token.meta = {"slot": marker.group("name")}
+    token.map = [start, start + 1]
+    state.line = start + 1
+    return True
+
+
+def _slots(state: StateCore) -> None:
+    """Each marker turned into the template Slidev hands the layout the slot's content in, which
+    runs to the next marker or the end of the slide."""
+    tokens: list[Token] = []
+    opened = False
+    for token in state.tokens:
+        if token.type != "slot_marker":
+            tokens.append(token)
+            continue
+        if opened:
+            tokens.append(Token("html_block", "", 0, content="\n</template>\n"))
+        slot = token.meta["slot"]
+        tokens.append(
+            Token("html_block", "", 0, content=f'\n<template v-slot:{slot}="slotProps">\n')
+        )
+        opened = True
+    if opened:
+        tokens.append(Token("html_block", "", 0, content="\n</template>\n"))
+    state.tokens = tokens

@@ -43,8 +43,6 @@ __all__ = ["DeckError", "Slide", "font_sizes", "parse_deck", "read_deck"]
 _SEPARATOR = re.compile(r"^---\s*$")
 
 _FENCE = re.compile(r"^\s*(```|~~~)")
-_HEADING = re.compile(r"^\s{0,3}#{1,6}\s+(?P<text>.*?)\s*#*\s*$")
-_BULLET = re.compile(r"^\s*(?:[-*+]|\d+[.)])\s+(?P<text>.*)$")
 
 #: A whole HTML comment. Slidev reads the last one on a slide as the speaker notes.
 _COMMENT = re.compile(r"<!--(?P<text>.*?)-->", re.DOTALL)
@@ -89,14 +87,6 @@ _SVG_FONT_SIZE = re.compile(
 #: A UnoCSS class that sets a font size: a named step of its scale, or an arbitrary value.
 _TEXT_SIZE_CLASS = re.compile(r"^text-(?:xs|sm|base|lg|\d?xl|\[[^\]]+\])$")
 
-#: An element's opening tag at the start of a line, which makes the block it opens one visual group.
-#: Only a name opens one: a closing tag or a stray ``<`` in prose does not.
-_ELEMENT = re.compile(r"^\s*<(?P<name>[A-Za-z][\w-]*)")
-
-#: Any tag of a given element, opening or closing, wherever the author wrapped its attributes. A
-#: quoted attribute may carry a ``>``, which is why quotes are skipped whole.
-_TAG_OF = r"""<(?P<closing>/?){name}\b(?:[^>"']|"[^"]*"|'[^']*')*?(?P<empty>/?)>"""
-
 #: The elements HTML never closes, so their opening tag is the whole of them.
 _VOID = frozenset(
     {
@@ -116,11 +106,6 @@ _VOID = frozenset(
     }
 )
 
-#: A run of a table, a picture alone on its line, and the slot marker a two-column layout splits on.
-_TABLE_ROW = re.compile(r"^\s*\|")
-_IMAGE_ALONE = re.compile(r"^\s*!\[[^\]]*\]\([^)]*\)\s*$")
-_SLOT = re.compile(r"^\s*::[\w-]+::\s*$")
-
 #: What a slide emphasises: a span in bold, either spelling, or a strong or highlighting element.
 #: Italics are for terms and titles and are not counted, and neither is anything in inline code.
 #: Markdown's own spellings open after a non-word character and close before one, so neither a
@@ -136,13 +121,9 @@ _EMPHASISED = re.compile(
 _EMPHASIS_TAG = re.compile(r"</?(?:strong|b|mark)\b", re.IGNORECASE)
 _INLINE_CODE = re.compile(r"`[^`]*`")
 
-#: The line a code block is folded to while the slide's groups are counted: it is one group, and
-#: nothing inside it is markup.
-_CODE = "\x00code"
-
 #: The elements that are not a group the eye lands on: a stylesheet and a script draw nothing, a
-#: line break only spaces what does, and the footnotes cite rather than say (below).
-_NOT_A_GROUP = frozenset({"style", "script", "br", "footnotes", "footnote"})
+#: line break or a rule only spaces what does, and the footnotes cite rather than say (below).
+_NOT_A_GROUP = frozenset({"style", "script", "br", "hr", "footnotes", "footnote"})
 
 #: The theme's footnotes, which cite rather than say: attribution set at the floor, which the room
 #: is not reading while the speaker talks. Their text is left out of what the slide says.
@@ -211,7 +192,8 @@ class Slide:
     font_sizes: tuple[str, ...] = ()
     #: The visual groups the slide is built from, beneath its headline, each named by its kind: a
     #: ``paragraph``, a ``list``, a ``table``, an ``image``, ``code``, or the element a block of
-    #: markup opens with. A block is counted at the top of the body, so what it wraps is part of it.
+    #: markup opens with. A block is counted at the top of the body, so what it wraps is part of it,
+    #: and each of a layout's slots is counted as the top of the body it holds.
     groups: tuple[str, ...] = ()
     #: The text of every span the slide sets in bold or highlights, its headline's included.
     emphasis: tuple[str, ...] = ()
@@ -361,7 +343,8 @@ def _slide(number: int, keys: dict[str, str], lines: Sequence[str]) -> Slide:
     # What the slide says, as opposed to what it cites.
     said = _FOOTNOTES.sub(_line_breaks, markup)
     time = _TIME.search(notes) if notes else None
-    words = _Words(_rendered(_without_slots(lines)))
+    tree = _rendered("\n".join(lines))
+    words = _Words(tree)
     return Slide(
         number=number,
         headline=words.headline,
@@ -372,7 +355,7 @@ def _slide(number: int, keys: dict[str, str], lines: Sequence[str]) -> Slide:
         backup=keys.get("backup") in _TRUE,
         layout=keys.get("layout") or None,
         font_sizes=_font_sizes(markup),
-        groups=_groups(lines),
+        groups=_groups(tree),
         emphasis=_emphasis(said),
         callouts=len(_CALLOUT.findall(markup)),
         duration=keys.get("duration") or None,
@@ -437,21 +420,6 @@ def _rendered(markdown: str) -> _Element:
     tree.feed(render(markdown))
     tree.close()
     return tree.root
-
-
-def _without_slots(lines: Sequence[str]) -> str:
-    """The slide's markdown with each slot marker blanked. A marker is where a layout splits the
-    slide, which Slidev reads before it renders the markdown, and no part of what the slide says."""
-    kept = list(lines)
-    index = 0
-    while index < len(kept):
-        if _FENCE.match(kept[index].rstrip()):
-            index = _fence_end(kept, index) + 1
-            continue
-        if _SLOT.match(kept[index]):
-            kept[index] = ""
-        index += 1
-    return "\n".join(kept)
 
 
 class _Words:
@@ -546,94 +514,54 @@ def _line_breaks(match: re.Match[str]) -> str:
     return "\n" * match.group().count("\n")
 
 
-def _groups(lines: Sequence[str]) -> tuple[str, ...]:
+def _groups(tree: _Element) -> tuple[str, ...]:
     """Each block at the top of the slide's body, beneath its headline, named by its kind.
 
-    A block is a run of lines between blank ones, or an element from its opening tag to the tag
-    that closes it, blank lines and all. What is inside an element is not counted again: a click
-    reveal wrapping a callout is one thing on the slide, and it is the thing the eye lands on.
-    Within a run, a change of kind starts a new block, except that a line running on from a bullet
-    is still that bullet's, as markdown's lazy continuation has it.
+    What is inside a block is not counted again: a click reveal wrapping a callout is one thing on
+    the slide, and it is the thing the eye lands on. The slide's first heading is its headline,
+    which the groups sit beneath rather than one of them.
     """
-    text = _COMMENT.sub("", "\n".join(_code_as_one_line(lines)))
-    rows = text.split("\n")
-    starts = [0]
-    for row in rows:
-        starts.append(starts[-1] + len(row) + 1)
-
     groups: list[str] = []
     headline = False
-    block: str | None = None
-    index = 0
-    while index < len(rows):
-        line = rows[index]
-        element = _ELEMENT.match(line)
-        heading = _HEADING.match(line)
-        if not line.strip() or _SLOT.match(line):
-            block = None
-        elif element:
-            name = element.group("name")
-            closed = _element_end(text, starts[index] + element.start("name") - 1, name)
-            if name.lower() not in _NOT_A_GROUP:
-                groups.append(name)
-            block = None
-            # Resume on the line after the one the element closes on.
-            while index + 1 < len(rows) and starts[index + 1] < closed:
-                index += 1
-        elif line == _CODE:
-            groups.append("code")
-            block = None
-        elif heading and not headline:
+    for block in _top(tree):
+        kind = _kind(block)
+        if kind == "heading" and not headline:
             headline = True
-            block = None
-        else:
-            kind = _block_kind(line, heading is not None)
-            if block is None or (kind != block and not (block == "list" and kind == "paragraph")):
-                groups.append(kind)
-                block = kind
-        index += 1
+        elif kind:
+            groups.append(kind)
     return tuple(groups)
 
 
-def _block_kind(line: str, heading: bool) -> str:
-    """What kind of markdown block a line of the slide's body opens, or carries on."""
-    if heading:
-        return "heading"
-    if _TABLE_ROW.match(line):
-        return "table"
-    if _BULLET.match(line):
-        return "list"
-    if _IMAGE_ALONE.match(line):
-        return "image"
-    return "paragraph"
-
-
-def _element_end(text: str, opened: int, name: str) -> int:
-    """Where the element opening at ``opened`` closes: the end of the tag that brings its depth back
-    to nothing, or the end of the slide if the author never closed it."""
-    depth = 0
-    for tag in re.finditer(_TAG_OF.format(name=re.escape(name)), text[opened:]):
-        if tag.group("closing"):
-            depth -= 1
-        elif not tag.group("empty") and name.lower() not in _VOID:
-            depth += 1
-        if depth <= 0:
-            return opened + tag.end()
-    return len(text)
-
-
-def _code_as_one_line(lines: Sequence[str]) -> list[str]:
-    """The slide with each code block folded to one line, which marks where it was."""
-    kept: list[str] = []
-    index = 0
-    while index < len(lines):
-        if _FENCE.match(lines[index].rstrip()):
-            kept.append(_CODE)
-            index = _fence_end(lines, index) + 1
+def _top(element: _Element) -> Iterator[_Element]:
+    """The blocks at the top of a slide's body. A slot's template draws nothing of its own, so each
+    of a layout's slots is looked through to the top of the body it holds. Text there is what a
+    component on a line of its own leaves after it, and is not a block."""
+    for child in element.children:
+        if isinstance(child, str):
             continue
-        kept.append(lines[index])
-        index += 1
-    return kept
+        if child.tag == "template":
+            yield from _top(child)
+        else:
+            yield child
+
+
+def _kind(block: _Element) -> str | None:
+    """What kind of group a block is, or None for one the eye does not land on."""
+    if block.tag in _NOT_A_GROUP:
+        return None
+    if block.tag in _HEADINGS:
+        return "heading"
+    if block.tag in {"ul", "ol"}:
+        return "list"
+    if block.tag == "pre":
+        return "code"
+    if block.tag == "img":
+        return "image"
+    if block.tag == "p":
+        held = [child for child in block.children if not isinstance(child, str) or child.strip()]
+        alone = len(held) == 1 and isinstance(held[0], _Element) and held[0].tag == "img"
+        return "image" if alone else "paragraph"
+    return block.name
 
 
 def _attributes_blanked(markup: str) -> str:
