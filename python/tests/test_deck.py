@@ -671,8 +671,8 @@ def test_each_top_level_block_beneath_the_headline_is_one_visual_group():
 
 
 def test_a_slot_marker_ends_the_list_above_it():
-    """Slidev reads a slot marker as a block of its own, so a list in each column is a group in each,
-    with or without a blank line between them."""
+    """Slidev reads a slot marker as a block of its own, so a list in each column is a group in
+    each, with or without a blank line between them."""
     [slide] = deck("# A claim\n\n::left::\n- one\n- two\n::right::\n- three\n")
 
     assert slide.groups == ("list", "list")
@@ -714,6 +714,14 @@ def test_bold_and_highlighted_spans_are_emphasis_and_italics_are_not():
     )
 
     assert slide.emphasis == ("bold", "strong", "highlight", "bullet")
+
+
+def test_markup_in_inline_code_is_text_and_sets_nothing():
+    """The slide shows the code as written: a tag in backticks draws no callout, sets no size."""
+    [slide] = deck('# A claim\n\nWrite `<Callout style="font-size: 12px">` sparingly.\n')
+
+    assert slide.callouts == 0
+    assert slide.font_sizes == ()
 
 
 def test_every_callout_is_counted_wherever_it_sits():

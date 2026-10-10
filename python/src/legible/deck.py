@@ -47,16 +47,8 @@ _FENCE = re.compile(r"^\s*(```|~~~)")
 #: A whole HTML comment. Slidev reads the last one on a slide as the speaker notes.
 _COMMENT = re.compile(r"<!--(?P<text>.*?)-->", re.DOTALL)
 
-#: Inline markup that is not what the room reads: an image is evidence rather than words, a link
-#: shows its text and never its URL, and emphasis markers are punctuation for the renderer.
-_IMAGE = re.compile(r"!\[[^\]]*\]\([^)]*\)")
-_LINK = re.compile(r"\[(?P<text>[^\]]*)\]\([^)]*\)")
-_TAG = re.compile(r"<[^>]+>")
-
 #: A run of the whitespace the browser sets as one space. A no-break space is not part of one.
 _SPACES = re.compile(r"[ \t\n\r\f]+")
-
-_EMPHASIS = re.compile(r"[*`~]+")
 
 #: An element's name as the author wrote it. The HTML parser lowercases every name, and a component
 #: is told apart by its capitals: ``Figure`` is the theme's, ``figure`` the browser's.
@@ -65,24 +57,13 @@ _TAG_NAME = re.compile(r"<(?P<name>[A-Za-z][^\t\n\r\f />\x00]*)")
 _HEADINGS = frozenset({"h1", "h2", "h3", "h4", "h5", "h6"})
 
 #: The elements whose text the room does not read off the slide: a stylesheet and a script draw no
-#: words, a code block is evidence no rule decided by script reads, and the theme's footnotes cite
-#: rather than say (below).
+#: words, and a code block is evidence that no rule decided by script reads. The theme's footnotes
+#: cite rather than say: attribution set at the floor, which the room is not reading while the
+#: speaker talks.
 _UNSAID = frozenset({"style", "script", "pre", "footnotes", "footnote"})
-
-#: Where a slide's markup can set a size: a style attribute (Vue's bound one included), a style
-#: block, and a class list. A size anywhere else — a sentence about CSS, a code block — is not one.
-_STYLE_ATTRIBUTE = re.compile(r"\bstyle\s*=\s*(?:\"(?P<double>[^\"]*)\"|'(?P<single>[^']*)')")
-_STYLE_BLOCK = re.compile(r"<style\b[^>]*>(?P<css>.*?)</style>", re.DOTALL | re.IGNORECASE)
-_CLASS_ATTRIBUTE = re.compile(r"\bclass\s*=\s*(?:\"(?P<double>[^\"]*)\"|'(?P<single>[^']*)')")
 
 #: A font size inside a style: the CSS property, or the camel-cased key a Vue style object uses.
 _FONT_SIZE = re.compile(r"font-?size['\"]?\s*:\s*['\"]?(?P<value>[^;'\",}]+)", re.IGNORECASE)
-
-#: An SVG text element's size as a presentation attribute, ``font-size="8"``. Unitless, it is in the
-#: SVG's user units, which are canvas px when the SVG is drawn at the size it lands.
-_SVG_FONT_SIZE = re.compile(
-    r"\bfont-size\s*=\s*(?:\"(?P<double>[^\"]*)\"|'(?P<single>[^']*)')", re.IGNORECASE
-)
 
 #: A UnoCSS class that sets a font size: a named step of its scale, or an arbitrary value.
 _TEXT_SIZE_CLASS = re.compile(r"^text-(?:xs|sm|base|lg|\d?xl|\[[^\]]+\])$")
@@ -90,50 +71,21 @@ _TEXT_SIZE_CLASS = re.compile(r"^text-(?:xs|sm|base|lg|\d?xl|\[[^\]]+\])$")
 #: The elements HTML never closes, so their opening tag is the whole of them.
 _VOID = frozenset(
     {
-        "area",
-        "base",
-        "br",
-        "col",
-        "embed",
-        "hr",
-        "img",
-        "input",
-        "link",
-        "meta",
-        "source",
-        "track",
-        "wbr",
+        *("area", "base", "br", "col", "embed", "hr", "img", "input", "link", "meta", "source"),
+        *("track", "wbr"),
     }
 )
 
-#: What a slide emphasises: a span in bold, either spelling, or a strong or highlighting element.
-#: Italics are for terms and titles and are not counted, and neither is anything in inline code.
-#: Markdown's own spellings open after a non-word character and close before one, so neither a
-#: ``snake__case`` name nor a stray pair of stars across a paragraph break reads as one.
-_EMPHASISED = re.compile(
-    r"(?<![\w*])\*\*(?P<stars>[^*\s](?:(?!\n\s*\n)[^*])*?)\*\*(?![\w*])"
-    r"|(?<!\w)__(?P<unders>[^_\s](?:(?!\n\s*\n)[^_])*?)__(?!\w)"
-    r"|<(?P<tag>strong|b|mark)\b[^>]*>(?P<inner>.*?)</(?P=tag)\s*>",
-    re.DOTALL | re.IGNORECASE,
-)
-
-#: The tags that emphasise, which are kept while every other tag is blanked out of the way.
-_EMPHASIS_TAG = re.compile(r"</?(?:strong|b|mark)\b", re.IGNORECASE)
-_INLINE_CODE = re.compile(r"`[^`]*`")
+#: The elements that emphasise: bold, as markdown writes it or as HTML does, and a highlight.
+#: Italics are for terms and titles and are not counted.
+_EMPHASISING = frozenset({"strong", "b", "mark"})
 
 #: The elements that are not a group the eye lands on: a stylesheet and a script draw nothing, a
-#: line break or a rule only spaces what does, and the footnotes cite rather than say (below).
+#: line break or a rule only spaces what does, and the footnotes cite rather than say (above).
 _NOT_A_GROUP = frozenset({"style", "script", "br", "hr", "footnotes", "footnote"})
 
-#: The theme's footnotes, which cite rather than say: attribution set at the floor, which the room
-#: is not reading while the speaker talks. Their text is left out of what the slide says.
-_FOOTNOTES = re.compile(
-    r"""<(?P<name>Footnotes?)\b(?:[^>"']|"[^"]*"|'[^']*')*?(?:/>|>.*?</(?P=name)\s*>)""",
-    re.DOTALL,
-)
-
 #: A callout, by the component the theme ships for one.
-_CALLOUT = re.compile(r"<Callout\b")
+_CALLOUT = "Callout"
 
 #: The line of a slide's notes that states its time budget, as the canon asks for it to be written.
 _TIME = re.compile(r"^\s*Time:[ \t]*(?P<budget>.+?)\s*$", re.MULTILINE)
@@ -338,10 +290,7 @@ def _frontmatter_end(lines: Sequence[str], separator: int) -> int | None:
 
 
 def _slide(number: int, keys: dict[str, str], lines: Sequence[str]) -> Slide:
-    body, notes = _body_and_notes(_without_code(lines))
-    markup = "\n".join(body)
-    # What the slide says, as opposed to what it cites.
-    said = _FOOTNOTES.sub(_line_breaks, markup)
+    notes = _notes(lines)
     time = _TIME.search(notes) if notes else None
     tree = _rendered("\n".join(lines))
     words = _Words(tree)
@@ -354,10 +303,10 @@ def _slide(number: int, keys: dict[str, str], lines: Sequence[str]) -> Slide:
         section=keys.get("section"),
         backup=keys.get("backup") in _TRUE,
         layout=keys.get("layout") or None,
-        font_sizes=_font_sizes(markup),
+        font_sizes=_font_sizes(tree),
         groups=_groups(tree),
-        emphasis=_emphasis(said),
-        callouts=len(_CALLOUT.findall(markup)),
+        emphasis=tuple(_emphasis(tree)),
+        callouts=sum(1 for element in _elements(tree) if element.name == _CALLOUT),
         duration=keys.get("duration") or None,
         time=time.group("budget") if time else None,
         exceptions=tuple(
@@ -416,8 +365,13 @@ def _rendered(markdown: str) -> _Element:
     """The slide as the browser is handed it: its markdown rendered as Slidev renders it, raw HTML
     and all, and built into a tree. What is a tag, a paragraph or a code span is the renderer's
     answer, and markdown's text arrives escaped, so nothing it left as text is read as a tag."""
+    return _parsed(render(markdown))
+
+
+def _parsed(html: str) -> _Element:
+    """HTML as a tree."""
     tree = _Tree()
-    tree.feed(render(markdown))
+    tree.feed(html)
     tree.close()
     return tree.root
 
@@ -504,14 +458,14 @@ def _lines(element: _Element, lines: list[list[str]]) -> list[list[str]]:
     return lines
 
 
+def _text(element: _Element) -> str:
+    """An element's text on one line, a break in it a space between words."""
+    return _collapsed(" ".join("".join(line) for line in _lines(element, [[]])))
+
+
 def _collapsed(text: str) -> str:
     """Text as the browser sets it: each run of whitespace one space, and none at either end."""
     return _SPACES.sub(" ", text).strip()
-
-
-def _line_breaks(match: re.Match[str]) -> str:
-    """What a match leaves behind: only the line breaks it spanned."""
-    return "\n" * match.group().count("\n")
 
 
 def _groups(tree: _Element) -> tuple[str, ...]:
@@ -564,23 +518,25 @@ def _kind(block: _Element) -> str | None:
     return block.name
 
 
-def _attributes_blanked(markup: str) -> str:
-    """The slide with every tag but the emphasising ones blanked to spaces, so no attribute can be
-    read as emphasis and a match still sits where it did."""
-    return _TAG.sub(
-        lambda tag: (
-            tag.group() if _EMPHASIS_TAG.match(tag.group()) else re.sub(r"\S", " ", tag.group())
-        ),
-        markup,
-    )
+def _emphasis(element: _Element) -> Iterator[str]:
+    """The text of every span the slide emphasises, in the order it sets them. A span inside one is
+    part of it, and is not counted again."""
+    for child in element.children:
+        if isinstance(child, str) or child.tag in _UNSAID:
+            continue
+        if child.tag in _EMPHASISING:
+            if text := _text(child):
+                yield text
+        else:
+            yield from _emphasis(child)
 
 
-def _emphasis(markup: str) -> tuple[str, ...]:
-    """The text of every span the slide emphasises, in the order it sets them."""
-    return tuple(
-        _plain(next(group for group in match.group("stars", "unders", "inner") if group))
-        for match in _EMPHASISED.finditer(_INLINE_CODE.sub("", _attributes_blanked(markup)))
-    )
+def _elements(element: _Element) -> Iterator[_Element]:
+    """Every element inside this one, in the order they open."""
+    for child in element.children:
+        if isinstance(child, _Element):
+            yield child
+            yield from _elements(child)
 
 
 def font_sizes(text: str, *, css: bool = False) -> tuple[str, ...]:
@@ -589,36 +545,36 @@ def font_sizes(text: str, *, css: bool = False) -> tuple[str, ...]:
     ``css`` reads the whole of ``text`` as a stylesheet; otherwise it is markup, a Vue component
     with its ``<style>`` block, its style attributes, its classes and any SVG it draws.
     """
-    if css:
-        return tuple(
-            f"font-size: {size.group('value').strip()}" for size in _FONT_SIZE.finditer(text)
-        )
-    return _font_sizes(text)
+    return tuple(_css_sizes(text)) if css else _font_sizes(_parsed(text))
 
 
-def _font_sizes(body: str) -> tuple[str, ...]:
-    """Every size the slide's markup sets, in the order it sets them."""
-    found: list[tuple[int, str]] = []
-    for attribute in _SVG_FONT_SIZE.finditer(body):
-        value = (attribute.group("double") or attribute.group("single") or "").strip()
-        # A bare number is user units; spelled with px, it is the same size said the CSS way.
-        unit = "px" if re.fullmatch(r"\d*\.?\d+", value) else ""
-        found.append((attribute.start(), f"font-size: {value}{unit}"))
-    for attribute in _STYLE_ATTRIBUTE.finditer(body):
-        style = attribute.group("double") or attribute.group("single") or ""
-        found.extend(
-            (attribute.start(), f"font-size: {size.group('value').strip()}")
-            for size in _FONT_SIZE.finditer(style)
-        )
-    for block in _STYLE_BLOCK.finditer(body):
-        found.extend(
-            (block.start(), f"font-size: {size.group('value').strip()}")
-            for size in _FONT_SIZE.finditer(block.group("css"))
-        )
-    for attribute in _CLASS_ATTRIBUTE.finditer(body):
-        classes = (attribute.group("double") or attribute.group("single") or "").split()
-        found.extend((attribute.start(), name) for name in classes if _TEXT_SIZE_CLASS.match(name))
-    return tuple(size for _, size in sorted(found, key=lambda at: at[0]))
+def _font_sizes(tree: _Element) -> tuple[str, ...]:
+    """Every size the markup sets, in the order it sets them: in an attribute, a style attribute
+    (Vue's bound one included), a class list or a style block. A size anywhere else, in a sentence
+    about CSS or a code block, is text and sets nothing."""
+    sizes: list[str] = []
+    for element in _elements(tree):
+        for name, value in element.attributes:
+            name = name.removeprefix("v-bind").removeprefix(":")
+            if value is None:
+                continue
+            if name == "font-size":
+                # A bare number is user units; with px, it is the same size said the CSS way.
+                unit = "px" if re.fullmatch(r"\d*\.?\d+", value.strip()) else ""
+                sizes.append(f"font-size: {value.strip()}{unit}")
+            elif name == "style":
+                sizes.extend(_css_sizes(value))
+            elif name == "class":
+                sizes.extend(word for word in value.split() if _TEXT_SIZE_CLASS.match(word))
+        if element.tag == "style":
+            sizes.extend(_css_sizes("".join(c for c in element.children if isinstance(c, str))))
+    return tuple(sizes)
+
+
+def _css_sizes(css: str) -> Iterator[str]:
+    """Every size a stylesheet or a style attribute sets."""
+    for size in _FONT_SIZE.finditer(css):
+        yield f"font-size: {size.group('value').strip()}"
 
 
 def _keys(frontmatter: Sequence[str]) -> dict[str, str]:
@@ -653,17 +609,7 @@ def _without_code(lines: Sequence[str]) -> list[str]:
     return kept
 
 
-def _body_and_notes(lines: Sequence[str]) -> tuple[list[str], str | None]:
-    """The slide's body with every comment removed, and the last comment as its speaker notes."""
-    text = "\n".join(lines)
-    comments = _COMMENT.findall(text)
-    notes = comments[-1].strip() if comments else None
-    return _COMMENT.sub("", text).split("\n"), notes or None
-
-
-def _plain(text: str) -> str:
-    """One line as the room receives it: no markup, no components, no URLs."""
-    text = _IMAGE.sub("", text)
-    text = _LINK.sub(lambda match: match.group("text"), text)
-    text = _TAG.sub("", text)
-    return _SPACES.sub(" ", _EMPHASIS.sub("", text)).strip()
+def _notes(lines: Sequence[str]) -> str | None:
+    """The slide's speaker notes: its last comment, a code block's left out."""
+    comments = _COMMENT.findall("\n".join(_without_code(lines)))
+    return (comments[-1].strip() or None) if comments else None
