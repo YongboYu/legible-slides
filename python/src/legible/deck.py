@@ -13,9 +13,9 @@ this. The deck's headmatter falls out of the same rule, being the frontmatter of
 not started yet.
 
 A slide's body is read the way Slidev renders it. markdown-it, the parser Slidev renders with, turns
-the markdown into the HTML the browser is handed, raw HTML and all, and the standard library's HTML
-parser builds that into a tree. What is a bullet, a paragraph, a code span or a tag is then the
-renderer's answer, read off the tree, rather than a regex's guess at it.
+the markdown into the HTML the browser is handed, raw HTML and all (``slidev_markdown``), and the
+standard library's HTML parser builds that into a tree. What is a bullet, a paragraph, a code span
+or a tag is then the renderer's answer, read off the tree, rather than a regex's guess at it.
 
 What comes back per slide is what the canon's script-decided rules ask about — the headline, the
 bullets, the prose and the speaker notes, every font size the slide's own markup sets, the visual
@@ -34,7 +34,7 @@ from dataclasses import dataclass, field
 from html.parser import HTMLParser
 from pathlib import Path
 
-from markdown_it import MarkdownIt
+from legible.slidev_markdown import INLINE_TAGS, render
 
 __all__ = ["DeckError", "Slide", "font_sizes", "parse_deck", "read_deck"]
 
@@ -60,29 +60,11 @@ _SPACES = re.compile(r"[ \t\n\r\f]+")
 
 _EMPHASIS = re.compile(r"[*`~]+")
 
-#: How Slidev renders a slide's markdown: markdown-it's default preset, which is CommonMark with
-#: tables and strikethrough, raw HTML allowed, and the typographer on (``--`` sets an en dash) with
-#: its quotes left straight. Slidev also turns a bare URL into a link, which changes no word the
-#: room reads, so that is left out.
-_MARKDOWN = MarkdownIt("js-default", {"html": True, "typographer": True, "quotes": "\"\"''"})
-
 #: An element's name as the author wrote it. The HTML parser lowercases every name, and a component
 #: is told apart by its capitals: ``Figure`` is the theme's, ``figure`` the browser's.
 _TAG_NAME = re.compile(r"<(?P<name>[A-Za-z][^\t\n\r\f />\x00]*)")
 
 _HEADINGS = frozenset({"h1", "h2", "h3", "h4", "h5", "h6"})
-
-#: The elements the browser sets as a block, which part the words on either side of them however
-#: close they sit, and end a passage. Any other element parts nothing: ``re<b>read</b>`` is one
-#: word, and neither does a component: what it draws is its own business.
-_BLOCKS = frozenset(
-    {
-        *("address", "article", "aside", "blockquote", "caption", "dd", "details", "dialog"),
-        *("div", "dl", "dt", "fieldset", "figcaption", "figure", "footer", "form", "header"),
-        *("hgroup", "hr", "li", "main", "nav", "ol", "p", "pre", "section", "summary", "table"),
-        *("tbody", "td", "tfoot", "th", "thead", "tr", "ul", *_HEADINGS),
-    }
-)
 
 #: The elements whose text the room does not read off the slide: a stylesheet and a script draw no
 #: words, a code block is evidence no rule decided by script reads, and the theme's footnotes cite
@@ -452,7 +434,7 @@ def _rendered(markdown: str) -> _Element:
     and all, and built into a tree. What is a tag, a paragraph or a code span is the renderer's
     answer, and markdown's text arrives escaped, so nothing it left as text is read as a tag."""
     tree = _Tree()
-    tree.feed(_MARKDOWN.render(markdown))
+    tree.feed(render(markdown))
     tree.close()
     return tree.root
 
@@ -480,6 +462,10 @@ class _Words:
     item's bullet, whatever blocks and blank lines come between its parts, since the browser sets
     them all inside it; a list inside the item holds bullets of its own. Any other text is prose,
     one passage to a block.
+
+    A block is any element HTML does not set inline, and it parts the words on either side of it
+    however close they sit, where an inline one parts nothing: ``re<b>read</b>`` is one word. A
+    component is a block, as Slidev's renderer reads one, since what it draws is its own business.
     """
 
     def __init__(self, tree: _Element) -> None:
@@ -505,16 +491,16 @@ class _Words:
                 self._end(into)
                 self._items.append(item := [])
                 self._read(child, item)
-            elif child.tag in _BLOCKS:
-                self._end(into)
-                into.append(" ")
-                self._read(child, into)
-                into.append(" ")
-                self._end(into)
             elif child.tag == "br":
                 into.append(" ")
-            else:
+            elif child.tag in INLINE_TAGS:
                 self._read(child, into)
+            else:
+                self._end(into)
+                into.append(" ")
+                self._read(child, into)
+                into.append(" ")
+                self._end(into)
 
     def _end(self, into: list[str]) -> None:
         """End the passage being gathered, if ``into`` is a passage rather than a bullet."""
