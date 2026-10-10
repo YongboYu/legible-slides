@@ -16,7 +16,7 @@
 # LEGIBLE_FROM installs the checks from somewhere else, such as a wheel you built yourself.
 set -eu
 
-VERSION=0.1.0
+VERSION=0.1.1
 FROM=${LEGIBLE_FROM:-legible-slides==$VERSION}
 
 if ! command -v uvx >/dev/null 2>&1; then

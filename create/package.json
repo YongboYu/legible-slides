@@ -1,6 +1,6 @@
 {
   "name": "create-legible-slides",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "type": "module",
   "description": "Start a Slidev talk built to the legible-slides method: npm create legible-slides my-talk.",
   "license": "MIT",

@@ -11,7 +11,7 @@
     "render": "slidev export slides.md --format png --with-clicks --output render"
   },
   "dependencies": {
-    "slidev-theme-legible": "0.1.0"
+    "slidev-theme-legible": "0.1.1"
   },
   "devDependencies": {
     "@slidev/cli": "^52.18.0",
