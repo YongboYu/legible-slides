@@ -189,6 +189,13 @@ def test_a_break_in_inline_code_is_text_the_slide_shows():
     assert slides[0].prose == ("Write <br> once.",)
 
 
+def test_the_typographer_s_dashes_and_apostrophes_are_the_ones_the_room_reads():
+    """Slidev renders with the typographer on, so three hyphens set an em dash on the slide."""
+    slides = deck("# Fast --- and the deck's wrong\n")
+
+    assert slides[0].headline == "Fast — and the deck’s wrong"
+
+
 def test_a_slide_with_no_heading_has_no_headline():
     slides = deck("Just a pane of evidence.\n")
 
@@ -301,6 +308,23 @@ def test_a_wrapped_bullet_is_one_bullet():
     assert slides[0].bullets == (
         "a bullet long enough that its author wrapped it across two lines of the source",
     )
+
+
+def test_an_indented_paragraph_under_a_bullet_is_that_bullet_s():
+    """Markdown keeps it inside the item, and the browser sets it there, so the word ceiling counts
+    it with the bullet rather than as a passage of its own."""
+    slides = deck(
+        """\
+        # Claim
+
+        - a bullet
+
+          and a second paragraph of the same item
+        """
+    )
+
+    assert slides[0].bullets == ("a bullet and a second paragraph of the same item",)
+    assert slides[0].prose == ()
 
 
 def test_a_code_block_is_evidence_rather_than_bullets_and_prose():

@@ -28,6 +28,12 @@ dependencies = [
     # The headline wrap reads the bundled face's advances and kerning. matplotlib already pulls
     # fontTools in, so this names a dependency rather than adding one.
     "fonttools>=4.22",
+    # The slide reader parses a slide's markdown the way Slidev renders it, with markdown-it, so
+    # what counts as a bullet, a paragraph or a tag is the renderer's answer rather than a regex's.
+    # Floated within a major, as matplotlib is: a parse is a reading, not a published measurement,
+    # and a release that read a slide differently would fail test_deck.py rather than move a
+    # number quietly.
+    "markdown-it-py>=4,<5",
 ]
 
 [project.urls]
