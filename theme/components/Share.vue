@@ -11,8 +11,8 @@
  */
 import { computed } from 'vue'
 import { useSlideContext } from '@slidev/client'
-import { resolveAssetUrl } from '@slidev/client/layoutHelper.ts'
 import qrPlaceholder from '../assets/placeholders/share-qr.svg?url'
+import { assetUrl } from '../utils/assets'
 
 const props = defineProps<{
   /** The QR code's image URL, overriding `themeConfig.shareQr`. */
@@ -26,14 +26,10 @@ const props = defineProps<{
 const { $slidev } = useSlideContext()
 
 /**
- * `??` rather than `||`, so an empty string is an answer — no code — and not the placeholder. The
- * deck's own path is resolved against the base the deck is hosted under, as Slidev does for the
- * images it finds in markdown. The placeholder is a bundled import, which Vite resolved already.
+ * `??` rather than `||`, so an empty string is an answer — no code — and not the placeholder. A
+ * path the deck names follows the base the deck is hosted under (`assetUrl`).
  */
-const qr = computed(() => {
-  const named = props.shareQr ?? $slidev.themeConfigs.shareQr
-  return named == null ? qrPlaceholder : resolveAssetUrl(named)
-})
+const qr = computed(() => assetUrl(props.shareQr ?? $slidev.themeConfigs.shareQr ?? qrPlaceholder))
 const url = computed(() => props.shareUrl ?? $slidev.themeConfigs.shareUrl ?? '')
 const contact = computed(() => props.contact ?? $slidev.themeConfigs.contact ?? '')
 

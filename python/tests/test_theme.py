@@ -457,7 +457,7 @@ def test_every_file_the_theme_imports_is_in_its_published_package(package):
     a checkout and breaks from the registry."""
     shipped = [(THEME / entry).resolve() for entry in package["files"]]
     sources = [*THEME.glob("components/*.vue"), *THEME.glob("layouts/*.vue")]
-    sources += [THEME / "slide-top.vue", *THEME.glob("styles/*.ts")]
+    sources += [THEME / "slide-top.vue", *THEME.glob("styles/*.ts"), *THEME.glob("utils/*.ts")]
 
     imported = {
         (source.parent / match.group(1)).resolve()

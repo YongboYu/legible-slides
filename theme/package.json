@@ -27,6 +27,7 @@
     "components",
     "layouts",
     "styles",
+    "utils",
     "slide-top.vue"
   ],
   "slidev": {

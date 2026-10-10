@@ -77,5 +77,6 @@ the rest — are a reviewer's, human or agent. See
 | `figures.py` | the three generated figures, and why each is drawn as it is. |
 | `style.css` | the two demonstrations the theme will not build, because the method refuses them: a stock-template slide, and body type below the floor. Slidev loads it for you. Every size in it derives from the theme's own custom properties, so nothing here invents one. |
 | `public/` | what the deck serves: the generated figures. The cover's two logo slots show the theme's placeholders — this project ships no institution's mark, so presenting under one is dropping it in here and pointing `themeConfig.venueLogo` or `themeConfig.affiliationLogo` at it. |
+| `check-hosted-images.mjs`, `fixtures/` | CI's check that every image loads when a deck is hosted under a path, as GitHub Pages hosts a project's: the flagship for its paths into `public/`, and the fixture for an image a deck imports. |
 
 The speaker and venue on the cover are the presenter's to set, and a `date` is theirs to add.
