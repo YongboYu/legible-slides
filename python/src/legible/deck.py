@@ -12,6 +12,11 @@ else of the block — not that it read as ``key: value``, not that it parse as Y
 this. The deck's headmatter falls out of the same rule, being the frontmatter of a slide that has
 not started yet.
 
+A slide's body is read the way Slidev renders it. markdown-it, the parser Slidev renders with, turns
+the markdown into the HTML the browser is handed, raw HTML and all, and the standard library's HTML
+parser builds that into a tree. What is a bullet, a paragraph, a code span or a tag is then the
+renderer's answer, read off the tree, rather than a regex's guess at it.
+
 What comes back per slide is what the canon's script-decided rules ask about — the headline, the
 bullets, the prose and the speaker notes, every font size the slide's own markup sets, the visual
 groups it is built from, the spans it emphasises and the callouts it carries, the time budget its
@@ -25,8 +30,11 @@ from __future__ import annotations
 
 import re
 from collections.abc import Iterable, Iterator, Sequence
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from html.parser import HTMLParser
 from pathlib import Path
+
+from markdown_it import MarkdownIt
 
 __all__ = ["DeckError", "Slide", "font_sizes", "parse_deck", "read_deck"]
 
@@ -48,41 +56,38 @@ _LINK = re.compile(r"\[(?P<text>[^\]]*)\]\([^)]*\)")
 _TAG = re.compile(r"<[^>]+>")
 
 #: A run of the whitespace the browser sets as one space. A no-break space is not part of one.
-_SPACES = re.compile(r"[ \t\r\f]+")
+_SPACES = re.compile(r"[ \t\n\r\f]+")
 
-#: An HTML list's tags, opening or closing: the list's own, and each item's.
-_LIST_TAG = re.compile(r"<(?P<closing>/?)(?P<name>ul|ol|li)\b", re.IGNORECASE)
-
-#: The tags of an element the browser sets as a block, which part the words on either side of
-#: them however close they sit. An inline element's parts nothing: ``re<b>read</b>`` is one word.
-_BLOCK_TAG = re.compile(
-    r"</?(?:address|article|aside|blockquote|caption|dd|details|dialog|div|dl|dt|fieldset"
-    r"|figcaption|figure|footer|form|h[1-6]|header|hgroup|hr|main|nav|p|pre|section|summary"
-    r"|table|td|th|tr)\b",
-    re.IGNORECASE,
-)
-
-#: How a list's tag stands while the slide is read: this, then ``ul``, ``/li`` and the like, on a
-#: line of its own.
-_LIST_MARK = ""
-
-#: A line break the author forced, and the character it stands as while tags are taken out. A
-#: forced break shapes a headline, so the headline keeps it; elsewhere it only separates words. The
-#: character is no space, so a heading's trim leaves a break at either end of it in place.
-_BREAK_TAG = re.compile(r"<br\b[^>]*>", re.IGNORECASE)
-_BREAK = "\ue000"
 _EMPHASIS = re.compile(r"[*`~]+")
 
-#: Inline code, which the slide shows as written: a ``<br>`` in backticks is text, and breaks no
-#: line. Markdown closes a span on a run of as many backticks as opened it, within one paragraph.
-_CODE_SPAN = re.compile(
-    r"(?<!`)(?P<ticks>`+)(?!`)(?:(?!\n[ \t]*\n).)+?(?<!`)(?P=ticks)(?!`)", re.DOTALL
+#: How Slidev renders a slide's markdown: markdown-it's default preset, which is CommonMark with
+#: tables and strikethrough, raw HTML allowed, and the typographer on (``--`` sets an en dash) with
+#: its quotes left straight. Slidev also turns a bare URL into a link, which changes no word the
+#: room reads, so that is left out.
+_MARKDOWN = MarkdownIt("js-default", {"html": True, "typographer": True, "quotes": "\"\"''"})
+
+#: An element's name as the author wrote it. The HTML parser lowercases every name, and a component
+#: is told apart by its capitals: ``Figure`` is the theme's, ``figure`` the browser's.
+_TAG_NAME = re.compile(r"<(?P<name>[A-Za-z][^\t\n\r\f />\x00]*)")
+
+_HEADINGS = frozenset({"h1", "h2", "h3", "h4", "h5", "h6"})
+
+#: The elements the browser sets as a block, which part the words on either side of them however
+#: close they sit, and end a passage. Any other element parts nothing: ``re<b>read</b>`` is one
+#: word, and neither does a component: what it draws is its own business.
+_BLOCKS = frozenset(
+    {
+        *("address", "article", "aside", "blockquote", "caption", "dd", "details", "dialog"),
+        *("div", "dl", "dt", "fieldset", "figcaption", "figure", "footer", "form", "header"),
+        *("hgroup", "hr", "li", "main", "nav", "ol", "p", "pre", "section", "summary", "table"),
+        *("tbody", "td", "tfoot", "th", "thead", "tr", "ul", *_HEADINGS),
+    }
 )
 
-#: The characters a code span's angle brackets stand as while tags are read, so no reader of tags
-#: takes one for a tag. ``_plain`` turns them back into what the span shows.
-_SHOWN = str.maketrans("<>", "\ue001\ue002")
-_UNSHOWN = str.maketrans("\ue001\ue002", "<>")
+#: The elements whose text the room does not read off the slide: a stylesheet and a script draw no
+#: words, a code block is evidence no rule decided by script reads, and the theme's footnotes cite
+#: rather than say (below).
+_UNSAID = frozenset({"style", "script", "pre", "footnotes", "footnote"})
 
 #: Where a slide's markup can set a size: a style attribute (Vue's bound one included), a style
 #: block, and a class list. A size anywhere else — a sentence about CSS, a code block — is not one.
@@ -111,7 +116,23 @@ _ELEMENT = re.compile(r"^\s*<(?P<name>[A-Za-z][\w-]*)")
 _TAG_OF = r"""<(?P<closing>/?){name}\b(?:[^>"']|"[^"]*"|'[^']*')*?(?P<empty>/?)>"""
 
 #: The elements HTML never closes, so their opening tag is the whole of them.
-_VOID = frozenset({"br", "hr", "img", "input", "source", "wbr"})
+_VOID = frozenset(
+    {
+        "area",
+        "base",
+        "br",
+        "col",
+        "embed",
+        "hr",
+        "img",
+        "input",
+        "link",
+        "meta",
+        "source",
+        "track",
+        "wbr",
+    }
+)
 
 #: A run of a table, a picture alone on its line, and the slot marker a two-column layout splits on.
 _TABLE_ROW = re.compile(r"^\s*\|")
@@ -358,57 +379,12 @@ def _slide(number: int, keys: dict[str, str], lines: Sequence[str]) -> Slide:
     # What the slide says, as opposed to what it cites.
     said = _FOOTNOTES.sub(_line_breaks, markup)
     time = _TIME.search(notes) if notes else None
-
-    headline: str | None = None
-    bullets: list[str] = []
-    prose: list[str] = []
-    paragraph: list[str] = []
-    # Whether the line being read continues the bullet above it. Only a blank line, a heading or
-    # the next bullet ends one, so where an author's editor wrapped a long bullet cannot decide
-    # its word count — markdown's own lazy continuation, and the ceiling depends on it.
-    continuing = False
-    # The HTML lists open around the line being read, the innermost last. Each holds the bullet of
-    # its open item, or None between items. Text inside an item is that item's own, whatever blank
-    # lines or child lists come between, as the browser groups it.
-    lists: list[int | None] = []
-
-    for line in _without_tags(_BREAK_TAG.sub(_BREAK, _code_shown(said))).split("\n"):
-        if line.startswith(_LIST_MARK):
-            _flush(paragraph, prose)
-            continuing = False
-            _follow(line.removeprefix(_LIST_MARK), lists, bullets)
-            continue
-        # A slot marker is where a layout splits the slide, which is layout rather than words.
-        line = "" if _SLOT.match(line) else line
-        heading = _HEADING.match(line)
-        bullet = _BULLET.match(line)
-
-        if not line.strip() or heading or bullet:
-            # Any of the three also ends the paragraph being gathered; a wrapped paragraph is
-            # still one passage, so the line break inside it does not.
-            _flush(paragraph, prose)
-            continuing = False
-
-        if heading:
-            headline = headline or _headline(heading.group("text")) or None
-        elif bullet:
-            bullets.append(_plain(bullet.group("text")))
-            continuing = True
-        elif not line.strip():
-            continue
-        elif continuing:
-            bullets[-1] = f"{bullets[-1]} {_plain(line)}".strip()
-        elif (item := _open_item(lists)) is not None:
-            bullets[item] = f"{bullets[item]} {_plain(line)}".strip()
-        else:
-            paragraph.append(_plain(line))
-
-    _flush(paragraph, prose)
+    words = _Words(_rendered(_without_slots(lines)))
     return Slide(
         number=number,
-        headline=headline,
-        bullets=tuple(bullet for bullet in bullets if bullet),
-        prose=tuple(prose),
+        headline=words.headline,
+        bullets=words.bullets,
+        prose=words.prose,
         notes=notes,
         section=keys.get("section"),
         backup=keys.get("backup") in _TRUE,
@@ -426,53 +402,157 @@ def _slide(number: int, keys: dict[str, str], lines: Sequence[str]) -> Slide:
     )
 
 
-def _without_tags(markup: str) -> str:
-    """The slide with its tags taken out, a line break inside one kept as a line break.
+@dataclass
+class _Element:
+    """One element of a rendered slide: its name as the author wrote it, its attributes in the
+    order they were written, and what it holds, text and elements in turn."""
 
-    A tag the author wrapped over several lines is still one tag: its attributes are the
-    component's, a figure's caption say, and not prose the room reads beside it. A list's tags each
-    leave a mark on a line of their own. The reader follows the lists by those marks, and reads an
-    HTML list the way it reads the same list in markdown.
+    name: str
+    attributes: list[tuple[str, str | None]]
+    children: list[_Element | str] = field(default_factory=list)
+
+    @property
+    def tag(self) -> str:
+        """The name as HTML compares it, which is without regard to case."""
+        return self.name.lower()
+
+
+class _Tree(HTMLParser):
+    """HTML built into a tree of elements, as forgiving of it as a browser.
+
+    An element HTML never closes holds nothing, a closing tag closes the innermost element it names
+    and everything opened inside that, a closing tag that names no open element is dropped, and an
+    element still open at the end is closed there. A comment is nothing on the slide.
     """
-    return _TAG.sub(_tag_left, markup)
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.root = _Element("", [])
+        self._open = [self.root]
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        written = _TAG_NAME.match(self.get_starttag_text() or "")
+        element = _Element(written.group("name") if written else tag, attrs)
+        self._open[-1].children.append(element)
+        if tag not in _VOID:
+            self._open.append(element)
+
+    def handle_endtag(self, tag: str) -> None:
+        for depth in range(len(self._open) - 1, 0, -1):
+            if self._open[depth].tag == tag:
+                del self._open[depth:]
+                return
+
+    def handle_data(self, data: str) -> None:
+        self._open[-1].children.append(data)
 
 
-def _tag_left(match: re.Match[str]) -> str:
-    """What a tag leaves behind: the line breaks it spanned, a list's tag as its mark, and a
-    block's tag as a space between the words it parts."""
-    breaks = _line_breaks(match)
-    tag = _LIST_TAG.match(match.group())
-    if tag:
-        return f"{breaks}\n{_LIST_MARK}{tag.group('closing')}{tag.group('name').lower()}\n"
-    if _BLOCK_TAG.match(match.group()):
-        return f" {breaks}"
-    return breaks
+def _rendered(markdown: str) -> _Element:
+    """The slide as the browser is handed it: its markdown rendered as Slidev renders it, raw HTML
+    and all, and built into a tree. What is a tag, a paragraph or a code span is the renderer's
+    answer, and markdown's text arrives escaped, so nothing it left as text is read as a tag."""
+    tree = _Tree()
+    tree.feed(_MARKDOWN.render(markdown))
+    tree.close()
+    return tree.root
 
 
-def _follow(tag: str, lists: list[int | None], bullets: list[str]) -> None:
-    """Move the reader's place in the HTML lists past one of their tags.
+def _without_slots(lines: Sequence[str]) -> str:
+    """The slide's markdown with each slot marker blanked. A marker is where a layout splits the
+    slide, which Slidev reads before it renders the markdown, and no part of what the slide says."""
+    kept = list(lines)
+    index = 0
+    while index < len(kept):
+        if _FENCE.match(kept[index].rstrip()):
+            index = _fence_end(kept, index) + 1
+            continue
+        if _SLOT.match(kept[index]):
+            kept[index] = ""
+        index += 1
+    return "\n".join(kept)
 
-    Each item opens a bullet, and its own closing tag or its list's closes it. An item outside any
-    list is read as a list of its own.
+
+class _Words:
+    """What a slide says, read off its rendered tree: its headline, its bullets and its prose.
+
+    Text belongs to the innermost of three things around it. A heading's is the headline, if it is
+    the slide's first heading with words in it, and is nobody's otherwise. A list item's is that
+    item's bullet, whatever blocks and blank lines come between its parts, since the browser sets
+    them all inside it; a list inside the item holds bullets of its own. Any other text is prose,
+    one passage to a block.
     """
-    if tag in {"ul", "ol"}:
-        lists.append(None)
-    elif tag in {"/ul", "/ol"}:
-        if lists:
-            lists.pop()
-    elif tag == "li":
-        bullets.append("")
-        if lists:
-            lists[-1] = len(bullets) - 1
-        else:
-            lists.append(len(bullets) - 1)
-    elif lists:
-        lists[-1] = None
+
+    def __init__(self, tree: _Element) -> None:
+        self.headline: str | None = None
+        self._items: list[list[str]] = []
+        self._passages: list[str] = []
+        self._passage: list[str] = []
+        self._read(tree, self._passage)
+        self._end(self._passage)
+        self.bullets = tuple(text for item in self._items if (text := _collapsed("".join(item))))
+        self.prose = tuple(self._passages)
+
+    def _read(self, element: _Element, into: list[str]) -> None:
+        for child in element.children:
+            if isinstance(child, str):
+                into.append(child)
+            elif child.tag in _UNSAID:
+                continue
+            elif child.tag in _HEADINGS:
+                self._end(into)
+                self.headline = self.headline or _headline(child)
+            elif child.tag == "li":
+                self._end(into)
+                self._items.append(item := [])
+                self._read(child, item)
+            elif child.tag in _BLOCKS:
+                self._end(into)
+                into.append(" ")
+                self._read(child, into)
+                into.append(" ")
+                self._end(into)
+            elif child.tag == "br":
+                into.append(" ")
+            else:
+                self._read(child, into)
+
+    def _end(self, into: list[str]) -> None:
+        """End the passage being gathered, if ``into`` is a passage rather than a bullet."""
+        if into is not self._passage:
+            return
+        passage = _collapsed("".join(into))
+        into.clear()
+        if passage:
+            self._passages.append(passage)
 
 
-def _open_item(lists: Sequence[int | None]) -> int | None:
-    """The bullet of the innermost HTML list item open, or None outside every item."""
-    return next((item for item in reversed(lists) if item is not None), None)
+def _headline(heading: _Element) -> str | None:
+    """The headline as the room receives it, each line the author's breaks set ending at a newline.
+
+    A break starts a line, an empty one too when the next break follows it, as the browser sets
+    them. A break at the very end only closes the last line. A headline of breaks alone is none.
+    """
+    lines = [_collapsed("".join(line)) for line in _lines(heading, [[]])]
+    if len(lines) > 1 and not lines[-1]:
+        lines.pop()
+    return "\n".join(lines) if any(lines) else None
+
+
+def _lines(element: _Element, lines: list[list[str]]) -> list[list[str]]:
+    """An element's text, in the lines its ``<br>`` tags start."""
+    for child in element.children:
+        if isinstance(child, str):
+            lines[-1].append(child)
+        elif child.tag == "br":
+            lines.append([])
+        elif child.tag not in _UNSAID:
+            _lines(child, lines)
+    return lines
+
+
+def _collapsed(text: str) -> str:
+    """Text as the browser sets it: each run of whitespace one space, and none at either end."""
+    return _SPACES.sub(" ", text).strip()
 
 
 def _line_breaks(match: re.Match[str]) -> str:
@@ -646,14 +726,6 @@ def _keys(frontmatter: Sequence[str]) -> dict[str, str]:
     return keys
 
 
-def _flush(paragraph: list[str], prose: list[str]) -> None:
-    """One gathered paragraph becomes one passage. Lines that were only markup are not a passage."""
-    passage = " ".join(text for text in paragraph if text)
-    paragraph.clear()
-    if passage:
-        prose.append(passage)
-
-
 def _without_code(lines: Sequence[str]) -> list[str]:
     """The slide without its code blocks. Code is evidence: no rule decided by script reads it."""
     kept: list[str] = []
@@ -675,27 +747,9 @@ def _body_and_notes(lines: Sequence[str]) -> tuple[list[str], str | None]:
     return _COMMENT.sub("", text).split("\n"), notes or None
 
 
-def _headline(text: str) -> str:
-    """The headline as the room receives it, each line the author's breaks set ending at a newline.
-
-    A break starts a line, an empty one too when the next break follows it, as the browser sets
-    them. A break at the very end only closes the last line. A headline of breaks alone is empty.
-    """
-    lines = [_plain(part) for part in text.split(_BREAK)]
-    if len(lines) > 1 and not lines[-1]:
-        lines.pop()
-    return "\n".join(lines) if any(lines) else ""
-
-
-def _code_shown(markup: str) -> str:
-    """The markup with each inline code span's angle brackets standing as other characters."""
-    return _CODE_SPAN.sub(lambda span: span.group().translate(_SHOWN), markup)
-
-
 def _plain(text: str) -> str:
     """One line as the room receives it: no markup, no components, no URLs."""
-    text = text.replace(_BREAK, " ")
     text = _IMAGE.sub("", text)
     text = _LINK.sub(lambda match: match.group("text"), text)
     text = _TAG.sub("", text)
-    return _SPACES.sub(" ", _EMPHASIS.sub("", text).translate(_UNSHOWN)).strip()
+    return _SPACES.sub(" ", _EMPHASIS.sub("", text)).strip()
