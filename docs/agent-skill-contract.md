@@ -93,7 +93,7 @@ grouped by slide and names each finding's rule; see
 | Section map fits | `section-locator` | the sections a deck declares, their count and each label's length, at the severity the rule assigns |
 | Type floor holds | `type-scale` | every font size a slide's markup sets (style attributes, style blocks, UnoCSS text classes, SVG `font-size` attributes): an inline px size, and any size that resolves below the rule's floor; and every absolute size in the deck's own `components/`, `layouts/`, `styles/` and `style.css` that resolves below it |
 | Closes on a conclusion | `conclusion-stays-up` | the last slide outside the backups: no headline, a closing label for one, or a thank-you, at the severity the rule assigns |
-| **Palette passes CVD and contrast** | `separation-floor`, `accent-is-attention`, `decorative-neutral-never-text` | **shell out to `cvd-validate`** over `themes/*.json` — never reimplement CVD. It measures the data colours' separation and the attention and text pairings' contrast |
+| **Palette passes CVD and contrast** | `separation-floor`, `accent-is-attention`, `decorative-neutral-never-text` | **call `validate()`, the check `cvd-validate` runs,** over `themes/*.json` — never reimplement CVD. It measures the data colours' separation and the attention and text pairings' contrast |
 | Visual groups (advisory) | `element-ceiling` | the blocks at the top of each slide's body, beneath the headline, at the severity the rule assigns |
 | Words on a slide (advisory) | `on-slide-words` | word count outside the headline, figures and footnotes, at the severity the rule assigns |
 | Emphasis and callouts (advisory) | `signal-budget` | bold or highlighted spans, and callouts, per slide, at the severity the rule assigns |
@@ -313,7 +313,7 @@ review does, and build's acceptance bar is §5's review.
 | Packaging | One Claude Code `SKILL.md` in `skill/`; four modes; plugin + cross-agent deferred |
 | Rule sourcing | Thin pointer — procedure in `SKILL.md`, rules + thresholds loaded from `method.md` |
 | Review surface | Slidev only |
-| Review engine | Hybrid — mechanical linter in `legible` (palette via `cvd-validate`) + LLM for 5 semantic checks |
+| Review engine | Hybrid — mechanical linter in `legible` (palette via `cvd-validate`'s `validate()`) + LLM for 5 semantic checks |
 | Review posture | Flag + suggest (human applies); two-tier gate/advisory; merged per-slide markdown report |
 | Scaffold | Minimal Slidev starter on `leuven-blue`, review-ready from slide one |
 | Draft & build | Paper and codebase → talk plan (author edits) → deck, reviewed |

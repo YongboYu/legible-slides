@@ -47,5 +47,5 @@ where the author accepts a fix, that fix alone. Draft proposes an argument and t
 in the plan. Build writes exactly what the plan says, word for word. The author decides what each
 slide is for; the skill holds the deck to the method.
 
-The scripts own the arithmetic: `legible lint` counts, and `cvd-validate`, through it, measures
-colour. Take their findings verbatim.
+The scripts own the arithmetic: `legible lint` counts, and the validator it shares with
+`cvd-validate` measures colour. Take their findings verbatim.

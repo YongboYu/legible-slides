@@ -106,7 +106,7 @@ def _parser() -> argparse.ArgumentParser:
         action="append",
         default=[],
         help=(
-            "check this theme's palette too, by running cvd-validate over it; repeatable. A deck "
+            "check this theme's palette too, the way cvd-validate checks it; repeatable. A deck "
             "does not record which palette it wears, so naming none checks the slides alone."
         ),
     )

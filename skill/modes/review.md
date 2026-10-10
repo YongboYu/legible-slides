@@ -30,7 +30,7 @@ the deck is pinned to, so its review applies the rules it was built to, whatever
 Each finding names its rule, its slide and its severity. Take them **verbatim**: the linter's count
 is the count. An **error** is the gate tier. A **warning** is the advisory tier: the canon's
 advisory budgets, and any finding a slide's exception turned into one, carrying its reason. The
-palette check inside the linter runs `cvd-validate`.
+palette check inside the linter is the one `cvd-validate` runs.
 
 Carry the exit code into the gate unchanged:
 
