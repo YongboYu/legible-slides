@@ -90,11 +90,11 @@ def _parser() -> argparse.ArgumentParser:
         "lint",
         help="check a deck against the rules the canon decides by script",
         description=(
-            "Check a Slidev deck against every rule docs/method.md marks as decided by script — "
-            "the bullet and word ceilings, em-dashes in a headline, inflated register, the "
-            "sentence-opener share, and, for each theme named, the separation floor. Exits 0 when "
-            "clean, 1 on any violation, and 2 if the deck or a theme could not be read. Findings "
-            "the canon marks a warning are reported and never change the exit code."
+            "Check a Slidev deck, and the palette of each theme named, against every rule "
+            "docs/method.md marks as decided by script; `legible rules --decided-by script` "
+            "prints them as the canon states them. Exits 0 when clean, 1 on any violation, and 2 "
+            "if the deck or a theme could not be read. Findings the canon marks a warning are "
+            "reported and never change the exit code."
         ),
     )
     lint_parser.add_argument("deck", metavar="DECK", type=Path, help="the deck's slides markdown")
