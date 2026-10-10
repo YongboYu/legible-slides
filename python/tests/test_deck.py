@@ -377,6 +377,41 @@ def test_prose_paragraphs_exclude_the_headline_the_bullets_and_the_chrome():
     assert slides[0].prose == ("Prose that proves it.",)
 
 
+def test_a_component_on_the_line_after_a_paragraph_is_not_that_paragraph_s():
+    """Slidev reads a line that opens with a component as a block of markup, even straight after a
+    paragraph, so the component's text is a passage of its own."""
+    slides = deck(
+        """\
+        # A claim
+
+        Evidence the room reads.
+        <Callout title="Why">Because.</Callout>
+        """
+    )
+
+    assert slides[0].prose == ("Evidence the room reads.", "Because.")
+
+
+def test_components_on_consecutive_lines_are_a_passage_each():
+    """Each draws a block of its own, however close the author set their lines."""
+    slides = deck(
+        """\
+        # A claim
+
+        <Callout title="One">First.</Callout>
+        <Callout title="Two">Second.</Callout>
+        """
+    )
+
+    assert slides[0].prose == ("First.", "Second.")
+
+
+def test_a_vue_event_handler_is_an_attribute_and_not_words():
+    slides = deck('# A claim\n\nPress <button @click="next()">next</button> to go on.\n')
+
+    assert slides[0].prose == ("Press next to go on.",)
+
+
 def test_a_wrapped_paragraph_is_one_passage():
     slides = deck(
         """\
