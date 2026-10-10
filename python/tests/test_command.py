@@ -11,6 +11,7 @@ from pathlib import Path
 import pytest
 
 from legible import gen_css, load_palette
+from legible.cli import main as cvd_validate
 from legible.command import main
 
 DECKS = Path(__file__).resolve().parent / "fixtures" / "decks"
@@ -174,6 +175,18 @@ def test_a_theme_that_could_not_be_checked_is_not_a_violation_either(capsys, tmp
 
     assert code == 2
     assert "absent.json" in capsys.readouterr().err
+
+
+def test_a_theme_that_could_not_be_checked_is_worded_as_cvd_validate_words_it(capsys, tmp_path):
+    """One reader decides why a theme is unreadable, so the two commands give the same reason."""
+    theme = str(tmp_path / "absent.json")
+
+    main(["lint", str(DECKS / "clean.md"), "--theme", theme])
+    linted = capsys.readouterr().err
+    cvd_validate([theme])
+    validated = capsys.readouterr().err
+
+    assert linted.removeprefix("legible lint: ") == validated.removeprefix("cvd-validate: ")
 
 
 def test_a_violation_outranks_a_theme_that_could_not_be_checked(tmp_path):

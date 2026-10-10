@@ -3,8 +3,9 @@
 A thin shell over ``validate()``. It decides nothing: `separation-floor` and the contrast pairings
 of `accent-is-attention` own what passes, and
 ``docs/cvd-validator-contract.md`` §4 fixes what this module adds — the shape of the human-readable
-report, and the exit code everything downstream keys on (CI, the opt-in pre-commit hook, and the
-review skill, which shells out here rather than reimplementing colour-vision simulation).
+report, and the exit code everything downstream keys on (CI and the opt-in pre-commit hook). The
+review skill reaches the same ``validate()`` through ``legible lint`` rather than reimplementing
+colour-vision simulation.
 
 The report names every pair by **role**, never by hex, because a hex pair tells an author nothing
 about which colour in their theme file to change.

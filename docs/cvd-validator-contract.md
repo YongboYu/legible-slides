@@ -175,8 +175,8 @@ invocation over whatever they were handed. Three consequences of that, settled i
 - **`--json` emits one report per line**, in argument order, so a report's shape never depends on how
   many themes were asked for. One theme — the documented call — is therefore one JSON object.
 
-The importable `validate()` is what tests, CI, and the (optional) figure helper [#10] call; they can
-share one palette-loader that reads the token-contract schema.
+The importable `validate()` is what tests, CI, `legible lint` and the (optional) figure helper [#10]
+call; they can share one palette-loader that reads the token-contract schema.
 
 ## 5. What it gates
 
@@ -261,7 +261,7 @@ the canon's floor on the four hard conditions, grayscale advisory.)*
 
 - The **shared palette-loader** and whether a **Python figure helper** is a third consumer of the
   theme file is decided in [#10](https://github.com/YongboYu/legible-slides/issues/10).
-- The review skill [#12] enforces "palette failing the validator" by invoking `cvd-validate` — this
-  contract fixes the tool and the exit code it keys on.
+- The review skill [#12] enforces "palette failing the validator" through `legible lint`, which
+  calls the same `validate()` — this contract fixes the check and the exit code CI keys on.
 - A **validated dark variant** (validator run on both grounds) is **v2**, per the token contract's
   light-only lock.

@@ -277,9 +277,9 @@ jobs:
           uv pip install --python "$RUNNER_TEMP/venv/bin/python" "$RUNNER_TEMP"/dist/*.whl
           cd "$RUNNER_TEMP/outside"
           "$RUNNER_TEMP/venv/bin/cvd-validate" my-palette.json
-      # The linter shells out to cvd-validate rather than importing it, so it has to find that
-      # command with nothing activated — the arrangement an installed tool actually runs in, and
-      # the one thing the test suite cannot prove from inside its own virtualenv.
+      # The linter reads the canon and the bundled face out of the wheel, and has to find both
+      # with nothing activated — the arrangement an installed tool actually runs in, and the one
+      # thing the test suite cannot prove from inside its own virtualenv.
       - name: Lint a deck outside this repo
         run: |
           cd "$RUNNER_TEMP/outside"

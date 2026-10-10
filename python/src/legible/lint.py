@@ -18,21 +18,16 @@ It does not decide the rules the canon marks **judgment** — whether a slide ca
 whether a headline is a claim. Those belong to the review skill, which is fallible and advisory;
 what is here is a gate, and a gate may only hold things that are decidable.
 
-It does not measure colour. The palette is checked by running ``cvd-validate`` and reading its exit
-code, which is what that exit code is for: one implementation of Machado (2009) in this package
-means a linter that says a palette collapses and a report that says it holds cannot disagree,
-because there is only ever one of them speaking. What the validator measured comes back in its JSON
-report and is carried over as it stands, each failing pair under the rule that names it, so the
-diagnosis reaches the author rather than only the verdict.
+It does not measure colour. The palette is checked by ``validate()``, the function ``cvd-validate``
+is a shell over: one implementation of Machado (2009) in this package means a linter that says a
+palette collapses and a report that says it holds cannot disagree, because there is only ever one
+of them speaking. What it measured is carried over as it stands, each failing pair under the rule
+that names it, so the diagnosis reaches the author rather than only the verdict.
 """
 
 from __future__ import annotations
 
-import json
 import re
-import shutil
-import subprocess
-import sys
 from collections.abc import Iterable, Iterator, Sequence
 from dataclasses import dataclass
 from pathlib import Path
@@ -76,7 +71,8 @@ from legible.method import (
     WORDS_PER_SLIDE,
 )
 from legible.method import rules as canon_rules
-from legible.validate import CONTRAST_PRECISION, PRECISION
+from legible.palette import PaletteError, load_palette
+from legible.validate import CONTRAST_PRECISION, PRECISION, Report, validate
 
 __all__ = ["ERROR", "WARNING", "Finding", "LintReport", "Unchecked", "lint"]
 
@@ -86,26 +82,18 @@ __all__ = ["ERROR", "WARNING", "Finding", "LintReport", "Unchecked", "lint"]
 #: legitimately overrides it.
 ERROR, WARNING = "error", "warning"
 
-#: The command the palette check runs. Never imported, always run: the exit code is the verdict,
-#: and the JSON report beside it is the diagnosis.
-VALIDATOR = "cvd-validate"
-
 #: Where, beside the deck, it sets type outside its slides: the files `type-scale` is checked in.
 #: Named here because a stamped deck's commit hook has to watch the same files, and does.
 TYPESET_SOURCES = ("components/**/*.vue", "layouts/**/*.vue", "styles/**/*.css", "style.css")
 
-#: Which rule each list of failures in the validator's report enforces, and how to read one entry.
-#: The validator checks three rules at once; a finding filed under the wrong one sends the author
-#: to fix colours that were never the problem.
+#: Which rule each list of failures in the validator's report enforces. The validator checks three
+#: rules at once; a finding filed under the wrong one sends the author to fix colours that were
+#: never the problem.
 _SEPARATION, _ATTENTION, _TEXT = (
     "separation-floor",
     "accent-is-attention",
     "decorative-neutral-never-text",
 )
-
-#: The exit codes ``cvd-validate`` publishes. 1 is a palette measured below the floor; anything
-#: else non-zero is a theme that was never measured, which is a different thing to report.
-_FLOOR_FAILED = 1
 
 #: The layout whose ``#`` is the talk's title rather than a headline: set heavier, and with no
 #: headline zone under it for a third line to run into.
@@ -174,7 +162,7 @@ class Finding(NamedTuple):
 
 
 class Unchecked(NamedTuple):
-    """A theme the validator could not measure. Not a violation, and not a pass either."""
+    """A theme that could not be read. Not a violation, and not a pass either."""
 
     theme: str
     detail: str
@@ -692,99 +680,52 @@ def _opens_with(sentence: str, opener: str) -> bool:
 def _palette_findings(
     themes: Iterable[str | Path],
 ) -> tuple[list[Finding], list[Unchecked]]:
-    """Run the validator over each theme: its exit code is the verdict, its report the diagnosis."""
+    """Measure each theme the way ``cvd-validate`` does, and file each failing pair as a finding."""
     findings: list[Finding] = []
     unchecked: list[Unchecked] = []
 
-    paths = [str(theme) for theme in themes]
-    command = _validator()
-    if command is None and paths:
-        return findings, [
-            Unchecked(theme, f"{theme}: {VALIDATOR} is not installed on this machine")
-            for theme in paths
-        ]
-
-    for theme in paths:
-        result = subprocess.run(
-            [str(command), "--json", theme], capture_output=True, text=True, check=False
-        )
-        if result.returncode == 0:
+    for theme in map(str, themes):
+        try:
+            palette = load_palette(theme)
+        except (OSError, PaletteError) as error:
+            unchecked.append(Unchecked(theme, str(error)))
             continue
-        if result.returncode == _FLOOR_FAILED:
-            findings.extend(_failures(result.stdout, theme))
-        else:
-            unchecked.append(Unchecked(theme, _verdict(result.stderr, theme)))
+        report = validate(palette)
+        findings.extend(_separation(report, theme))
+        findings.extend(_contrast(report, theme))
 
     return findings, unchecked
 
 
-def _failures(output: str, theme: str) -> list[Finding]:
-    """One finding per failing pair in the validator's report, under the rule it breaks.
-
-    The exit code already said the palette failed, so a report that cannot be read, or that names
-    nothing, still fails the gate: it fails it under `separation-floor`, pointing at the command
-    that prints the full report, rather than passing a palette the validator rejected.
-    """
-    try:
-        report = json.loads(output)
-        found = [*_separation(report, theme), *_contrast(report, theme)]
-    except (ValueError, KeyError, TypeError):
-        found = []
-    if found:
-        return found
-    return [
-        _deck_finding(_SEPARATION, f"{theme}: failed; `{VALIDATOR} {theme}` prints the full report")
-    ]
-
-
-def _separation(report: dict, theme: str) -> Iterator[Finding]:
+def _separation(report: Report, theme: str) -> Iterator[Finding]:
     """Each pair of data colours below the floor, with every condition it falls under."""
     pairs: dict[tuple[str, str], list[str]] = {}
-    for failure in report["failures"]:
-        pairs.setdefault((failure["role_a"], failure["role_b"]), []).append(
-            f"{failure['delta_e']:.{PRECISION}f} under {failure['condition']}"
+    for failure in report.failures:
+        pairs.setdefault((failure.role_a, failure.role_b), []).append(
+            f"{failure.delta_e:.{PRECISION}f} under {failure.condition}"
         )
-    floor = f"{report['threshold']:.{PRECISION}f}"
+    floor = f"{report.threshold:.{PRECISION}f}"
     for (role_a, role_b), measured in pairs.items():
         yield _deck_finding(
             _SEPARATION, f"{theme}: {role_a} ↔ {role_b} ΔE {', '.join(measured)} (floor {floor})"
         )
 
 
-def _contrast(report: dict, theme: str) -> Iterator[Finding]:
+def _contrast(report: Report, theme: str) -> Iterator[Finding]:
     """Each attention and text pairing below its ratio, under the rule that lists the pairing."""
     for rule, failures, threshold in (
-        (_ATTENTION, "contrast_failures", "contrast_threshold"),
-        (_TEXT, "text_contrast_failures", "text_contrast_threshold"),
+        (_ATTENTION, report.contrast_failures, report.contrast_threshold),
+        (_TEXT, report.text_contrast_failures, report.text_contrast_threshold),
     ):
-        minimum = f"{report[threshold]:.{CONTRAST_PRECISION}f}"
-        for pair in report[failures]:
+        minimum = f"{threshold:.{CONTRAST_PRECISION}f}"
+        for pair in failures:
             yield _deck_finding(
                 rule,
-                f"{theme}: {pair['foreground']} on {pair['background']} contrasts "
-                f"{pair['ratio']:.{CONTRAST_PRECISION}f}:1 (min {minimum})",
+                f"{theme}: {pair.foreground} on {pair.background} contrasts "
+                f"{pair.ratio:.{CONTRAST_PRECISION}f}:1 (min {minimum})",
             )
 
 
 def _deck_finding(rule: str, message: str) -> Finding:
     """A palette finding: against the whole deck, and gating, since all three rules are floors."""
     return Finding(rule=rule, severity=ERROR, slide=None, message=message)
-
-
-def _validator() -> str | None:
-    """Where ``cvd-validate`` is, preferring the one installed beside the interpreter running us.
-
-    An environment where the package is importable but its console script is not on ``PATH`` is
-    ordinary — a virtualenv nobody activated — and looking there first means the linter and the
-    validator are the same install, checking against the same pin.
-    """
-    return shutil.which(VALIDATOR, path=str(Path(sys.executable).parent)) or shutil.which(VALIDATOR)
-
-
-def _verdict(output: str, theme: str) -> str:
-    """The validator's own first line, so its wording reaches the author rather than a paraphrase.
-
-    Which is also why nothing here parses that line: what it *means* arrived in the exit code.
-    """
-    lines: Sequence[str] = [line.strip() for line in output.splitlines() if line.strip()]
-    return lines[0] if lines else f"{theme}: {VALIDATOR} said nothing"

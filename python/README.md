@@ -176,7 +176,7 @@ from legible import lint
 report = lint("deck/slides.md", themes=["themes/leuven-blue.json"])
 report.passed      # False if any finding is an error
 report.findings    # (Finding(rule=…, severity=…, slide=…, message=…), …)
-report.unchecked   # themes cvd-validate could not measure; neither a pass nor a violation
+report.unchecked   # themes that could not be read; neither a pass nor a violation
 ```
 
 **Exit code** — `0` clean, `1` on any violation, `2` if the deck or a theme could not be read.
@@ -190,11 +190,10 @@ the report verbatim.
 - **The rules the canon marks `judgment`.** Whether a slide carries one message, whether a headline
   is a claim. Those are the review skill's, and they are advisory because they are fallible; this is
   a gate, and a gate may only hold what is decidable.
-- **Colour.** The palette is checked by **running `cvd-validate` and reading its exit code** —
-  which is what that exit code is for. There is one implementation of Machado (2009) in this
-  package, so a linter saying a palette collapses and a report saying it holds cannot disagree.
-  What it measured comes back in its JSON report and is carried over as it stands, each failing
-  pair under the rule that names it: `separation-floor`, `accent-is-attention` or
+- **Colour.** The palette is checked by **the `validate()` that `cvd-validate` runs**. There is one
+  implementation of Machado (2009) in this package, so a linter saying a palette collapses and a
+  report saying it holds cannot disagree. What it measured is carried over as it stands, each
+  failing pair under the rule that names it: `separation-floor`, `accent-is-attention` or
   `decorative-neutral-never-text`.
 - **Its own thresholds.** Every number and wordlist above is quoted from the rule that owns it in
   the canon. Change `bullets-per-slide` there and this command enforces the new one.
