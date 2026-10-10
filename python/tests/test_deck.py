@@ -252,6 +252,20 @@ def test_an_html_list_item_runs_on_across_a_blank_line():
     assert slides[0].prose == ("After the list.",)
 
 
+def test_the_paragraphs_in_an_html_list_item_are_apart_however_close_their_tags():
+    """The browser sets each paragraph as a block, so the last word of one and the first of the
+    next are two words; an inline tag sets nothing apart, and leaves the word it splits whole."""
+    slides = deck(
+        "# Claim\n\n<ul><li><p>one two three four five six</p>"
+        "<p>seven eight nine ten eleven twelve thirteen</p></li><li>re<b>read</b></li></ul>\n"
+    )
+
+    assert slides[0].bullets == (
+        "one two three four five six seven eight nine ten eleven twelve thirteen",
+        "reread",
+    )
+
+
 def test_a_list_tag_in_inline_code_is_text_and_opens_no_bullet():
     slides = deck("# The `<li>` element groups a list\n\nWrap each item in `<li>` and `</li>`.\n")
 

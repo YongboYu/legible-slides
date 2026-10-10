@@ -47,8 +47,20 @@ _IMAGE = re.compile(r"!\[[^\]]*\]\([^)]*\)")
 _LINK = re.compile(r"\[(?P<text>[^\]]*)\]\([^)]*\)")
 _TAG = re.compile(r"<[^>]+>")
 
+#: A run of the whitespace the browser sets as one space. A no-break space is not part of one.
+_SPACES = re.compile(r"[ \t\r\f]+")
+
 #: An HTML list's tags, opening or closing: the list's own, and each item's.
 _LIST_TAG = re.compile(r"<(?P<closing>/?)(?P<name>ul|ol|li)\b", re.IGNORECASE)
+
+#: The tags of an element the browser sets as a block, which part the words on either side of
+#: them however close they sit. An inline element's parts nothing: ``re<b>read</b>`` is one word.
+_BLOCK_TAG = re.compile(
+    r"</?(?:address|article|aside|blockquote|caption|dd|details|dialog|div|dl|dt|fieldset"
+    r"|figcaption|figure|footer|form|h[1-6]|header|hgroup|hr|main|nav|p|pre|section|summary"
+    r"|table|td|th|tr)\b",
+    re.IGNORECASE,
+)
 
 #: How a list's tag stands while the slide is read: this, then ``ul``, ``/li`` and the like, on a
 #: line of its own.
@@ -426,11 +438,14 @@ def _without_tags(markup: str) -> str:
 
 
 def _tag_left(match: re.Match[str]) -> str:
-    """What a tag leaves behind: the line breaks it spanned, and a list's tag as its mark."""
+    """What a tag leaves behind: the line breaks it spanned, a list's tag as its mark, and a
+    block's tag as a space between the words it parts."""
     breaks = _line_breaks(match)
     tag = _LIST_TAG.match(match.group())
     if tag:
         return f"{breaks}\n{_LIST_MARK}{tag.group('closing')}{tag.group('name').lower()}\n"
+    if _BLOCK_TAG.match(match.group()):
+        return f" {breaks}"
     return breaks
 
 
@@ -683,4 +698,4 @@ def _plain(text: str) -> str:
     text = _IMAGE.sub("", text)
     text = _LINK.sub(lambda match: match.group("text"), text)
     text = _TAG.sub("", text)
-    return _EMPHASIS.sub("", text).translate(_UNSHOWN).strip()
+    return _SPACES.sub(" ", _EMPHASIS.sub("", text).translate(_UNSHOWN)).strip()

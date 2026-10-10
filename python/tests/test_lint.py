@@ -77,6 +77,14 @@ def test_an_html_bullet_split_by_its_child_list_counts_all_its_words(write_deck)
     assert rules(report) == ["word-ceiling"]
 
 
+def test_an_html_bullet_in_two_paragraphs_counts_the_words_of_both(write_deck):
+    """Thirteen words in two paragraphs, with nothing between the tags that part them."""
+    item = "<p>one two three four five six</p><p>seven eight nine ten eleven twelve thirteen</p>"
+    report = lint(write_deck(f"# Each item explains it\n\n<ul><li>{item}</li></ul>\n"))
+
+    assert rules(report) == ["word-ceiling"]
+
+
 def test_a_list_tag_in_inline_code_is_no_bullet(write_deck):
     """Five bullets sit on the ceiling, and the ``<li>`` in the headline is a word of it."""
     bullets = "\n".join(f"- {word}" for word in ("one", "two", "three", "four", "five"))
